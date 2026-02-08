@@ -42,4 +42,12 @@ interface VettrApi {
      */
     @POST("auth/login")
     suspend fun login(@Body request: LoginRequest): AuthResponse
+
+    /**
+     * Refresh access token using refresh token.
+     * @param request Refresh token request containing the refresh token
+     * @return Authentication response with new access token
+     */
+    @POST("auth/refresh")
+    suspend fun refreshToken(@Body request: RefreshTokenRequest): AuthResponse
 }

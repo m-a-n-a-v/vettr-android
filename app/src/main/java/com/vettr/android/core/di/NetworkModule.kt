@@ -1,6 +1,7 @@
 package com.vettr.android.core.di
 
 import com.vettr.android.BuildConfig
+import com.vettr.android.core.data.remote.AuthInterceptor
 import com.vettr.android.core.data.remote.VettrApi
 import dagger.Module
 import dagger.Provides
@@ -27,12 +28,13 @@ object NetworkModule {
     private const val WRITE_TIMEOUT = 30L
 
     /**
-     * Provides singleton OkHttpClient with logging interceptor.
-     * Logs HTTP request/response body in debug builds.
+     * Provides singleton OkHttpClient with auth and logging interceptors.
+     * AuthInterceptor adds Bearer token and handles token refresh on 401.
+     * LoggingInterceptor logs HTTP request/response body in debug builds.
      */
     @Provides
     @Singleton
-    fun provideOkHttpClient(): OkHttpClient {
+    fun provideOkHttpClient(authInterceptor: AuthInterceptor): OkHttpClient {
         val loggingInterceptor = HttpLoggingInterceptor().apply {
             level = if (BuildConfig.DEBUG) {
                 HttpLoggingInterceptor.Level.BODY
@@ -42,6 +44,7 @@ object NetworkModule {
         }
 
         return OkHttpClient.Builder()
+            .addInterceptor(authInterceptor)
             .addInterceptor(loggingInterceptor)
             .connectTimeout(CONNECT_TIMEOUT, TimeUnit.SECONDS)
             .readTimeout(READ_TIMEOUT, TimeUnit.SECONDS)
