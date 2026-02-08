@@ -9,6 +9,16 @@ import java.util.UUID
 /**
  * AlertRule entity for user-defined alert rules.
  * Stores rules that trigger notifications when specific conditions are met for stocks.
+ *
+ * @property id Unique identifier (auto-generated UUID)
+ * @property userId User who owns this alert rule
+ * @property stockTicker Stock ticker this rule applies to
+ * @property ruleType Type of rule (e.g., "price", "filing", "insider", "red_flag")
+ * @property triggerCondition Condition that triggers the alert (e.g., "price > 10.0")
+ * @property isActive Whether the rule is currently active
+ * @property createdAt Rule creation timestamp (Unix epoch milliseconds)
+ * @property lastTriggeredAt Timestamp when alert last triggered (nullable)
+ * @property frequency Alert frequency (e.g., "Real-time", "Daily", "Weekly")
  */
 @Entity(
     tableName = "alert_rules",

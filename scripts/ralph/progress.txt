@@ -3798,3 +3798,68 @@ Details:
   - Feedback loop uses prioritization matrix (Impact × Effort × Frequency) to determine P0/P1/P2/P3
   - Documentation tasks are straightforward - focus on clarity, examples, and actionable procedures
 ---
+
+## US-141: Create release notes, terms of service, and privacy policy
+Status: ✅ COMPLETE
+Date: 2026-02-08
+Details:
+- Verified all required documents exist and are comprehensive:
+  - PRIVACY_POLICY.md: Complete privacy policy with GDPR/CCPA compliance, data collection details, third-party services, user rights
+  - TERMS_OF_SERVICE.md: Complete terms with investment disclaimers, liability limitations, acceptable use policy, dispute resolution
+  - PLAY_STORE_ASSETS.md: Contains version 1.0.0 release notes highlighting all major features (Pulse, Discovery, Pedigree, Alerts, VETR Score)
+  - PLAY_STORE_ASSETS.md: Contains comprehensive Play Store description with key features and selling points
+  - PLAY_STORE_ASSETS.md: Contains ASO keywords (venture capital, stock research, TSX-V, CSE, investment intelligence)
+- All acceptance criteria met:
+  ✓ Version 1.0.0 release notes written
+  ✓ Play Store description highlights Pedigree, Pulse, Alerts, VETR Score
+  ✓ Keywords prepared for app store optimization
+  ✓ Terms of service includes disclaimers, liability limitations, investment warnings
+  ✓ Privacy policy covers data collection, third-party services, GDPR/CCPA compliance
+- Build passes successfully
+- Files changed: scripts/ralph/prd.json (updated passes: true)
+- **Learnings for future iterations:**
+  - Legal documents were already created in previous iterations (likely US-138, US-139, US-140)
+  - Always check existing documentation before creating new files
+  - Documentation stories can be verification tasks rather than creation tasks
+  - The docs/ folder structure is well-organized and comprehensive
+---
+
+## US-142: Document API contracts for backend integration
+Status: ✅ COMPLETE
+Date: 2026-02-08
+Details:
+- Created comprehensive API_CONTRACTS.md in docs/ directory
+- Documented all authentication endpoints: POST /auth/signup, POST /auth/login, POST /auth/refresh, POST /auth/logout, POST /auth/google
+- Documented stock endpoints: GET /stocks, GET /stocks/{ticker}, POST /stocks/search, POST /stocks/{id}/favorite
+- Documented filing endpoints: GET /filings/{ticker}, GET /filings/search
+- Documented executive endpoints: GET /executives/{ticker}, GET /executives/{id}
+- Documented alert rule endpoints: GET /alerts/rules, POST /alerts/rules, PUT /alerts/rules/{id}, DELETE /alerts/rules/{id}
+- Documented red flag endpoints: GET /red-flags/{ticker}, POST /red-flags/{id}/acknowledge
+- Documented VETR score endpoints: GET /vetr-score/{ticker}, GET /vetr-score/{ticker}/history
+- Included comprehensive request/response JSON formats with field descriptions
+- Documented error codes: INVALID_TOKEN, INVALID_REFRESH_TOKEN, INVALID_ID_TOKEN, USER_NOT_FOUND, STOCK_NOT_FOUND, RATE_LIMIT_EXCEEDED, VALIDATION_ERROR, INTERNAL_ERROR
+- Documented rate limits: 10 req/min for auth, 100 req/min for stocks/filings/red-flags/VETR, 50 req/min for alerts
+- Documented cursor-based pagination with limit, cursor, has_more, next_cursor, total_count
+- Included implementation notes: date/time format (Unix ms), JSON serialization (snake_case), token expiration (24h), idempotency keys
+- Documented score components and calculation formulas for VETR score
+- Added testing recommendations, health check endpoint, and support contact information
+- Build successful: ./gradlew assembleDebug passes
+
+Files changed:
+- docs/API_CONTRACTS.md (created comprehensive API documentation)
+- scripts/ralph/prd.json (updated passes: true for US-142)
+
+**Learnings for future iterations:**
+- API documentation should include both endpoint specifications AND implementation details (error codes, rate limits, pagination)
+- Cursor-based pagination is preferred over offset-based for better performance at scale
+- Include example request/response payloads for every endpoint to reduce integration friction
+- Document not just the "happy path" but also error scenarios and edge cases
+- Token refresh flow should be clearly documented to prevent authentication issues
+- Rate limit headers (X-RateLimit-*) help clients self-regulate and avoid hitting limits
+- Idempotency keys prevent duplicate resource creation in unreliable networks
+- Unix timestamps in milliseconds provide consistent cross-platform date/time handling
+- Snake_case JSON fields align with backend conventions (Python, Ruby), while camelCase aligns with mobile (Swift, Kotlin)
+- Comprehensive API documentation acts as a contract between frontend and backend teams, reducing miscommunication
+- Document scoring algorithms and calculation formulas so backend can implement them correctly
+- Testing recommendations and mock data specifications help backend developers test their implementations
+---

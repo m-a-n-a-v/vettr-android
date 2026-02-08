@@ -7,6 +7,21 @@ import androidx.room.Index
 import androidx.room.PrimaryKey
 import java.util.UUID
 
+/**
+ * Executive entity representing company leadership and management.
+ * Stores information about executives, board members, and key personnel.
+ *
+ * @property id Unique identifier (auto-generated UUID)
+ * @property stockId Associated stock ID (foreign key to Stock entity)
+ * @property name Executive's full name
+ * @property title Job title (e.g., "CEO", "CFO", "CTO")
+ * @property yearsAtCompany Tenure at current company in years
+ * @property previousCompanies JSON-serialized list of previous companies
+ * @property education Educational background
+ * @property specialization Area of expertise (e.g., "Finance", "Engineering")
+ * @property socialLinkedIn LinkedIn profile URL (nullable)
+ * @property socialTwitter Twitter/X profile URL (nullable)
+ */
 @Entity(
     tableName = "executives",
     foreignKeys = [
