@@ -3389,3 +3389,51 @@ Details:
   - Use relaxed = true for mocks like HapticService that don't need verification
   - When ViewModel constructors change, update all test instantiations
 ---
+## US-129: Create Compose UI tests for critical journeys
+Status: ✅ COMPLETE
+Date: 2026-02-08
+Details:
+- Created androidTest directory structure under app/src/androidTest/java/com/vettr/android/
+- Created LoginScreenTest.kt with 11 UI tests covering:
+  - Email and password field visibility
+  - Welcome text display
+  - Login button and Google Sign-In button functionality
+  - Sign up link navigation
+  - Email and password input handling
+  - Password visibility toggle
+  - Button click callbacks
+- Created StockDetailScreenTest.kt with 16 UI tests covering:
+  - Stock information display (ticker, name, price)
+  - Three tabs display (Overview, Pedigree, Red Flags)
+  - Tab switching functionality between all three tabs
+  - Favorite toggle from both states (favorite/not favorite)
+  - Share button display and callback
+  - Back button display and callback
+  - VETR score display
+  - Time range filters display (1D, 1W, 1M, 3M, 1Y, ALL)
+- Created AlertsScreenTest.kt with 13 UI tests covering:
+  - Screen title display
+  - Three filter chips (All, Active, Triggered)
+  - Filter chip click functionality for all three filters
+  - Switching between filters multiple times
+  - FAB (Create Alert) display and callback
+  - Loading and empty states
+  - Top app bar display
+- All tests use composeTestRule.setContent with VettrTheme
+- Build successful: ./gradlew assembleDebug passes
+- **Files changed:**
+  - app/src/androidTest/java/com/vettr/android/feature/auth/LoginScreenTest.kt (new, 199 lines)
+  - app/src/androidTest/java/com/vettr/android/feature/stockdetail/StockDetailScreenTest.kt (new, 308 lines)
+  - app/src/androidTest/java/com/vettr/android/feature/alerts/AlertsScreenTest.kt (new, 190 lines)
+- **Learnings for future iterations:**
+  - Compose UI tests use `composeTestRule.setContent` to render composables
+  - Use `onNodeWithText()` to find text nodes, `onNodeWithContentDescription()` for accessibility nodes
+  - Use `assertIsDisplayed()`, `assertIsEnabled()`, `performClick()`, `performTextInput()` for interactions
+  - Tests can verify callbacks are triggered by passing lambda refs and checking state changes
+  - Without mocking ViewModels, tests verify UI structure and user interactions, not business logic
+  - Create test entities inline (like testStock) to provide data to composables
+  - Use VettrTheme wrapper to ensure proper theming in tests
+  - androidTest tests require actual device/emulator to run (connectedDebugAndroidTest)
+  - Build verification with assembleDebug confirms test code compiles correctly
+---
+
