@@ -1225,7 +1225,7 @@
         "./gradlew testDebugUnitTest passes"
       ],
       "priority": 88,
-      "passes": false
+      "passes": true
     },
     {
       "id": "US-089",
@@ -1239,7 +1239,7 @@
         "./gradlew testDebugUnitTest passes"
       ],
       "priority": 89,
-      "passes": false
+      "passes": true
     },
     {
       "id": "US-090",

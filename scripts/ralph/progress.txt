@@ -2001,3 +2001,54 @@ Details:
   - Multiple preview functions help visualize different states (Free vs Pro tier, dialog states)
   - Icons from material.icons.automirrored.filled for chevrons and navigation icons ensure proper RTL support
 ---
+
+## US-088: Add auth unit tests
+Status: ✅ COMPLETE
+Date: 2026-02-07
+Details:
+- Created app/src/test/java/com/vettr/android/feature/auth/AuthViewModelTest.kt with comprehensive unit tests
+- Test coverage includes:
+  - signInWithEmail: success with isAuthenticated=true, failure with errorMessage, empty field validation
+  - signUp: validation for empty fields, successful account creation, failure error handling
+  - signInWithGoogle: success and failure scenarios
+  - UI state updates: onEmailChange, onPasswordChange, clearError
+- Fixed User model fields: used avatarUrl (not photoUrl) and tier field
+- All 11 tests pass successfully
+- Command used: ./gradlew testDebugUnitTest --tests "com.vettr.android.feature.auth.AuthViewModelTest"
+**Learnings for future iterations:**
+  - Unit tests use MockK for mocking repositories
+  - Coroutines testing requires: StandardTestDispatcher, Dispatchers.setMain/resetMain, runTest, advanceUntilIdle()
+  - StateFlow testing: collect with advanceUntilIdle() to ensure state updates are processed
+  - User model requires: id, email, displayName, avatarUrl, tier, createdAt
+  - Test structure: @Before setup with mock repository, @After tearDown to reset Main dispatcher
+  - MockK patterns: coEvery for suspend functions, flowOf() for Flow returns, coVerify for assertions
+---
+
+## US-089: Add navigation and screen unit tests
+Status: ✅ COMPLETE
+Date: 2026-02-07
+Details:
+- Created PulseViewModelTest.kt with tests for loadData populating stocks and filings flows
+- Created DiscoveryViewModelTest.kt with tests for filter toggle updating displayed stocks
+- Created StockDetailViewModelTest.kt with tests for toggleFavorite updating stock.isFavorite
+- Created ProfileViewModelTest.kt with tests for logout clearing user state
+- All tests use MockK for mocking repositories and Kotlin coroutines test framework
+- Tests verify proper state flow updates, loading states, and error handling
+- All 24 unit tests pass successfully with ./gradlew testDebugUnitTest
+
+Files changed:
+- app/src/test/java/com/vettr/android/feature/pulse/PulseViewModelTest.kt (new)
+- app/src/test/java/com/vettr/android/feature/discovery/DiscoveryViewModelTest.kt (new)
+- app/src/test/java/com/vettr/android/feature/stockdetail/StockDetailViewModelTest.kt (new)
+- app/src/test/java/com/vettr/android/feature/profile/ProfileViewModelTest.kt (new)
+- scripts/ralph/prd.json (updated US-089 to passes: true)
+
+**Learnings for future iterations:**
+- Filing model uses `date` and `summary` fields, not `filedDate`, `url`, or `ticker`
+- ViewModels call loadData() in init block, so loading state tests need to account for this
+- Use `advanceUntilIdle()` after creating ViewModels to ensure all coroutines complete
+- MockK's `returnsMany` is useful for testing state changes across multiple calls
+- Use StandardTestDispatcher with Dispatchers.setMain() for proper coroutine testing
+- SavedStateHandle needs to be mocked with proper stockId parameter for StockDetailViewModel
+- Test both success and error paths for comprehensive coverage
+---
