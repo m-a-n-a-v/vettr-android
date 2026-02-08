@@ -1027,3 +1027,129 @@ Iteration 35 complete. Continuing...
 ===============================================================
   Ralph Iteration 36 of 158 (claude)
 ===============================================================
+## Summary
+
+I've successfully completed **US-037: Create RedFlagHistory Room entity**.
+
+### What was implemented:
+- Created `RedFlagHistory.kt` entity with all required properties:
+  - `id` (String, primary key with UUID generation)
+  - `stockTicker` (String, indexed for query optimization)
+  - `flagType` (String)
+  - `severity` (String)
+  - `score` (Double)
+  - `description` (String)
+  - `detectedAt` (Long timestamp)
+  - `isAcknowledged` (Boolean, defaults to false)
+- Added proper Room annotations including `@ColumnInfo` for snake_case column names
+- Added index on `stock_ticker` column for optimized queries
+- Updated `VettrDatabase.kt` to include the new entity
+
+### Build status:
+✅ `./gradlew assembleDebug` passes successfully
+
+### Commits:
+1. `feat: US-037 - Create RedFlagHistory Room entity`
+2. `docs: Update PRD and progress for US-037 completion`
+
+There are still **118 user stories** remaining with `passes: false`. The next story in priority order is **US-038: Create VetrScoreHistory Room entity**.
+Iteration 36 complete. Continuing...
+
+===============================================================
+  Ralph Iteration 37 of 158 (claude)
+===============================================================
+Perfect! I've successfully completed **US-038: Create VetrScoreHistory Room entity**. 
+
+## Summary
+
+I implemented the VetrScoreHistory Room entity to persist historical Vetr score data. Here's what was done:
+
+### Files Created/Modified:
+1. **Created** `app/src/main/java/com/vettr/android/core/model/VetrScoreHistory.kt`
+   - Added `@Entity` annotation with `tableName = "vetr_score_history"`
+   - Defined all required properties: id, stockTicker, overallScore, pedigreeScore, filingVelocityScore, redFlagScore, growthScore, governanceScore, calculatedAt
+   - Applied `@ColumnInfo` annotations for snake_case column names
+   - Added `@Index` on stock_ticker column for query optimization
+
+2. **Updated** `app/src/main/java/com/vettr/android/core/data/local/VettrDatabase.kt`
+   - Added VetrScoreHistory import
+   - Included VetrScoreHistory in the entities array
+
+### Key Features:
+- Stores comprehensive score breakdowns with 6 component scores plus overall score
+- Indexed on stockTicker for efficient queries when fetching historical scores
+- Uses Long timestamp for calculatedAt to enable time-series analysis
+- Follows established entity patterns: UUID primary key, snake_case columns, proper indexing
+
+### Quality Checks:
+✅ Build successful: `./gradlew assembleDebug` passes  
+✅ PRD updated with `passes: true` for US-038  
+✅ Changes committed with proper feat message  
+✅ Progress logged to progress.txt
+
+This entity will enable users to track how Vetr scores evolve over time, providing valuable insights into stock scoring trends.
+Iteration 37 complete. Continuing...
+
+===============================================================
+  Ralph Iteration 38 of 158 (claude)
+===============================================================
+Perfect! I've successfully completed US-039: Create SyncHistory Room entity. Here's a summary:
+
+## Completed: US-039 - Create SyncHistory Room entity
+
+**What was implemented:**
+- Created `core/model/SyncHistory.kt` data class with Room entity annotations
+- Properties: id, startedAt, completedAt, duration, itemsSynced, errors, status
+- Used proper @ColumnInfo annotations for snake_case column names
+- Updated VettrDatabase to include SyncHistory in the entities array
+
+**Files changed:**
+- `app/src/main/java/com/vettr/android/core/model/SyncHistory.kt` (created)
+- `app/src/main/java/com/vettr/android/core/data/local/VettrDatabase.kt` (updated)
+
+**Build status:** ✅ Passing
+
+The SyncHistory entity will be used to log background sync operations performed by WorkManager, tracking when syncs start, complete, how many items were synced, and any errors that occurred.
+Iteration 38 complete. Continuing...
+
+===============================================================
+  Ralph Iteration 39 of 158 (claude)
+===============================================================
+## Summary
+
+I've successfully completed **US-040: Create StockDao interface**. Here's what was implemented:
+
+### Implementation Details
+
+**Created StockDao interface** (`core/data/local/StockDao.kt`):
+- Query methods with Flow return types for reactive data:
+  - `getAll()`: Returns all stocks
+  - `getById(id: String)`: Returns single stock by ID
+  - `getByTicker(ticker: String)`: Returns single stock by ticker symbol
+  - `searchByName(query: String)`: Searches stocks by name or ticker with LIKE wildcard matching
+  - `getFavorites()`: Returns only favorited stocks (is_favorite = 1)
+
+- Mutation methods with suspend modifiers:
+  - `insert(stock: Stock)`: Insert single stock with REPLACE conflict strategy
+  - `insertAll(stocks: List<Stock>)`: Batch insert stocks with REPLACE conflict strategy
+  - `update(stock: Stock)`: Update existing stock
+  - `delete(stock: Stock)`: Delete stock
+
+**Updated VettrDatabase.kt**:
+- Added `abstract fun stockDao(): StockDao` method to expose the DAO
+
+### Key Patterns Applied
+- Used Flow for reactive data observation - UI automatically updates when database changes
+- Used `OnConflictStrategy.REPLACE` for upsert behavior (insert or update)
+- Search functionality uses SQL LIKE operator to match both name and ticker fields
+- All database operations follow Room best practices
+
+### Build Status
+✅ Build successful: `./gradlew assembleDebug` passes
+
+All changes have been committed with message: `feat: US-040 - Create StockDao interface`
+Iteration 39 complete. Continuing...
+
+===============================================================
+  Ralph Iteration 40 of 158 (claude)
+===============================================================

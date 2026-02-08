@@ -32,4 +32,5 @@ import com.vettr.android.core.util.Converters
 @TypeConverters(Converters::class)
 abstract class VettrDatabase : RoomDatabase() {
     abstract fun stockDao(): StockDao
+    abstract fun filingDao(): FilingDao
 }

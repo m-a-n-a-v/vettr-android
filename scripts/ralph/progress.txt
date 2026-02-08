@@ -759,3 +759,72 @@ Files changed:
   - detectedAt stored as Long (Unix timestamp) for efficient date/time storage and chronological queries
   - Pattern follows established entity conventions: UUID primary key, snake_case column names, proper indexing
 ---
+## US-038: Create VetrScoreHistory Room entity
+Status: ✅ COMPLETE
+Date: 2026-02-07
+Details:
+- Created core/model/VetrScoreHistory.kt data class annotated with @Entity(tableName = "vetr_score_history")
+- Added all required properties: id (String, @PrimaryKey), stockTicker, overallScore, pedigreeScore, filingVelocityScore, redFlagScore, growthScore, governanceScore, calculatedAt (Long)
+- Added @ColumnInfo annotations for snake_case column names: stock_ticker, overall_score, pedigree_score, filing_velocity_score, red_flag_score, growth_score, governance_score, calculated_at
+- Added @Index on stock_ticker column to optimize queries for stock-specific score history
+- Updated VettrDatabase.kt to include VetrScoreHistory entity in entities array
+- Build successful: ./gradlew assembleDebug passes
+Files changed:
+- app/src/main/java/com/vettr/android/core/model/VetrScoreHistory.kt (created)
+- app/src/main/java/com/vettr/android/core/data/local/VettrDatabase.kt (updated)
+**Learnings for future iterations:**
+  - VetrScoreHistory entity stores historical Vetr score breakdowns for tracking score changes over time
+  - Score breakdown includes 6 component scores: pedigree, filing velocity, red flag, growth, governance, plus overall score
+  - Index on stockTicker optimizes queries when fetching score history for specific stocks to visualize trends
+  - calculatedAt stored as Long (Unix timestamp) for efficient chronological queries and time-series analysis
+  - Pattern follows established entity conventions: UUID primary key, snake_case column names, proper indexing
+  - This entity enables temporal analysis of stock scoring, allowing users to see how Vetr scores evolve
+---
+## US-039: Create SyncHistory Room entity
+Status: ✅ COMPLETE
+Date: 2026-02-07
+Details:
+- Created core/model/SyncHistory.kt data class annotated with @Entity(tableName = "sync_history")
+- Added all required properties: id (String, @PrimaryKey), startedAt (Long), completedAt (Long?), duration (Long?), itemsSynced (Int), errors (String?), status (String)
+- Added @ColumnInfo annotations for snake_case column names: started_at, completed_at, items_synced
+- completedAt, duration, and errors are nullable since sync operations may be in progress or succeed without errors
+- Updated VettrDatabase.kt to include SyncHistory entity in entities array
+- Build successful: ./gradlew assembleDebug passes
+Files changed:
+- app/src/main/java/com/vettr/android/core/model/SyncHistory.kt (created)
+- app/src/main/java/com/vettr/android/core/data/local/VettrDatabase.kt (updated)
+**Learnings for future iterations:**
+  - SyncHistory entity provides logging for background sync operations performed by WorkManager
+  - Nullable properties (completedAt, duration, errors) allow tracking of in-progress sync operations
+  - startedAt stores when sync began, completedAt stores when it finished (null if in progress)
+  - duration can be calculated (completedAt - startedAt) or stored for convenience
+  - itemsSynced tracks number of items synced (stocks, filings, etc.) for monitoring data volume
+  - errors field stores any error messages as String for debugging failed syncs
+  - status field categorizes sync state (e.g., "success", "in_progress", "failed", "cancelled")
+  - Pattern follows established entity conventions: UUID primary key, snake_case column names
+---
+
+## US-040: Create StockDao interface
+Status: ✅ COMPLETE
+Date: 2026-02-07
+Details:
+- Created core/data/local/StockDao.kt interface annotated with @Dao
+- Implemented all required query methods: getAll(), getById(), getByTicker(), searchByName(), getFavorites()
+- Implemented all required mutation methods: insert(), insertAll(), update(), delete()
+- Used @Query annotations with Flow return types for reactive data observation
+- Used @Insert with OnConflictStrategy.REPLACE for upsert behavior
+- Used @Update and @Delete annotations for modification operations
+- Added StockDao abstract method to VettrDatabase class
+- Build successful: ./gradlew assembleDebug passes
+Files changed:
+- app/src/main/java/com/vettr/android/core/data/local/StockDao.kt (created)
+- app/src/main/java/com/vettr/android/core/data/local/VettrDatabase.kt (updated)
+**Learnings for future iterations:**
+  - StockDao provides database operations for Stock entities with reactive Flow return types
+  - searchByName() uses LIKE query with wildcards to search both name and ticker fields
+  - Flow return types enable reactive UI updates when database data changes
+  - suspend functions required for insert/update/delete operations to run on background thread
+  - OnConflictStrategy.REPLACE provides upsert behavior for insert operations
+  - getFavorites() queries for is_favorite = 1 (Room uses 1 for true, 0 for false in SQLite)
+  - DAO abstract methods must be added to RoomDatabase class to expose database operations
+---
