@@ -1,5 +1,6 @@
 package com.vettr.android.feature.stockdetail
 
+import android.content.Intent
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -42,6 +43,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -66,6 +68,29 @@ import java.util.Date
 import java.util.Locale
 
 /**
+ * Shares stock information via the Android share sheet.
+ *
+ * @param context Android context for launching the share intent.
+ * @param stock The stock to share.
+ */
+private fun shareStock(context: android.content.Context, stock: Stock) {
+    val shareText = buildString {
+        append("${stock.ticker} - ${stock.name}\n")
+        append("VETR Score: ${stock.vetrScore}/100\n")
+        append("\nView more on VETTR: https://vettr.com/stocks/${stock.ticker}")
+    }
+
+    val sendIntent = Intent().apply {
+        action = Intent.ACTION_SEND
+        putExtra(Intent.EXTRA_TEXT, shareText)
+        type = "text/plain"
+    }
+
+    val shareIntent = Intent.createChooser(sendIntent, null)
+    context.startActivity(shareIntent)
+}
+
+/**
  * Stock Detail screen wrapper that connects to ViewModel.
  * Use this composable when navigating to stock details with ViewModel integration.
  */
@@ -76,6 +101,7 @@ fun StockDetailRoute(
     viewModel: StockDetailViewModel = hiltViewModel(),
     modifier: Modifier = Modifier
 ) {
+    val context = LocalContext.current
     val stock by viewModel.stock.collectAsStateWithLifecycle()
     val filings by viewModel.filings.collectAsStateWithLifecycle()
     val selectedTab by viewModel.selectedTab.collectAsStateWithLifecycle()
@@ -91,7 +117,12 @@ fun StockDetailRoute(
             StockDetailTab.NEWS -> 2
         },
         onBackClick = onBackClick,
-        onShareClick = onShareClick,
+        onShareClick = {
+            stock?.let { stockData ->
+                shareStock(context, stockData)
+            }
+            onShareClick()
+        },
         onFavoriteClick = { viewModel.toggleFavorite() },
         onTimeRangeSelected = { viewModel.selectTimeRange(it) },
         onTabSelected = { tabIndex ->
