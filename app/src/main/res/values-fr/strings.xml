@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- App Name -->
+    <string name="app_name">VETTR</string>
+
+    <!-- Example French Translations (5 samples for Phase 2) -->
+
+    <!-- Welcome Screen -->
+    <string name="welcome_tagline">Investissement intelligent pour les Canadiens</string>
+    <string name="welcome_button_getstarted">Commencer</string>
+    <string name="welcome_button_login">Se connecter</string>
+
+    <!-- Navigation -->
+    <string name="nav_pulse">Pouls</string>
+    <string name="nav_discovery">Découverte</string>
+
+    <!-- Note: Additional translations will be added in Phase 2 -->
+    <!-- Total estimated strings to translate: ~200 -->
+</resources>

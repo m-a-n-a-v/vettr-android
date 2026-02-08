@@ -1,4 +1,295 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+    <!-- App Name -->
     <string name="app_name">VETTR</string>
+
+    <!-- Common / Shared -->
+    <string name="common_button_cancel">Cancel</string>
+    <string name="common_button_ok">OK</string>
+    <string name="common_button_retry">Retry</string>
+    <string name="common_button_save">Save</string>
+    <string name="common_button_next">Next</string>
+    <string name="common_button_previous">Previous</string>
+    <string name="common_button_edit">Edit</string>
+    <string name="common_loading">Loading…</string>
+    <string name="common_error_generic">Failed to load data. Please check your connection.</string>
+    <string name="common_contentdesc_back">Back</string>
+    <string name="common_contentdesc_share">Share</string>
+    <string name="common_contentdesc_navigate">Navigate</string>
+    <string name="common_time_justnow">Just now</string>
+    <string name="common_time_minutes_ago">%d minute(s) ago</string>
+    <string name="common_time_hours_ago">%d hour(s) ago</string>
+    <string name="common_time_days_ago">%d day(s) ago</string>
+    <string name="common_time_weeks_ago">%d week(s) ago</string>
+
+    <!-- Welcome Screen -->
+    <string name="welcome_logo_letter">V</string>
+    <string name="welcome_app_name">VETTR</string>
+    <string name="welcome_emoji">🐕</string>
+    <string name="welcome_tagline">Smart Investing for Canadians</string>
+    <string name="welcome_button_getstarted">Get Started</string>
+    <string name="welcome_button_login">Log In</string>
+
+    <!-- Auth - Login Screen -->
+    <string name="auth_login_title">Welcome Back</string>
+    <string name="auth_login_subtitle">Log in to continue</string>
+    <string name="auth_field_email">Email</string>
+    <string name="auth_field_password">Password</string>
+    <string name="auth_contentdesc_hidepassword">Hide password</string>
+    <string name="auth_contentdesc_showpassword">Show password</string>
+    <string name="auth_button_login">Log In</string>
+    <string name="auth_button_google">Sign in with Google</string>
+    <string name="auth_text_noaccount">Don\'t have an account? </string>
+    <string name="auth_link_signup">Sign Up</string>
+
+    <!-- Auth - Sign Up Screen -->
+    <string name="auth_signup_title">Create Account</string>
+    <string name="auth_signup_subtitle">Sign up to get started</string>
+    <string name="auth_field_confirmpassword">Confirm Password</string>
+    <string name="auth_error_email_empty">Email cannot be empty</string>
+    <string name="auth_error_email_invalid">Invalid email format</string>
+    <string name="auth_error_password_empty">Password cannot be empty</string>
+    <string name="auth_error_passwords_nomatch">Passwords do not match</string>
+    <string name="auth_button_signup">Sign Up</string>
+    <string name="auth_button_google_signup">Sign up with Google</string>
+    <string name="auth_text_haveaccount">Already have an account? </string>
+
+    <!-- Navigation -->
+    <string name="nav_pulse">Pulse</string>
+    <string name="nav_discovery">Discovery</string>
+    <string name="nav_stocks">Stocks</string>
+    <string name="nav_alerts">Alerts</string>
+    <string name="nav_profile">Profile</string>
+
+    <!-- Pulse Screen -->
+    <string name="pulse_empty_title">No Market Data</string>
+    <string name="pulse_empty_subtitle">Unable to load market data. Pull down to refresh.</string>
+    <string name="pulse_section_marketoverview">Market Overview</string>
+    <string name="pulse_section_events">Strategic Events</string>
+    <string name="pulse_section_trending">Trending Stocks</string>
+    <string name="pulse_contentdesc_notifications">Notifications</string>
+    <string name="pulse_metric_tsx">TSX</string>
+    <string name="pulse_metric_sp500">S&amp;P 500</string>
+    <string name="pulse_metric_nasdaq">NASDAQ</string>
+
+    <!-- Discovery Screen -->
+    <string name="discovery_title">Discovery</string>
+    <string name="discovery_filter_watchlist">My Watchlist</string>
+    <string name="discovery_filter_alertsonly">Alerts Only</string>
+    <string name="discovery_section_topsectors">Top Sectors</string>
+    <string name="discovery_section_recentupdates">Recent Updates</string>
+
+    <!-- Stock Detail Screen -->
+    <string name="stockdetail_contentdesc_removefavorite">Remove from favorites</string>
+    <string name="stockdetail_contentdesc_addfavorite">Add to favorites</string>
+    <string name="stockdetail_loading">Loading stock details…</string>
+    <string name="stockdetail_chart_placeholder">Chart Placeholder</string>
+    <string name="stockdetail_timerange_1d">1D</string>
+    <string name="stockdetail_timerange_1w">1W</string>
+    <string name="stockdetail_timerange_1m">1M</string>
+    <string name="stockdetail_timerange_1y">1Y</string>
+    <string name="stockdetail_tab_overview">Overview</string>
+    <string name="stockdetail_tab_pedigree">Pedigree</string>
+    <string name="stockdetail_tab_redflags">Red Flags</string>
+    <string name="stockdetail_section_companyoverview">Company Overview</string>
+    <string name="stockdetail_section_keymetrics">Key Metrics</string>
+    <string name="stockdetail_contentdesc_scorehelp">VETR Score Help</string>
+    <string name="stockdetail_metric_marketcap">Market Cap</string>
+    <string name="stockdetail_metric_sector">Sector</string>
+    <string name="stockdetail_metric_exchange">Exchange</string>
+    <string name="stockdetail_metric_vetrscore">VETR Score</string>
+    <string name="stockdetail_section_executiveteam">Executive Team</string>
+    <string name="stockdetail_contentdesc_pedigreehelp">Pedigree Help</string>
+    <string name="stockdetail_section_riskanalysis">Risk Analysis</string>
+    <string name="stockdetail_contentdesc_redflaghelp">Red Flag Help</string>
+    <string name="stockdetail_share_text">View more on VETTR: https://vettr.com/stocks/%s</string>
+    <string name="stockdetail_section_vetranalysis">VETR Analysis</string>
+    <string name="stockdetail_empty_nofilings">No recent filings available</string>
+    <string name="stockdetail_helper_howthisworks">How this works:</string>
+
+    <!-- Alerts Screen -->
+    <string name="alerts_title">Alerts</string>
+    <string name="alerts_contentdesc_createalert">Create Alert</string>
+    <string name="alerts_filter_all">All</string>
+    <string name="alerts_filter_active">Active</string>
+    <string name="alerts_filter_triggered">Triggered</string>
+    <string name="alerts_loading">Loading alerts…</string>
+    <string name="alerts_section_allrules">All Alert Rules</string>
+    <string name="alerts_section_recenttriggers">Recent Triggers</string>
+    <string name="alerts_label_frequency">Frequency: </string>
+    <string name="alerts_state_active">Active</string>
+    <string name="alerts_state_inactive">Inactive</string>
+    <string name="alerts_contentdesc_delete">Delete</string>
+    <string name="alerts_contentdesc_share">Share alert</string>
+    <string name="alerts_empty_title">No alerts yet</string>
+    <string name="alerts_empty_subtitle">Tap the + button to create your first alert</string>
+    <string name="alerts_empty_contentdesc">No alerts</string>
+    <string name="alerts_share_text">VETTR Alert: %1$s\n%2$s\nFrequency: %3$s\nLast triggered: %4$s\n\nCreate your own alerts on VETTR: https://vettr.com/alerts</string>
+    <string name="alerts_time_justnow">just now</string>
+    <string name="alerts_time_minutesago">%d minutes ago</string>
+    <string name="alerts_time_hoursago">%d hours ago</string>
+    <string name="alerts_time_daysago">%d days ago</string>
+    <string name="alerts_triggered_at">Triggered %s</string>
+
+    <!-- Alert Rule Creator -->
+    <string name="alertcreator_title">Create Alert Rule</string>
+    <string name="alertcreator_success">Alert rule created successfully!</string>
+    <string name="alertcreator_button_previous">Previous</string>
+    <string name="alertcreator_button_next">Next</string>
+    <string name="alertcreator_button_save">Save Rule</string>
+
+    <!-- Alert Creator - Step 1: Select Stock -->
+    <string name="alertcreator_step1_title">Select a Stock</string>
+    <string name="alertcreator_step1_subtitle">Choose the stock you want to create an alert for</string>
+    <string name="alertcreator_step1_searchhint">Search by ticker or company name</string>
+    <string name="alertcreator_contentdesc_selected">Selected</string>
+
+    <!-- Alert Creator - Step 2: Rule Type -->
+    <string name="alertcreator_step2_title">Choose Rule Type</string>
+    <string name="alertcreator_step2_subtitle">Select the type of alert you want to create</string>
+    <string name="alertcreator_ruletype_priceabove_title">Price Above</string>
+    <string name="alertcreator_ruletype_priceabove_desc">Alert when stock price goes above a specific value</string>
+    <string name="alertcreator_ruletype_pricebelow_title">Price Below</string>
+    <string name="alertcreator_ruletype_pricebelow_desc">Alert when stock price goes below a specific value</string>
+    <string name="alertcreator_ruletype_priceincrease_title">Price Increase</string>
+    <string name="alertcreator_ruletype_priceincrease_desc">Alert when stock price increases by a percentage</string>
+    <string name="alertcreator_ruletype_pricedecrease_title">Price Decrease</string>
+    <string name="alertcreator_ruletype_pricedecrease_desc">Alert when stock price decreases by a percentage</string>
+    <string name="alertcreator_ruletype_scorechange_title">VETR Score Change</string>
+    <string name="alertcreator_ruletype_scorechange_desc">Alert when VETR score changes significantly</string>
+
+    <!-- Alert Creator - Step 3: Condition -->
+    <string name="alertcreator_step3_title">Set Condition</string>
+    <string name="alertcreator_step3_label_price">Enter price threshold</string>
+    <string name="alertcreator_step3_hint_price">e.g., 12.50</string>
+    <string name="alertcreator_step3_suffix_price">$</string>
+    <string name="alertcreator_step3_label_percentage">Enter percentage change</string>
+    <string name="alertcreator_step3_hint_percentage">e.g., 5</string>
+    <string name="alertcreator_step3_suffix_percentage">%</string>
+    <string name="alertcreator_step3_label_score">Enter minimum score change</string>
+    <string name="alertcreator_step3_hint_score">e.g., 10</string>
+    <string name="alertcreator_step3_suffix_score">points</string>
+    <string name="alertcreator_step3_helper_header">How this works:</string>
+    <string name="alertcreator_step3_helper_priceabove">You\'ll be notified when the stock price goes above your specified value.</string>
+    <string name="alertcreator_step3_helper_pricebelow">You\'ll be notified when the stock price goes below your specified value.</string>
+    <string name="alertcreator_step3_helper_priceincrease">You\'ll be notified when the stock price increases by your specified percentage.</string>
+    <string name="alertcreator_step3_helper_pricedecrease">You\'ll be notified when the stock price decreases by your specified percentage.</string>
+    <string name="alertcreator_step3_helper_scorechange">You\'ll be notified when the VETR score changes by at least your specified number of points.</string>
+
+    <!-- Alert Creator - Step 4: Frequency -->
+    <string name="alertcreator_step4_title">Notification Frequency</string>
+    <string name="alertcreator_step4_subtitle">How often do you want to be notified?</string>
+    <string name="alertcreator_freq_realtime_title">Real-time</string>
+    <string name="alertcreator_freq_realtime_desc">Get notified immediately when condition is met</string>
+    <string name="alertcreator_freq_daily_title">Once per day</string>
+    <string name="alertcreator_freq_daily_desc">Get one notification per day when condition is met</string>
+    <string name="alertcreator_freq_weekly_title">Once per week</string>
+    <string name="alertcreator_freq_weekly_desc">Get one notification per week when condition is met</string>
+
+    <!-- Alert Creator - Step 5: Review -->
+    <string name="alertcreator_step5_title">Review &amp; Confirm</string>
+    <string name="alertcreator_step5_subtitle">Review your alert rule before saving</string>
+    <string name="alertcreator_review_label_stock">Stock</string>
+    <string name="alertcreator_review_notselected">Not selected</string>
+    <string name="alertcreator_review_label_ruletype">Rule Type</string>
+    <string name="alertcreator_review_ruletype_priceabove">Price Above</string>
+    <string name="alertcreator_review_ruletype_pricebelow">Price Below</string>
+    <string name="alertcreator_review_ruletype_priceincrease">Price Increase</string>
+    <string name="alertcreator_review_ruletype_pricedecrease">Price Decrease</string>
+    <string name="alertcreator_review_ruletype_scorechange">VETR Score Change</string>
+    <string name="alertcreator_review_label_condition">Condition</string>
+    <string name="alertcreator_review_label_frequency">Frequency</string>
+
+    <!-- Profile Screen -->
+    <string name="profile_contentdesc_avatar">Profile avatar</string>
+    <string name="profile_contentdesc_defaultavatar">Default avatar</string>
+    <string name="profile_default_username">Guest User</string>
+    <string name="profile_default_email">guest@vettr.com</string>
+    <string name="profile_menuitem_settings">Settings</string>
+    <string name="profile_section_help">Help &amp; Learning</string>
+    <string name="profile_menuitem_glossary">Glossary</string>
+    <string name="profile_menuitem_faq">FAQ</string>
+    <string name="profile_menuitem_about">About</string>
+    <string name="profile_menuitem_logout">Log Out</string>
+    <string name="profile_upgrade_title">Upgrade to Pro</string>
+    <string name="profile_upgrade_subtitle">Unlock unlimited watchlists, faster updates, and more</string>
+    <string name="profile_upgrade_price">$10.99/month</string>
+    <string name="profile_contentdesc_upgrade">Upgrade</string>
+    <string name="profile_dialog_logout_title">Log Out</string>
+    <string name="profile_dialog_logout_message">Are you sure you want to log out?</string>
+    <string name="profile_contentdesc_sync">Sync</string>
+    <string name="profile_section_sync">Sync</string>
+    <string name="profile_sync_lastsync">Last sync</string>
+    <string name="profile_sync_never">Never</string>
+    <string name="profile_sync_nextsync">Next sync</string>
+    <string name="profile_sync_unknown">Unknown</string>
+    <string name="profile_sync_frequency">Sync frequency</string>
+    <string name="profile_sync_freq_daily">Daily (24h)</string>
+    <string name="profile_sync_freq_12hours">Every 12 hours</string>
+    <string name="profile_sync_freq_4hours">Every 4 hours</string>
+    <string name="profile_button_syncnow">Sync Now</string>
+    <string name="profile_button_syncing">Syncing…</string>
+    <string name="profile_sync_soon">Soon</string>
+    <string name="profile_sync_in_minutes">In %d minute(s)</string>
+    <string name="profile_sync_in_hours">In %d hour(s)</string>
+    <string name="profile_sync_in_days">In %d day(s)</string>
+    <string name="profile_tier_free">Free</string>
+    <string name="profile_tier_pro">Pro</string>
+    <string name="profile_tier_premium">Premium</string>
+    <string name="profile_tier_badge_free">FREE</string>
+    <string name="profile_tier_badge_pro">PRO</string>
+    <string name="profile_tier_badge_premium">PREMIUM</string>
+
+    <!-- Settings Screen -->
+    <string name="settings_title">Settings</string>
+    <string name="settings_section_general">General</string>
+    <string name="settings_item_currency">Currency</string>
+    <string name="settings_item_darkmode">Dark Mode</string>
+    <string name="settings_subtitle_darkmode">Currently using dark theme</string>
+    <string name="settings_item_language">Language</string>
+    <string name="settings_section_notifications">Notifications</string>
+    <string name="settings_item_filings">Filing Notifications</string>
+    <string name="settings_subtitle_filings">Get notified about new SEC filings</string>
+    <string name="settings_item_pricealerts">Price Alert Notifications</string>
+    <string name="settings_subtitle_pricealerts">Get notified when price targets are hit</string>
+    <string name="settings_item_insider">Insider Activity Notifications</string>
+    <string name="settings_subtitle_insider">Get notified about insider trades</string>
+    <string name="settings_item_redflags">Red Flag Notifications</string>
+    <string name="settings_subtitle_redflags">Get notified about red flags</string>
+    <string name="settings_item_notiffreq">Notification Frequency</string>
+    <string name="settings_section_privacy">Privacy</string>
+    <string name="settings_item_optout_analytics">Opt Out of Analytics</string>
+    <string name="settings_subtitle_optout_analytics">Disable usage analytics collection</string>
+    <string name="settings_item_optout_crash">Opt Out of Crash Reporting</string>
+    <string name="settings_subtitle_optout_crash">Disable crash report collection</string>
+    <string name="settings_section_security">Security</string>
+    <string name="settings_item_biometric">Enable Biometric Login</string>
+    <string name="settings_subtitle_biometric_enabled">Unlock with fingerprint or face</string>
+    <string name="settings_subtitle_biometric_disabled">Use fingerprint or face to unlock app</string>
+    <string name="settings_subtitle_biometric_unavailable">Biometric authentication not available</string>
+    <string name="settings_section_accessibility">Accessibility</string>
+    <string name="settings_item_haptic">Haptic Feedback</string>
+    <string name="settings_subtitle_haptic">Vibrate on taps and interactions</string>
+    <string name="settings_section_developer">Developer</string>
+    <string name="settings_item_buildversion">Build Version</string>
+    <string name="settings_item_device">Device</string>
+    <string name="settings_item_memory">Memory Usage</string>
+    <string name="settings_item_resetdata">Reset App Data</string>
+    <string name="settings_subtitle_resetdata">Clear all local data and settings</string>
+    <string name="settings_dialog_reset_title">Reset App Data</string>
+    <string name="settings_dialog_reset_message">This will clear all local data and settings. You will be logged out and the app will restart. Are you sure?</string>
+    <string name="settings_dialog_reset_button">Reset</string>
+    <string name="settings_dialog_biometric_title">Biometric Login Unavailable</string>
+
+    <!-- Empty State -->
+    <string name="empty_watchlist_title">No Stocks in Watchlist</string>
+    <string name="empty_watchlist_subtitle">Add stocks to your watchlist to see them here</string>
+    <string name="empty_alerts_title">No Alerts Set</string>
+    <string name="empty_alerts_subtitle">Create custom alerts to stay informed about market movements</string>
+    <string name="empty_action_createalert">Create Alert</string>
+
+    <!-- Error View -->
+    <string name="error_contentdesc_icon">Error</string>
+    <string name="error_button_gohome">Go Home</string>
+    <string name="error_button_contactsupport">Contact Support</string>
 </resources>

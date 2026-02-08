@@ -19,6 +19,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -58,7 +59,7 @@ fun WelcomeScreen(
                 contentAlignment = Alignment.Center
             ) {
                 Text(
-                    text = "V",
+                    text = stringResource(R.string.welcome_logo_letter),
                     style = MaterialTheme.typography.displayLarge,
                     color = Color.White
                 )
@@ -68,7 +69,7 @@ fun WelcomeScreen(
 
             // App name
             Text(
-                text = "VETTR",
+                text = stringResource(R.string.welcome_app_name),
                 style = MaterialTheme.typography.displayLarge,
                 color = MaterialTheme.colorScheme.onBackground
             )
@@ -90,7 +91,7 @@ fun WelcomeScreen(
                 contentAlignment = Alignment.Center
             ) {
                 Text(
-                    text = "🐕",
+                    text = stringResource(R.string.welcome_emoji),
                     style = MaterialTheme.typography.displayMedium
                 )
             }
@@ -99,7 +100,7 @@ fun WelcomeScreen(
 
             // Tagline
             Text(
-                text = "Smart Investing for Canadians",
+                text = stringResource(R.string.welcome_tagline),
                 style = MaterialTheme.typography.titleLarge,
                 color = MaterialTheme.colorScheme.onBackground,
                 textAlign = TextAlign.Center
@@ -113,7 +114,7 @@ fun WelcomeScreen(
             verticalArrangement = Arrangement.spacedBy(Spacing.md)
         ) {
             PrimaryButton(
-                text = "Get Started",
+                text = stringResource(R.string.welcome_button_getstarted),
                 onClick = onGetStartedClick,
                 fullWidth = true,
                 modifier = Modifier.padding(horizontal = 0.dp)
@@ -124,7 +125,7 @@ fun WelcomeScreen(
                 modifier = Modifier.fillMaxWidth()
             ) {
                 Text(
-                    text = "Log In",
+                    text = stringResource(R.string.welcome_button_login),
                     style = MaterialTheme.typography.bodyLarge,
                     color = MaterialTheme.colorScheme.primary
                 )
