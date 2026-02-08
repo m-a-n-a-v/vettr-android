@@ -6,9 +6,12 @@ import com.vettr.android.core.data.repository.StockRepository
 import com.vettr.android.core.data.repository.VetrScoreRepository
 import com.vettr.android.core.model.Filing
 import com.vettr.android.core.model.Stock
+import com.vettr.android.core.util.HapticService
 import io.mockk.coEvery
 import io.mockk.coVerify
+import io.mockk.every
 import io.mockk.mockk
+import io.mockk.verify
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.flowOf
@@ -35,6 +38,7 @@ class StockDetailViewModelTest {
     private lateinit var stockRepository: StockRepository
     private lateinit var filingRepository: FilingRepository
     private lateinit var vetrScoreRepository: VetrScoreRepository
+    private lateinit var hapticService: HapticService
     private lateinit var savedStateHandle: SavedStateHandle
 
     private val testDispatcher = StandardTestDispatcher()
@@ -46,6 +50,7 @@ class StockDetailViewModelTest {
         stockRepository = mockk()
         filingRepository = mockk()
         vetrScoreRepository = mockk()
+        hapticService = mockk(relaxed = true)
         savedStateHandle = SavedStateHandle(mapOf("stockId" to testStockId))
     }
 
@@ -80,7 +85,7 @@ class StockDetailViewModelTest {
         coEvery { filingRepository.getFilingsForStock(testStockId) } returns flowOf(emptyList())
         coEvery { stockRepository.toggleFavorite(testStockId) } returns Unit
 
-        viewModel = StockDetailViewModel(stockRepository, filingRepository, vetrScoreRepository, savedStateHandle)
+        viewModel = StockDetailViewModel(stockRepository, filingRepository, vetrScoreRepository, hapticService, savedStateHandle)
         advanceUntilIdle()
 
         // Verify initial state
@@ -88,7 +93,7 @@ class StockDetailViewModelTest {
         assertFalse(viewModel.stock.value?.isFavorite ?: true)
 
         // When
-        viewModel.toggleFavorite()
+        viewModel.toggleFavorite(null)
         advanceUntilIdle()
 
         // Then
@@ -136,7 +141,7 @@ class StockDetailViewModelTest {
         coEvery { filingRepository.getFilingsForStock(testStockId) } returns flowOf(mockFilings)
 
         // When
-        viewModel = StockDetailViewModel(stockRepository, filingRepository, vetrScoreRepository, savedStateHandle)
+        viewModel = StockDetailViewModel(stockRepository, filingRepository, vetrScoreRepository, hapticService, savedStateHandle)
         advanceUntilIdle()
 
         // Then
@@ -164,7 +169,7 @@ class StockDetailViewModelTest {
         coEvery { stockRepository.getStock(testStockId) } returns flowOf(mockStock)
         coEvery { filingRepository.getFilingsForStock(testStockId) } returns flowOf(emptyList())
 
-        viewModel = StockDetailViewModel(stockRepository, filingRepository, vetrScoreRepository, savedStateHandle)
+        viewModel = StockDetailViewModel(stockRepository, filingRepository, vetrScoreRepository, hapticService, savedStateHandle)
         advanceUntilIdle()
 
         // Verify initial tab is OVERVIEW
@@ -204,7 +209,7 @@ class StockDetailViewModelTest {
         coEvery { stockRepository.getStock(testStockId) } returns flowOf(mockStock)
         coEvery { filingRepository.getFilingsForStock(testStockId) } returns flowOf(emptyList())
 
-        viewModel = StockDetailViewModel(stockRepository, filingRepository, vetrScoreRepository, savedStateHandle)
+        viewModel = StockDetailViewModel(stockRepository, filingRepository, vetrScoreRepository, hapticService, savedStateHandle)
         advanceUntilIdle()
 
         // Verify initial time range is ONE_DAY
@@ -245,11 +250,11 @@ class StockDetailViewModelTest {
         coEvery { filingRepository.getFilingsForStock(testStockId) } returns flowOf(emptyList())
         coEvery { stockRepository.toggleFavorite(testStockId) } throws Exception("Network error")
 
-        viewModel = StockDetailViewModel(stockRepository, filingRepository, vetrScoreRepository, savedStateHandle)
+        viewModel = StockDetailViewModel(stockRepository, filingRepository, vetrScoreRepository, hapticService, savedStateHandle)
         advanceUntilIdle()
 
         // When
-        viewModel.toggleFavorite()
+        viewModel.toggleFavorite(null)
         advanceUntilIdle()
 
         // Then - error message should be set
@@ -263,7 +268,7 @@ class StockDetailViewModelTest {
         savedStateHandle = SavedStateHandle(mapOf("stockId" to ""))
 
         // When
-        viewModel = StockDetailViewModel(stockRepository, filingRepository, vetrScoreRepository, savedStateHandle)
+        viewModel = StockDetailViewModel(stockRepository, filingRepository, vetrScoreRepository, hapticService, savedStateHandle)
         advanceUntilIdle()
 
         // Then
