@@ -11,11 +11,20 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.graphics.Color
 import com.vettr.android.designsystem.theme.Spacing
 import com.vettr.android.designsystem.theme.VettrGreen
 import com.vettr.android.designsystem.theme.VettrNavy
 import com.vettr.android.designsystem.theme.VettrRed
 import com.vettr.android.designsystem.theme.VettrTheme
+
+/**
+ * Determines the color for a change indicator based on whether the change is positive or negative.
+ * Exposed for testing.
+ */
+fun getChangeColor(change: Double): Color {
+    return if (change >= 0) VettrGreen else VettrRed
+}
 
 /**
  * MetricCard displays a key metric in a consistent card format.
@@ -55,7 +64,7 @@ fun MetricCard(
         // Change indicator (if provided)
         change?.let {
             val isPositive = it >= 0
-            val changeColor = if (isPositive) VettrGreen else VettrRed
+            val changeColor = getChangeColor(it)
             val changePrefix = if (isPositive) "+" else ""
 
             Row(

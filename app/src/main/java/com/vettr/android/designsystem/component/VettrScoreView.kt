@@ -26,6 +26,34 @@ import com.vettr.android.designsystem.theme.VettrTheme
 import com.vettr.android.designsystem.theme.VettrYellow
 
 /**
+ * Determines the color for a VETR score based on score ranges.
+ * Exposed for testing.
+ */
+fun getScoreColor(score: Int): Color {
+    val normalizedScore = score.coerceIn(0, 100)
+    return when {
+        normalizedScore > 80 -> VettrGreen  // Strong Buy
+        normalizedScore >= 60 -> VettrYellow // Buy
+        normalizedScore >= 40 -> Color(0xFFFF9800) // Orange - Hold
+        else -> VettrRed // Caution
+    }
+}
+
+/**
+ * Determines the label for a VETR score based on score ranges.
+ * Exposed for testing.
+ */
+fun getScoreLabel(score: Int): String {
+    val normalizedScore = score.coerceIn(0, 100)
+    return when {
+        normalizedScore > 80 -> "Strong Buy"
+        normalizedScore >= 60 -> "Buy"
+        normalizedScore >= 40 -> "Hold"
+        else -> "Caution"
+    }
+}
+
+/**
  * A circular VETR score badge that displays a score from 0-100 with color coding
  * and a descriptive label.
  *
@@ -42,20 +70,10 @@ fun VettrScoreView(
     val normalizedScore = score.coerceIn(0, 100)
 
     // Determine color based on score ranges
-    val scoreColor = when {
-        normalizedScore > 80 -> VettrGreen  // Strong Buy
-        normalizedScore >= 60 -> VettrYellow // Buy
-        normalizedScore >= 40 -> Color(0xFFFF9800) // Orange - Hold
-        else -> VettrRed // Caution
-    }
+    val scoreColor = getScoreColor(score)
 
     // Determine label based on score ranges
-    val scoreLabel = when {
-        normalizedScore > 80 -> "Strong Buy"
-        normalizedScore >= 60 -> "Buy"
-        normalizedScore >= 40 -> "Hold"
-        else -> "Caution"
-    }
+    val scoreLabel = getScoreLabel(score)
 
     Column(
         modifier = modifier,
