@@ -3292,3 +3292,35 @@ Details:
   - Analytics events follow existing pattern with sealed class hierarchy
   - Share text includes deep links to vettr.com (placeholder URLs)
 ---
+
+## US-126: Implement feedback and app rating prompts
+Status: ✅ COMPLETE
+Date: 2026-02-08
+Details:
+- Created FeedbackService.kt in core/util/ with DataStore integration
+  - Tracks watchlist additions with 10-addition threshold
+  - Implements 90-day cooldown for review prompts
+  - Tracks feedback submission count
+  - Provides methods to trigger Play Store review using ReviewManager API
+- Added Google Play Core library dependency (version 1.10.3) to gradle/libs.versions.toml and app/build.gradle.kts
+- Created FeedbackScreen.kt in feature/profile/ with complete UI:
+  - Category picker with segmented buttons (Bug/Feature/General)
+  - Multi-line text input for feedback
+  - Optional email input field
+  - Submit button that records feedback and shows thank you snackbar
+  - Mock implementation sends to support@vettr.ca (logged to console)
+- Added feedback analytics events to AnalyticsEvent.kt:
+  - FeedbackSubmitted (tracks category, email presence, submission count)
+  - PlayStoreReviewRequested
+  - PlayStoreReviewCompleted
+- Build successful: ./gradlew assembleDebug passes
+**Learnings for future iterations:**
+  - ReviewManager API requires FragmentActivity context (not just Activity)
+  - DataStore preferences with preferencesDataStore delegate pattern is recommended for simple key-value storage
+  - Play Core library provides in-app review flow without leaving the app
+  - Segmented buttons in Material 3 use SingleChoiceSegmentedButtonRow composable
+  - FeedbackService uses Singleton scope with Hilt injection
+  - Review prompts should be triggered after meaningful engagement (10 watchlist additions) to avoid annoying users
+  - 90-day cooldown prevents review spam
+  - Feedback screen is standalone and needs to be integrated into navigation graph (not done in this story - will be done when navigation is expanded)
+---
