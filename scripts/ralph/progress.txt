@@ -360,3 +360,51 @@ Files changed:
   - Arrangement.spacedBy(Spacing.xs) provides consistent vertical spacing between title, value, and change
   - Using MaterialTheme.colorScheme colors ensures proper contrast in dark theme
 ---
+
+## US-020: Create SectorChip composable component
+Status: ✅ COMPLETE
+Date: 2026-02-07
+Details:
+- Created designsystem/component/SectorChip.kt @Composable function
+- Implemented pill-shaped Surface with RoundedCornerShape(Dimensions.chipRadius) = 20.dp
+- Applied VettrCardBackground color with 1.dp VettrAccent border
+- Uses labelSmall typography with compact padding (horizontal: Spacing.md, vertical: Spacing.sm)
+- Added 3 @Preview composables: Mining, Technology, Energy sectors
+- Build successful: ./gradlew assembleDebug passes
+Files changed:
+- app/src/main/java/com/vettr/android/designsystem/component/SectorChip.kt (created)
+**Learnings for future iterations:**
+  - SectorChip provides consistent sector tag styling across the app (stock lists, detail screens, etc.)
+  - Using Dimensions.chipRadius (20.dp) creates perfect pill shape for compact tags
+  - Border modifier must be applied before Surface to ensure border is visible on the Surface shape
+  - labelSmall typography (12sp) is optimal for compact tag text readability
+  - Preview composables with dark background (0xFF0D1B2A) help visualize components in the dark theme
+  - Horizontal padding (Spacing.md = 16.dp) and vertical padding (Spacing.sm = 8.dp) provide balanced visual weight for chip
+---
+
+## US-021: Create StockRowView composable component
+Status: ✅ COMPLETE
+Date: 2026-02-07
+Details:
+- Created designsystem/component/StockRowView.kt @Composable function
+- Parameters: ticker, companyName, price, priceChange, logoUrl, onClick
+- Displays ticker and company name in left column with ticker in titleMedium and company name in bodyMedium
+- Displays price and price change in right column, both right-aligned
+- Uses AsyncImage from Coil for company logo with 48.dp circular shape
+- Price change color-coded: VettrGreen for positive/zero, VettrRed for negative
+- Price change displays with +/- prefix and dollar sign (e.g., "+$2.35" or "-$1.45")
+- Row is clickable with onClick callback
+- Added 4 @Preview composables: positive change (SHOP), negative change (RY), zero change (ENB), no logo (TD)
+- Build successful: ./gradlew assembleDebug passes
+Files changed:
+- app/src/main/java/com/vettr/android/designsystem/component/StockRowView.kt (created)
+**Learnings for future iterations:**
+  - StockRowView provides consistent stock list item format for Pulse, Discovery, and Watchlist screens
+  - AsyncImage from Coil 3.x handles logo loading with contentDescription for accessibility
+  - Using Modifier.weight(1f) on ticker/company column allows price column to stay right-aligned
+  - Circular logo shape (CircleShape with clip) creates professional appearance for company logos
+  - Column with Alignment.End for price/change ensures proper right alignment
+  - Price formatting uses String.format("$%.2f", price) for consistent 2-decimal display
+  - Clickable modifier applied to entire row enables navigation to stock detail screen
+  - Real stock examples (Canadian stocks like SHOP, RY, ENB, TD) provide realistic preview data
+---
