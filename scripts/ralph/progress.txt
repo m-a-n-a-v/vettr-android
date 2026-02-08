@@ -1811,3 +1811,35 @@ Files changed:
 - Color coding uses VettrGreen and VettrRed from theme
 - Chart placeholder can be simple Box with gray background and centered text
 ---
+
+## US-080: Add Overview/Analysis/News tabs to StockDetailScreen
+Status: ✅ COMPLETE
+Date: 2026-02-07
+Details:
+- Added custom TabRow with 3 tabs: Overview, Analysis, News
+- Tab indicator uses VettrAccent color (#00C853)
+- Overview tab displays:
+  - Company description text
+  - Key metrics in MetricCards: Market Cap, Sector, Exchange, VETR Score
+  - 2x2 grid layout for metrics
+- Analysis tab displays:
+  - "VETR Analysis" header
+  - 5 bullet points with analysis text using custom AnalysisBulletPoint composable
+  - Green bullet points with VettrAccent color
+- News tab displays:
+  - LazyColumn of filings using FilingCard composable
+  - Each filing card shows: date (formatted), title, summary
+  - Empty state when no filings available
+- Updated StockDetailScreen params to accept filings list and selectedTab index
+- Updated previews to include mock filing data
+- Build successful: ./gradlew assembleDebug passes
+
+**Learnings for future iterations:**
+  - TabRow uses TabRowDefaults.SecondaryIndicator with tabIndicatorOffset modifier for custom indicator color
+  - NumberFormat.getCompactNumberInstance requires API 24+ - created custom formatMarketCap function for compact number formatting
+  - Filing entity already existed with date as Long (timestamp) - used SimpleDateFormat to convert to readable date
+  - MetricCard component from designsystem provides consistent metric display
+  - Tab content should use when expression to switch between tab composables
+  - LazyColumn items() function works well for displaying list of filings
+  - Custom bullet points with Row composable provide clean analysis presentation
+---
