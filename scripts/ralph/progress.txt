@@ -433,3 +433,23 @@ Files changed:
   - Placeholder uses onSurfaceVariant color for subtle hint text that doesn't distract
   - Border colors use alpha transparency (0.5f) for unfocused state to reduce visual weight
 ---
+## US-023: Create SectionHeader composable component
+Status: ✅ COMPLETE
+Date: 2026-02-07
+Details:
+- Created designsystem/component/SectionHeader.kt @Composable function
+- Implemented Row layout with SpaceBetween arrangement for title and optional "See All" button
+- Uses titleMedium typography for section title text
+- Optional TextButton with "See All" text appears only when onSeeAllClick callback is provided
+- Added 2 @Preview composables: SectionHeaderPreview (without See All) and SectionHeaderWithSeeAllPreview (with See All button)
+- Build successful: ./gradlew assembleDebug passes
+Files changed:
+- app/src/main/java/com/vettr/android/designsystem/component/SectionHeader.kt (created)
+**Learnings for future iterations:**
+  - SectionHeader provides consistent section header styling across all screens (Pulse, Discovery, Alerts, etc.)
+  - Using Row with Arrangement.SpaceBetween automatically places title on left and "See All" button on right
+  - TextButton is the Material3 component for text-only clickable actions, perfect for "See All" links
+  - Conditional rendering (if onSeeAllClick != null) allows component to work with or without the action button
+  - Preview composables with dark background (0xFF0D1B2A) demonstrate component in the VETTR dark theme
+  - titleMedium typography (20sp, SemiBold) provides proper visual hierarchy for section headers
+---
