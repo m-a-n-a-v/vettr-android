@@ -10,6 +10,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
@@ -30,11 +31,15 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.vettr.android.designsystem.component.EventCard
 import com.vettr.android.designsystem.component.MetricCard
 import com.vettr.android.designsystem.component.SearchBarView
 import com.vettr.android.designsystem.component.SectionHeader
 import com.vettr.android.designsystem.theme.Spacing
+import com.vettr.android.designsystem.theme.VettrGreen
+import com.vettr.android.designsystem.theme.VettrRed
 import com.vettr.android.designsystem.theme.VettrTheme
+import com.vettr.android.designsystem.theme.VettrYellow
 
 /**
  * Pulse screen - displays market overview and strategic events.
@@ -119,6 +124,41 @@ fun PulseScreen(
                             modifier = Modifier.width(150.dp)
                         )
                     }
+                }
+            }
+
+            // Strategic Events Section
+            Column(
+                verticalArrangement = Arrangement.spacedBy(Spacing.md)
+            ) {
+                SectionHeader(title = "Strategic Events")
+
+                Column(
+                    verticalArrangement = Arrangement.spacedBy(Spacing.sm)
+                ) {
+                    EventCard(
+                        title = "Discovery Drill Hit",
+                        subtitle = "BBB.V - Significant gold discovery announced",
+                        date = "2 hours ago",
+                        indicatorColor = VettrGreen,
+                        onClick = {}
+                    )
+
+                    EventCard(
+                        title = "Red Flag Alert",
+                        subtitle = "XYZ.TO - Unusual insider selling detected",
+                        date = "4 hours ago",
+                        indicatorColor = VettrRed,
+                        onClick = {}
+                    )
+
+                    EventCard(
+                        title = "New Financing",
+                        subtitle = "ABC.V - $10M private placement completed",
+                        date = "1 day ago",
+                        indicatorColor = VettrYellow,
+                        onClick = {}
+                    )
                 }
             }
 
