@@ -1,29 +1,57 @@
 package com.vettr.android.feature.discovery
 
-import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.grid.GridCells
+import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
+import androidx.compose.foundation.lazy.grid.items
+import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.FilterChip
+import androidx.compose.material3.FilterChipDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.dp
+import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.vettr.android.designsystem.component.EventCard
+import com.vettr.android.designsystem.component.SectionHeader
+import com.vettr.android.designsystem.component.cardStyle
+import com.vettr.android.designsystem.component.vettrPadding
+import com.vettr.android.designsystem.theme.Spacing
+import com.vettr.android.designsystem.theme.VettrGreen
+import com.vettr.android.designsystem.theme.VettrRed
 import com.vettr.android.designsystem.theme.VettrTheme
+import com.vettr.android.designsystem.theme.VettrYellow
 
 /**
  * Discovery screen - displays stock discovery and search features.
- * Placeholder implementation to be enhanced in future stories.
  */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun DiscoveryScreen(
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    viewModel: DiscoveryViewModel = hiltViewModel()
 ) {
+    val selectedFilter by viewModel.selectedFilter.collectAsStateWithLifecycle()
+    val sectors by viewModel.sectors.collectAsStateWithLifecycle()
+
     Scaffold(
         modifier = modifier,
         topBar = {
@@ -41,18 +69,153 @@ fun DiscoveryScreen(
             )
         }
     ) { paddingValues ->
-        Box(
+        LazyColumn(
             modifier = Modifier
                 .fillMaxSize()
-                .padding(paddingValues),
-            contentAlignment = Alignment.Center
+                .padding(paddingValues)
+                .padding(Spacing.md),
+            verticalArrangement = Arrangement.spacedBy(Spacing.lg)
         ) {
-            Text(
-                text = "Discovery",
-                style = MaterialTheme.typography.headlineMedium,
-                color = MaterialTheme.colorScheme.onSurface
-            )
+            // Filter Chips Section
+            item {
+                Row(
+                    horizontalArrangement = Arrangement.spacedBy(Spacing.sm),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    FilterChip(
+                        selected = selectedFilter == DiscoveryFilter.WATCHLIST,
+                        onClick = { viewModel.toggleFilter() },
+                        label = {
+                            Text(
+                                text = "My Watchlist",
+                                style = MaterialTheme.typography.labelLarge
+                            )
+                        },
+                        colors = FilterChipDefaults.filterChipColors(
+                            selectedContainerColor = MaterialTheme.colorScheme.primary,
+                            selectedLabelColor = MaterialTheme.colorScheme.onPrimary
+                        )
+                    )
+
+                    FilterChip(
+                        selected = selectedFilter == DiscoveryFilter.ALERTS,
+                        onClick = { viewModel.toggleFilter() },
+                        label = {
+                            Text(
+                                text = "Alerts Only",
+                                style = MaterialTheme.typography.labelLarge
+                            )
+                        },
+                        colors = FilterChipDefaults.filterChipColors(
+                            selectedContainerColor = MaterialTheme.colorScheme.primary,
+                            selectedLabelColor = MaterialTheme.colorScheme.onPrimary
+                        )
+                    )
+                }
+            }
+
+            // Top Sectors Section
+            item {
+                Column(
+                    verticalArrangement = Arrangement.spacedBy(Spacing.md)
+                ) {
+                    SectionHeader(title = "Top Sectors")
+
+                    LazyVerticalGrid(
+                        columns = GridCells.Fixed(2),
+                        modifier = Modifier.height(200.dp),
+                        horizontalArrangement = Arrangement.spacedBy(Spacing.md),
+                        verticalArrangement = Arrangement.spacedBy(Spacing.md),
+                        contentPadding = PaddingValues(0.dp)
+                    ) {
+                        items(sectors) { sector ->
+                            SectorCard(
+                                name = sector,
+                                percentage = when (sector) {
+                                    "Critical Minerals" -> "+12.5%"
+                                    "AI Technology" -> "+8.3%"
+                                    "Energy Juniors" -> "-3.2%"
+                                    "Clean Tech" -> "+5.7%"
+                                    else -> "+0.0%"
+                                },
+                                onClick = { /* TODO: Navigate to sector detail */ }
+                            )
+                        }
+                    }
+                }
+            }
+
+            // Recent Updates Section
+            item {
+                Column(
+                    verticalArrangement = Arrangement.spacedBy(Spacing.md)
+                ) {
+                    SectionHeader(title = "Recent Updates")
+                }
+            }
+
+            // Recent Updates List
+            items(5) { index ->
+                val events = listOf(
+                    Triple("New Drill Results", "CRE.V - High-grade lithium discovery", VettrGreen),
+                    Triple("Insider Selling Alert", "ABC.TO - CEO sold 50,000 shares", VettrRed),
+                    Triple("Earnings Beat", "DEF.TO - Q4 revenue up 45%", VettrGreen),
+                    Triple("Price Target Change", "GHI.V - Downgraded to Hold", VettrYellow),
+                    Triple("M&A Rumor", "JKL.TO - Acquisition talks confirmed", VettrGreen)
+                )
+                val event = events[index % events.size]
+                EventCard(
+                    title = event.first,
+                    subtitle = event.second,
+                    date = "${index + 1} hour${if (index == 0) "" else "s"} ago",
+                    indicatorColor = event.third,
+                    onClick = { /* TODO: Navigate to event detail */ }
+                )
+            }
         }
+    }
+}
+
+/**
+ * Sector card composable displaying sector name and performance percentage.
+ */
+@Composable
+fun SectorCard(
+    name: String,
+    percentage: String,
+    onClick: () -> Unit,
+    modifier: Modifier = Modifier
+) {
+    Column(
+        modifier = modifier
+            .fillMaxWidth()
+            .cardStyle()
+            .clickable(onClick = onClick)
+            .vettrPadding(),
+        verticalArrangement = Arrangement.spacedBy(Spacing.sm)
+    ) {
+        Text(
+            text = name,
+            style = MaterialTheme.typography.titleMedium,
+            color = MaterialTheme.colorScheme.onSurface
+        )
+        Text(
+            text = percentage,
+            style = MaterialTheme.typography.bodyLarge,
+            color = if (percentage.startsWith("+")) VettrGreen else VettrRed
+        )
+    }
+}
+
+@Preview(showBackground = true, backgroundColor = 0xFF0D1B2A)
+@Composable
+fun SectorCardPreview() {
+    VettrTheme {
+        SectorCard(
+            name = "Critical Minerals",
+            percentage = "+12.5%",
+            onClick = {}
+        )
     }
 }
 
