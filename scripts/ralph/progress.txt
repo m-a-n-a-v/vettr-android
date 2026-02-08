@@ -3090,3 +3090,29 @@ Details:
   - For screens with UiState data classes, add lastUpdatedAt property to the data class (AlertsViewModel)
   - Import androidx.compose.foundation.layout.fillMaxWidth when using .fillMaxWidth() modifier
 ---
+
+## US-120: Create AppError sealed class and error handling
+Status: ✅ COMPLETE
+Date: 2026-02-08
+Details:
+- Created core/util/AppError.kt sealed class with 6 error types: NetworkError, InvalidData, NotFound, Unauthorized, ServerError, Unknown
+- Each error type includes: userMessage (String), icon (ImageVector), suggestedAction (Retry/GoHome/ContactSupport)
+- Created core/util/ErrorMapper.kt utility to map exceptions to AppError:
+  - Maps UnknownHostException, SocketTimeoutException, IOException to NetworkError
+  - Maps HttpException by status code: 400→InvalidData, 401/403→Unauthorized, 404→NotFound, 500-504→ServerError
+  - Maps JsonParseException to InvalidData
+  - Defaults to Unknown for unexpected exceptions
+- Updated designsystem/component/ErrorView.kt to accept AppError parameter
+- Maintained backward compatibility with legacy ErrorView(message, onRetry) signature
+- Added comprehensive unit tests in ErrorMapperTest.kt (14 test cases covering all error mappings)
+- Fixed ProfileViewModelTest compilation errors by adding missing syncManager and syncHistoryDao mock parameters
+- All tests pass: ./gradlew testDebugUnitTest --tests "com.vettr.android.core.util.ErrorMapperTest"
+- Build successful: ./gradlew assembleDebug
+**Learnings for future iterations:**
+  - When ViewModels get new constructor parameters, all test files that instantiate them need to be updated
+  - Use mockk(relaxed = true) for dependencies that aren't directly tested to avoid having to mock every method call
+  - Sealed classes are perfect for representing finite sets of error states with associated data
+  - ErrorMapper pattern centralizes exception-to-domain-error mapping logic for consistent error handling across the app
+  - ResponseBody.create(null, "") is deprecated but still works for unit tests - warnings are acceptable
+  - ProfileViewModelTest needed syncManager and syncHistoryDao added to all ProfileViewModel() constructor calls
+---
