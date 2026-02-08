@@ -3214,3 +3214,60 @@ Details:
   - isFirstResume flag prevents biometric prompt from showing on onCreate (only show on app resume from background)
   - SettingToggleRow enabled parameter controls both visual state and interactivity
 ---
+
+## US-124: Create in-app help, glossary, and FAQ screens
+Status: ✅ COMPLETE
+Date: 2026-02-08
+Details:
+- Created GlossaryScreen.kt with 25+ investment terms
+  - Organized into 5 categories: Stocks, Filings, Executives, Metrics, Alerts
+  - Implemented real-time search with filterable LazyColumn
+  - Added category filter chips for easy navigation
+  - Included @Preview composables for development
+- Created FaqScreen.kt with 16 FAQ items
+  - Organized into 5 categories: Getting Started, Stocks & Watchlists, Alerts & Notifications, VETR Scoring, Account & Billing
+  - Implemented expandable sections using AnimatedVisibility for smooth UX
+  - Questions cover common user scenarios and feature explanations
+- Added help IconButtons to stock detail sections
+  - Created HelpBottomSheets.kt with three comprehensive help sheets:
+    - VetrScoreHelpBottomSheet: Explains 0-100 scoring methodology, component weights (Financial Health 30%, Management Pedigree 25%, Filing Consistency 20%, Market Performance 15%, Risk Indicators 10%), and score ranges
+    - RedFlagHelpBottomSheet: Describes red flag types (Executive Turnover, Filing Delays, Unusual Trading, Financial Concerns, Regulatory Issues, Governance Problems) and severity levels
+    - PedigreeHelpBottomSheet: Details management evaluation criteria (Industry Experience, Track Record, Education, Board Composition, Insider Ownership, Network & Reputation)
+  - Updated StockDetailScreen to include state management for help sheets
+  - Added info IconButtons to Overview tab (VETR Score metrics), Pedigree tab (Executive Team), and Red Flags tab (Risk Analysis)
+- Updated ProfileScreen with "Help & Learning" section
+  - Added section header with VettrAccent color
+  - Replaced placeholders with actual navigation to Glossary and FAQ
+  - Updated function signatures to include onNavigateToGlossary and onNavigateToFaq callbacks
+- Updated MainScreen navigation
+  - Added composable routes for "glossary" and "faq"
+  - Wired up ProfileScreen callbacks to navigate to new screens
+  - Both screens include back navigation functionality
+- Files changed:
+  - Created: app/src/main/java/com/vettr/android/feature/profile/GlossaryScreen.kt (25+ terms, 530 lines)
+  - Created: app/src/main/java/com/vettr/android/feature/profile/FaqScreen.kt (16 FAQs, 330 lines)
+  - Created: app/src/main/java/com/vettr/android/feature/stockdetail/HelpBottomSheets.kt (3 help sheets, 480 lines)
+  - Modified: app/src/main/java/com/vettr/android/feature/profile/ProfileScreen.kt
+  - Modified: app/src/main/java/com/vettr/android/feature/stockdetail/StockDetailScreen.kt
+  - Modified: app/src/main/java/com/vettr/android/feature/main/MainScreen.kt
+- Build verification: ./gradlew assembleDebug succeeds
+- All acceptance criteria met:
+  ✅ GlossaryScreen with 25+ terms (created 25 terms across 5 categories)
+  ✅ FaqScreen with 15+ questions (created 16 questions across 5 categories)
+  ✅ Info IconButtons opening BottomSheet explanations for VETR Score, Red Flags, and Pedigree
+  ✅ Help & Learning section in ProfileScreen with navigation
+  ✅ @Preview composables for all new screens
+  ✅ Build passes
+
+**Learnings for future iterations:**
+- BottomSheet pattern is excellent for contextual help - can be reused for other explanatory content
+- FilterChip + LazyColumn combination provides great UX for searchable/filterable content
+- AnimatedVisibility with expandVertically/shrinkVertically creates polished expand/collapse interactions
+- Organizing content by category (enum with displayName) makes it easy to group and filter
+- Adding help buttons to section headers (via Row with SpaceBetween) is non-intrusive and discoverable
+- Search + filter combination works well: search narrows down results, filters organize them
+- Preview composables are essential for rapid iteration on complex UI components
+- Passing callbacks up through navigation layers (ProfileScreen -> MainScreen) maintains clean separation of concerns
+- Material 3 ModalBottomSheet with skipPartiallyExpanded = true provides full-screen help content
+- Using remember { mutableStateOf } for bottom sheet visibility keeps state local to composables
+---
