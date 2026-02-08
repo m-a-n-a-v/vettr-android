@@ -2,8 +2,8 @@ package com.vettr.android.core.util
 
 import android.app.ActivityManager
 import android.content.Context
-import android.util.Log
 import com.vettr.android.BuildConfig
+import timber.log.Timber
 import dagger.hilt.android.qualifiers.ApplicationContext
 import javax.inject.Inject
 import javax.inject.Singleton
@@ -77,7 +77,7 @@ class MemoryMonitor @Inject constructor(
         if (!BuildConfig.DEBUG) return
 
         val stats = getMemoryStats()
-        Log.d(TAG, buildString {
+        Timber.tag(TAG).d(buildString {
             append("Memory Stats: ")
             append("Used: %.2f MB / %.2f MB (%.1f%%), ".format(
                 stats.usedMemoryMB,
@@ -127,7 +127,7 @@ class MemoryMonitor @Inject constructor(
      */
     fun requestGC() {
         if (BuildConfig.DEBUG) {
-            Log.d(TAG, "Requesting garbage collection")
+            Timber.tag(TAG).d("Requesting garbage collection")
             System.gc()
         }
     }

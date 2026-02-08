@@ -4,8 +4,8 @@ import android.app.ActivityManager
 import android.content.Context
 import android.os.Build
 import android.util.DisplayMetrics
-import android.util.Log
 import android.view.WindowManager
+import timber.log.Timber
 import dagger.hilt.android.qualifiers.ApplicationContext
 import java.text.SimpleDateFormat
 import java.util.*
@@ -35,47 +35,47 @@ class MockErrorReportingService @Inject constructor(
     private val dateFormat = SimpleDateFormat("HH:mm:ss.SSS", Locale.US)
 
     override fun logError(throwable: Throwable, context: Map<String, Any>) {
-        Log.e(TAG, "╔════════════════════════════════════════════════════════════════")
-        Log.e(TAG, "║ 🚨 ERROR REPORT")
-        Log.e(TAG, "╠════════════════════════════════════════════════════════════════")
-        Log.e(TAG, "║ Exception: ${throwable.javaClass.simpleName}")
-        Log.e(TAG, "║ Message: ${throwable.message ?: "No message"}")
-        Log.e(TAG, "║ User: ${currentUserId ?: "Not set"}")
-        Log.e(TAG, "╠════════════════════════════════════════════════════════════════")
+        Timber.tag(TAG).e("╔════════════════════════════════════════════════════════════════")
+        Timber.tag(TAG).e("║ 🚨 ERROR REPORT")
+        Timber.tag(TAG).e("╠════════════════════════════════════════════════════════════════")
+        Timber.tag(TAG).e("║ Exception: ${throwable.javaClass.simpleName}")
+        Timber.tag(TAG).e("║ Message: ${throwable.message ?: "No message"}")
+        Timber.tag(TAG).e("║ User: ${currentUserId ?: "Not set"}")
+        Timber.tag(TAG).e("╠════════════════════════════════════════════════════════════════")
 
         // Log context
         if (context.isNotEmpty()) {
-            Log.e(TAG, "║ Context:")
+            Timber.tag(TAG).e("║ Context:")
             context.forEach { (key, value) ->
-                Log.e(TAG, "║   $key: $value")
+                Timber.tag(TAG).e("║   $key: $value")
             }
-            Log.e(TAG, "╠════════════════════════════════════════════════════════════════")
+            Timber.tag(TAG).e("╠════════════════════════════════════════════════════════════════")
         }
 
         // Log device info
-        Log.e(TAG, "║ Device Info:")
+        Timber.tag(TAG).e("║ Device Info:")
         val deviceInfo = getDeviceInfo()
         deviceInfo.forEach { (key, value) ->
-            Log.e(TAG, "║   $key: $value")
+            Timber.tag(TAG).e("║   $key: $value")
         }
-        Log.e(TAG, "╠════════════════════════════════════════════════════════════════")
+        Timber.tag(TAG).e("╠════════════════════════════════════════════════════════════════")
 
         // Log breadcrumbs
         if (breadcrumbs.isNotEmpty()) {
-            Log.e(TAG, "║ Breadcrumbs (last ${breadcrumbs.size} actions):")
+            Timber.tag(TAG).e("║ Breadcrumbs (last ${breadcrumbs.size} actions):")
             breadcrumbs.forEach { breadcrumb ->
-                Log.e(TAG, "║   [${breadcrumb.timestamp}] ${breadcrumb.message}")
+                Timber.tag(TAG).e("║   [${breadcrumb.timestamp}] ${breadcrumb.message}")
             }
-            Log.e(TAG, "╠════════════════════════════════════════════════════════════════")
+            Timber.tag(TAG).e("╠════════════════════════════════════════════════════════════════")
         }
 
         // Log stack trace
-        Log.e(TAG, "║ Stack Trace:")
+        Timber.tag(TAG).e("║ Stack Trace:")
         throwable.stackTrace.take(10).forEach { element ->
-            Log.e(TAG, "║   at $element")
+            Timber.tag(TAG).e("║   at $element")
         }
 
-        Log.e(TAG, "╚════════════════════════════════════════════════════════════════")
+        Timber.tag(TAG).e("╚════════════════════════════════════════════════════════════════")
     }
 
     override fun logMessage(message: String, level: String) {
@@ -89,11 +89,11 @@ class MockErrorReportingService @Inject constructor(
         }
 
         when (level) {
-            ErrorLevel.DEBUG -> Log.d(TAG, "$icon $message")
-            ErrorLevel.INFO -> Log.i(TAG, "$icon $message")
-            ErrorLevel.WARNING -> Log.w(TAG, "$icon $message")
-            ErrorLevel.ERROR, ErrorLevel.FATAL -> Log.e(TAG, "$icon $message")
-            else -> Log.v(TAG, "$icon $message")
+            ErrorLevel.DEBUG -> Timber.tag(TAG).d("$icon $message")
+            ErrorLevel.INFO -> Timber.tag(TAG).i("$icon $message")
+            ErrorLevel.WARNING -> Timber.tag(TAG).w("$icon $message")
+            ErrorLevel.ERROR, ErrorLevel.FATAL -> Timber.tag(TAG).e("$icon $message")
+            else -> Timber.tag(TAG).v("$icon $message")
         }
     }
 
@@ -109,12 +109,12 @@ class MockErrorReportingService @Inject constructor(
             }
         }
 
-        Log.v(TAG, "🍞 Breadcrumb: [$timestamp] $message")
+        Timber.tag(TAG).v("🍞 Breadcrumb: [$timestamp] $message")
     }
 
     override fun setUser(id: String) {
         currentUserId = id
-        Log.d(TAG, "👤 User ID Set for Error Reporting: $id")
+        Timber.tag(TAG).d("👤 User ID Set for Error Reporting: $id")
     }
 
     /**

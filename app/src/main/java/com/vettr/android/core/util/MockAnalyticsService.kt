@@ -1,6 +1,6 @@
 package com.vettr.android.core.util
 
-import android.util.Log
+import timber.log.Timber
 import javax.inject.Inject
 import javax.inject.Singleton
 
@@ -33,7 +33,7 @@ class MockAnalyticsService @Inject constructor() : AnalyticsService {
     private var currentUserId: String? = null
 
     override fun trackScreen(name: String) {
-        Log.d(TAG, "📱 Screen Viewed: $name")
+        Timber.tag(TAG).d("📱 Screen Viewed: $name")
     }
 
     override fun trackEvent(name: String, params: Map<String, Any>) {
@@ -44,19 +44,19 @@ class MockAnalyticsService @Inject constructor() : AnalyticsService {
             " | Params: ${sanitizedParams.entries.joinToString { "${it.key}=${it.value}" }}"
         }
 
-        Log.d(TAG, "🎯 Event: $name$paramsString")
+        Timber.tag(TAG).d("🎯 Event: $name$paramsString")
     }
 
     override fun setUserId(id: String) {
         currentUserId = id
-        Log.d(TAG, "👤 User ID Set: $id")
+        Timber.tag(TAG).d("👤 User ID Set: $id")
     }
 
     override fun setUserProperty(key: String, value: String) {
         val sanitizedKey = sanitizeKey(key)
         val sanitizedValue = if (isPIIKey(key)) "[REDACTED]" else value
 
-        Log.d(TAG, "🏷️  User Property: $sanitizedKey = $sanitizedValue")
+        Timber.tag(TAG).d("🏷️  User Property: $sanitizedKey = $sanitizedValue")
     }
 
     /**

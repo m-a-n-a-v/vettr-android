@@ -11,6 +11,7 @@ import com.vettr.android.core.data.local.UserDao
 import com.vettr.android.core.model.VettrTier
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.flow.firstOrNull
+import timber.log.Timber
 import java.util.concurrent.TimeUnit
 import javax.inject.Inject
 import javax.inject.Singleton
@@ -68,7 +69,7 @@ class SyncManager @Inject constructor(
             syncWorkRequest
         )
 
-        android.util.Log.d(TAG, "Periodic sync started for tier: $tier (interval: $intervalHours hours)")
+        Timber.tag(TAG).d("Periodic sync started for tier: $tier (interval: $intervalHours hours)")
     }
 
     /**
@@ -76,7 +77,7 @@ class SyncManager @Inject constructor(
      */
     fun stopPeriodicSync() {
         workManager.cancelUniqueWork(SyncWorker.WORK_NAME)
-        android.util.Log.d(TAG, "Periodic sync stopped")
+        Timber.tag(TAG).d("Periodic sync stopped")
     }
 
     /**
@@ -95,7 +96,7 @@ class SyncManager @Inject constructor(
             .build()
 
         workManager.enqueue(syncWorkRequest)
-        android.util.Log.d(TAG, "Immediate sync triggered")
+        Timber.tag(TAG).d("Immediate sync triggered")
     }
 
     companion object {

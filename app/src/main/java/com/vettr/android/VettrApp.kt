@@ -2,8 +2,8 @@ package com.vettr.android
 
 import android.app.Application
 import android.content.ComponentCallbacks2
-import android.util.Log
 import androidx.hilt.work.HiltWorkerFactory
+import timber.log.Timber
 import androidx.work.Configuration
 import coil3.ImageLoader
 import coil3.SingletonImageLoader
@@ -38,12 +38,13 @@ class VettrApp : Application(), Configuration.Provider, SingletonImageLoader.Fac
 
     private val applicationScope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
 
-    companion object {
-        private const val TAG = "VettrApp"
-    }
-
     override fun onCreate() {
         super.onCreate()
+
+        // Initialize Timber for debug builds only
+        if (BuildConfig.DEBUG) {
+            Timber.plant(Timber.DebugTree())
+        }
 
         // Track app startup time
         val startupDuration = AppStartupTracker.getElapsedTime()
@@ -78,7 +79,7 @@ class VettrApp : Application(), Configuration.Provider, SingletonImageLoader.Fac
         super.onTrimMemory(level)
 
         if (BuildConfig.DEBUG) {
-            Log.d(TAG, "onTrimMemory called with level: $level")
+            Timber.d("onTrimMemory called with level: $level")
             memoryMonitor.logMemoryStats()
         }
 
@@ -89,7 +90,7 @@ class VettrApp : Application(), Configuration.Provider, SingletonImageLoader.Fac
                 // Clear memory cache only
                 imageLoader.memoryCache?.clear()
                 if (BuildConfig.DEBUG) {
-                    Log.d(TAG, "Cleared Coil memory cache (running low)")
+                    Timber.d("Cleared Coil memory cache (running low)")
                 }
             }
 
@@ -100,7 +101,7 @@ class VettrApp : Application(), Configuration.Provider, SingletonImageLoader.Fac
                 imageLoader.memoryCache?.clear()
                 imageLoader.diskCache?.clear()
                 if (BuildConfig.DEBUG) {
-                    Log.d(TAG, "Cleared Coil memory and disk cache (critical)")
+                    Timber.d("Cleared Coil memory and disk cache (critical)")
                 }
             }
 
@@ -109,7 +110,7 @@ class VettrApp : Application(), Configuration.Provider, SingletonImageLoader.Fac
                 // Clear memory cache when UI is hidden
                 imageLoader.memoryCache?.clear()
                 if (BuildConfig.DEBUG) {
-                    Log.d(TAG, "Cleared Coil memory cache (UI hidden)")
+                    Timber.d("Cleared Coil memory cache (UI hidden)")
                 }
             }
 
@@ -118,7 +119,7 @@ class VettrApp : Application(), Configuration.Provider, SingletonImageLoader.Fac
             ComponentCallbacks2.TRIM_MEMORY_MODERATE -> {
                 imageLoader.memoryCache?.clear()
                 if (BuildConfig.DEBUG) {
-                    Log.d(TAG, "Cleared Coil memory cache (background)")
+                    Timber.d("Cleared Coil memory cache (background)")
                 }
             }
         }
@@ -133,7 +134,7 @@ class VettrApp : Application(), Configuration.Provider, SingletonImageLoader.Fac
         super.onLowMemory()
 
         if (BuildConfig.DEBUG) {
-            Log.w(TAG, "onLowMemory called - clearing all caches")
+            Timber.w("onLowMemory called - clearing all caches")
             memoryMonitor.logMemoryStats()
         }
 

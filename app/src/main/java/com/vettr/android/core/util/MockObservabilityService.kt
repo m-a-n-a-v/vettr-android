@@ -1,6 +1,6 @@
 package com.vettr.android.core.util
 
-import android.util.Log
+import timber.log.Timber
 import java.util.UUID
 import javax.inject.Inject
 import javax.inject.Singleton
@@ -30,7 +30,7 @@ class MockObservabilityService @Inject constructor() : ObservabilityService {
     }
 
     override fun trackAppStartup(durationMs: Long) {
-        Log.i(TAG, "App startup: ${durationMs}ms")
+        Timber.tag(TAG).i("App startup: ${durationMs}ms")
 
         if (durationMs > APP_STARTUP_THRESHOLD_MS) {
             trackSlaViolation(
@@ -42,10 +42,10 @@ class MockObservabilityService @Inject constructor() : ObservabilityService {
     }
 
     override fun trackScreenLoadTime(screenName: String, durationMs: Long) {
-        Log.i(TAG, "Screen load - $screenName: ${durationMs}ms")
+        Timber.tag(TAG).i("Screen load - $screenName: ${durationMs}ms")
 
         if (durationMs > SCREEN_LOAD_THRESHOLD_MS) {
-            Log.w(TAG, "⚠️ Slow screen load detected: $screenName took ${durationMs}ms (threshold: ${SCREEN_LOAD_THRESHOLD_MS}ms)")
+            Timber.tag(TAG).w("⚠️ Slow screen load detected: $screenName took ${durationMs}ms (threshold: ${SCREEN_LOAD_THRESHOLD_MS}ms)")
         }
     }
 
@@ -56,31 +56,31 @@ class MockObservabilityService @Inject constructor() : ObservabilityService {
         statusCode: Int?
     ) {
         val status = if (success) "✓" else "✗"
-        Log.i(TAG, "API call $status - $endpoint: ${durationMs}ms (status: $statusCode)")
+        Timber.tag(TAG).i("API call $status - $endpoint: ${durationMs}ms (status: $statusCode)")
 
         if (durationMs > API_RESPONSE_THRESHOLD_MS) {
-            Log.w(TAG, "⚠️ Slow API response: $endpoint took ${durationMs}ms (threshold: ${API_RESPONSE_THRESHOLD_MS}ms)")
+            Timber.tag(TAG).w("⚠️ Slow API response: $endpoint took ${durationMs}ms (threshold: ${API_RESPONSE_THRESHOLD_MS}ms)")
         }
     }
 
     override fun trackMemoryUsage(usedMemoryMb: Long, maxMemoryMb: Long) {
         val usagePercent = usedMemoryMb.toDouble() / maxMemoryMb.toDouble()
-        Log.d(TAG, "Memory usage: ${usedMemoryMb}MB / ${maxMemoryMb}MB (${String.format("%.1f", usagePercent * 100)}%)")
+        Timber.tag(TAG).d("Memory usage: ${usedMemoryMb}MB / ${maxMemoryMb}MB (${String.format("%.1f", usagePercent * 100)}%)")
 
         if (usagePercent > MEMORY_USAGE_THRESHOLD_PERCENT) {
-            Log.w(TAG, "⚠️ High memory usage detected: ${String.format("%.1f", usagePercent * 100)}%")
+            Timber.tag(TAG).w("⚠️ High memory usage detected: ${String.format("%.1f", usagePercent * 100)}%")
         }
     }
 
     override fun trackCustomMetric(metricName: String, value: Double, unit: String?) {
         val unitStr = unit?.let { " $it" } ?: ""
-        Log.d(TAG, "Custom metric - $metricName: $value$unitStr")
+        Timber.tag(TAG).d("Custom metric - $metricName: $value$unitStr")
     }
 
     override fun startTrace(traceName: String): String {
         val traceId = UUID.randomUUID().toString()
         traces[traceId] = System.currentTimeMillis()
-        Log.d(TAG, "Starting trace: $traceName (id: $traceId)")
+        Timber.tag(TAG).d("Starting trace: $traceName (id: $traceId)")
         return traceId
     }
 
@@ -91,13 +91,13 @@ class MockObservabilityService @Inject constructor() : ObservabilityService {
             val attrStr = if (attributes.isNotEmpty()) {
                 " [${attributes.entries.joinToString(", ") { "${it.key}=${it.value}" }}]"
             } else ""
-            Log.d(TAG, "Trace completed: ${duration}ms (id: $traceId)$attrStr")
+            Timber.tag(TAG).d("Trace completed: ${duration}ms (id: $traceId)$attrStr")
         } else {
-            Log.w(TAG, "Trace not found: $traceId")
+            Timber.tag(TAG).w("Trace not found: $traceId")
         }
     }
 
     override fun trackSlaViolation(slaName: String, actualValue: Double, threshold: Double) {
-        Log.e(TAG, "🚨 SLA VIOLATION - $slaName: actual=$actualValue, threshold=$threshold")
+        Timber.tag(TAG).e("🚨 SLA VIOLATION - $slaName: actual=$actualValue, threshold=$threshold")
     }
 }

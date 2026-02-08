@@ -4,7 +4,7 @@ import android.content.ContentProvider
 import android.content.ContentValues
 import android.database.Cursor
 import android.net.Uri
-import android.util.Log
+import timber.log.Timber
 
 /**
  * ContentProvider-based startup tracker that measures time from process start to Application.onCreate.
@@ -50,7 +50,7 @@ class AppStartupTracker : ContentProvider() {
 
     override fun onCreate(): Boolean {
         startTime = System.currentTimeMillis()
-        Log.d(TAG, "App startup tracking initialized at $startTime")
+        Timber.tag(TAG).d("App startup tracking initialized at $startTime")
         return true
     }
 

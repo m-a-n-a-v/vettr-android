@@ -12,6 +12,7 @@ import com.vettr.android.core.model.SyncHistory
 import dagger.assisted.Assisted
 import dagger.assisted.AssistedInject
 import kotlinx.coroutines.delay
+import timber.log.Timber
 import java.util.UUID
 
 /**
@@ -51,7 +52,7 @@ class SyncWorker @AssistedInject constructor(
                 itemsSynced += 10 // Mock: synced 10 stocks
             } catch (e: Exception) {
                 // Log error but continue with other syncs
-                android.util.Log.e(TAG, "Error syncing stocks", e)
+                Timber.tag(TAG).e("Error syncing stocks", e)
             }
 
             // Sync filings
@@ -60,7 +61,7 @@ class SyncWorker @AssistedInject constructor(
                 delay(100)
                 itemsSynced += 5 // Mock: synced 5 filings
             } catch (e: Exception) {
-                android.util.Log.e(TAG, "Error syncing filings", e)
+                Timber.tag(TAG).e("Error syncing filings", e)
             }
 
             // Sync alert rules
@@ -69,7 +70,7 @@ class SyncWorker @AssistedInject constructor(
                 delay(100)
                 itemsSynced += 3 // Mock: synced 3 alert rules
             } catch (e: Exception) {
-                android.util.Log.e(TAG, "Error syncing alerts", e)
+                Timber.tag(TAG).e("Error syncing alerts", e)
             }
 
             // Update sync history with success
@@ -82,7 +83,7 @@ class SyncWorker @AssistedInject constructor(
                 status = "success"
             )
 
-            android.util.Log.d(TAG, "Sync completed successfully. Items synced: $itemsSynced")
+            Timber.tag(TAG).d("Sync completed successfully. Items synced: $itemsSynced")
             Result.success()
         } catch (e: Exception) {
             // Update sync history with failure
@@ -91,7 +92,7 @@ class SyncWorker @AssistedInject constructor(
                 errors = e.message ?: "Unknown error"
             )
 
-            android.util.Log.e(TAG, "Sync failed", e)
+            Timber.tag(TAG).e(e, "Sync failed")
 
             // Retry with exponential backoff
             if (runAttemptCount < MAX_RETRY_ATTEMPTS) {
