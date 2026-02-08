@@ -21,6 +21,7 @@ import androidx.compose.material.icons.automirrored.filled.ArrowForward
 import androidx.compose.material.icons.automirrored.filled.Help
 import androidx.compose.material.icons.automirrored.filled.Logout
 import androidx.compose.material.icons.filled.AccountCircle
+import androidx.compose.material.icons.filled.Info
 import androidx.compose.material.icons.filled.Notifications
 import androidx.compose.material.icons.filled.School
 import androidx.compose.material.icons.filled.Settings
@@ -74,6 +75,7 @@ fun ProfileScreen(
     viewModel: ProfileViewModel = hiltViewModel(),
     onLogout: () -> Unit = {},
     onNavigateToSettings: () -> Unit = {},
+    onNavigateToAbout: () -> Unit = {},
     modifier: Modifier = Modifier
 ) {
     val user by viewModel.user.collectAsStateWithLifecycle()
@@ -95,6 +97,7 @@ fun ProfileScreen(
         onShowLogoutDialog = { showLogoutDialog = it },
         onManualSync = { viewModel.triggerManualSync() },
         onNavigateToSettings = onNavigateToSettings,
+        onNavigateToAbout = onNavigateToAbout,
         onLogout = {
             viewModel.logout()
             onLogout()
@@ -115,6 +118,7 @@ private fun ProfileScreenContent(
     onShowLogoutDialog: (Boolean) -> Unit,
     onManualSync: () -> Unit,
     onNavigateToSettings: () -> Unit,
+    onNavigateToAbout: () -> Unit,
     onLogout: () -> Unit,
     modifier: Modifier = Modifier
 ) {
@@ -172,6 +176,15 @@ private fun ProfileScreenContent(
                 icon = Icons.AutoMirrored.Filled.Help,
                 title = "Help & Support",
                 onClick = { /* TODO: Navigate to help & support */ }
+            )
+
+            Spacer(modifier = Modifier.height(Spacing.sm))
+
+            // About (shows onboarding carousel)
+            MenuRow(
+                icon = Icons.Default.Info,
+                title = "About",
+                onClick = onNavigateToAbout
             )
 
             Spacer(modifier = Modifier.height(Spacing.sm))
@@ -688,6 +701,7 @@ fun ProfileScreenPreview() {
             onShowLogoutDialog = {},
             onManualSync = {},
             onNavigateToSettings = {},
+            onNavigateToAbout = {},
             onLogout = {}
         )
     }
@@ -715,6 +729,7 @@ fun ProfileScreenProPreview() {
             onShowLogoutDialog = {},
             onManualSync = {},
             onNavigateToSettings = {},
+            onNavigateToAbout = {},
             onLogout = {}
         )
     }

@@ -37,6 +37,7 @@ import com.vettr.android.designsystem.theme.VettrTheme
 import com.vettr.android.feature.alerts.AlertRuleCreatorScreen
 import com.vettr.android.feature.alerts.AlertsScreen
 import com.vettr.android.feature.discovery.DiscoveryScreen
+import com.vettr.android.feature.onboarding.OnboardingScreen
 import com.vettr.android.feature.profile.ProfileScreen
 import com.vettr.android.feature.pulse.PulseScreen
 import com.vettr.android.feature.stockdetail.StockDetailRoute
@@ -162,6 +163,9 @@ fun MainScreen(
                     modifier = Modifier.fillMaxSize(),
                     onNavigateToSettings = {
                         navController.navigate("settings")
+                    },
+                    onNavigateToAbout = {
+                        navController.navigate("onboarding")
                     }
                 )
             }
@@ -171,6 +175,14 @@ fun MainScreen(
                 com.vettr.android.feature.profile.SettingsScreen(
                     onBackClick = { navController.navigateUp() },
                     modifier = Modifier.fillMaxSize()
+                )
+            }
+
+            // Onboarding screen
+            composable("onboarding") {
+                OnboardingScreen(
+                    onComplete = { navController.navigateUp() },
+                    onSkip = { navController.navigateUp() }
                 )
             }
 
