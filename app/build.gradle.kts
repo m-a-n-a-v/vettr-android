@@ -107,6 +107,7 @@ dependencies {
 
     // Security
     implementation(libs.androidx.security.crypto)
+    implementation(libs.androidx.biometric)
 
     // WorkManager
     implementation(libs.androidx.work.runtime.ktx)
