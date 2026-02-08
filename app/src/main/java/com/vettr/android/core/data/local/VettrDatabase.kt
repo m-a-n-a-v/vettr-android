@@ -36,4 +36,5 @@ abstract class VettrDatabase : RoomDatabase() {
     abstract fun executiveDao(): ExecutiveDao
     abstract fun alertRuleDao(): AlertRuleDao
     abstract fun redFlagHistoryDao(): RedFlagHistoryDao
+    abstract fun vetrScoreHistoryDao(): VetrScoreHistoryDao
 }
