@@ -4178,3 +4178,43 @@ Files changed:
 - The postSplashScreenTheme ensures a smooth transition from splash to the main app theme
 - Vector drawables in res/drawable/ work perfectly for adaptive icon layers, keeping APK size small
 ---
+
+## US-154: Add Gradle build optimization
+Status: ✅ COMPLETE
+Date: 2026-02-08
+Details:
+- Verified gradle.properties optimizations (all were already configured):
+  - org.gradle.parallel=true - Parallel task execution for faster builds
+  - org.gradle.caching=true - Build cache enabled for reusing outputs
+  - org.gradle.daemon=true - Persistent Gradle daemon reduces startup overhead
+  - org.gradle.jvmargs=-Xmx4096m - 4GB heap prevents OOM errors on large builds
+  - android.nonTransitiveRClass=true - Optimizes R class generation
+- Added local build cache configuration in settings.gradle.kts:
+  - Enabled local cache with directory .gradle/build-cache
+  - Auto-cleanup of unused entries after 7 days
+  - Significantly improves incremental build performance
+- Measured and documented build performance baselines:
+  - Clean build (./gradlew clean assembleDebug): ~17 seconds
+  - Incremental build with no changes: ~0.8 seconds
+  - Incremental build with single file change: ~3-4 seconds
+- Created BUILD_PERFORMANCE.md with:
+  - Current optimization settings
+  - Build time baselines
+  - Performance monitoring tips
+  - Command examples for profiling builds
+- Build verification: ./gradlew assembleDebug succeeds
+
+Files changed:
+- settings.gradle.kts (added buildCache configuration)
+- BUILD_PERFORMANCE.md (new documentation file)
+
+**Learnings for future iterations:**
+- Local build cache is separate from remote cache and can speed up builds by 50%+
+- The buildCache block in settings.gradle.kts configures cache directory and cleanup policy
+- Build performance should be regularly monitored as the project grows
+- Gradle daemon persistence is crucial - avoid stopping it unnecessarily
+- Parallel execution works best when tasks have minimal dependencies
+- The 4GB heap is sufficient for current project size but may need adjustment as project grows
+- Incremental builds are extremely fast (~1 second) when only checking up-to-date status
+- Single file changes typically trigger 2-4 seconds of compilation work
+---
