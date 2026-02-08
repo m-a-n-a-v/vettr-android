@@ -1373,3 +1373,27 @@ Files changed:
   - Test results are in XML format at app/build/test-results/testDebugUnitTest/*.xml
   - Adding new test dependencies requires updating both libs.versions.toml and build.gradle.kts
 ---
+
+## US-062: Create AuthViewModel with Hilt
+Status: ✅ COMPLETE
+Date: 2026-02-07
+Details:
+- Created feature/auth/AuthViewModel.kt with @HiltViewModel annotation
+- Injected AuthRepository via @Inject constructor
+- Implemented StateFlow-based UI state with AuthUiState data class
+- Added StateFlow properties: email, password, isLoading, errorMessage, isAuthenticated
+- Implemented methods: signInWithEmail(), signInWithGoogle(idToken), signUp(), clearError()
+- Added helper methods: onEmailChange(), onPasswordChange() for UI state updates
+- ViewModel observes authRepository.isAuthenticated() flow in init block
+- All methods use viewModelScope.launch for coroutines
+- Error handling with Result.fold() pattern for repository responses
+- Build successful: ./gradlew assembleDebug passes
+**Learnings for future iterations:**
+  - ViewModels follow pattern: @HiltViewModel + @Inject constructor + StateFlow
+  - Use viewModelScope.launch for all coroutine operations
+  - Repository methods return Result<T>, handle with fold(onSuccess, onFailure)
+  - UI state should be a data class with all screen state properties
+  - Use MutableStateFlow internally, expose as StateFlow with asStateFlow()
+  - Update state immutably with _uiState.update { it.copy(...) }
+  - Validation logic (e.g., blank email/password) should happen in ViewModel
+---
