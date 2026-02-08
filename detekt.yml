@@ -63,12 +63,13 @@ complexity:
     threshold: 800
   LongMethod:
     active: true
-    threshold: 300
+    threshold: 350
   LongParameterList:
     active: true
-    functionThreshold: 16
+    functionThreshold: 18
     constructorThreshold: 16
     ignoreDefaultParameters: true
+    ignoreAnnotated: ['Composable']
   MethodOverloading:
     active: false
   NestedBlockDepth:

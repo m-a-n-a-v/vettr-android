@@ -125,6 +125,7 @@ class MemoryMonitor @Inject constructor(
      * Request garbage collection (for debugging only).
      * Note: This is a hint to the runtime, not a guarantee.
      */
+    @Suppress("ExplicitGarbageCollectionCall")
     fun requestGC() {
         if (BuildConfig.DEBUG) {
             Timber.tag(TAG).d("Requesting garbage collection")

@@ -43,7 +43,6 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.vettr.android.core.util.AnalyticsService
 import com.vettr.android.core.util.FeedbackService
@@ -53,7 +52,6 @@ import com.vettr.android.designsystem.theme.VettrCardBackground
 import com.vettr.android.designsystem.theme.VettrNavy
 import com.vettr.android.designsystem.theme.VettrTextPrimary
 import com.vettr.android.designsystem.theme.VettrTextSecondary
-import com.vettr.android.designsystem.theme.VettrTheme
 import kotlinx.coroutines.launch
 
 /**

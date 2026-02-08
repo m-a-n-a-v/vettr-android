@@ -23,14 +23,14 @@
     <!-- Production API domain configuration -->
     <domain-config cleartextTrafficPermitted="false">
         <domain includeSubdomains="true">api.vettr.com</domain>
-        <pin-set expiration="2027-01-01">
-            <!--
-                Certificate pinning can be added here for additional security.
-                Example (uncomment and add actual pins when certificates are available):
+        <!--
+            Certificate pinning can be added here for additional security.
+            Example (when certificates are available):
+            <pin-set expiration="2027-01-01">
                 <pin digest="SHA-256">base64encodedpin==</pin>
                 <pin digest="SHA-256">backuppin==</pin>
-            -->
-        </pin-set>
+            </pin-set>
+        -->
         <trust-anchors>
             <certificates src="system" />
         </trust-anchors>

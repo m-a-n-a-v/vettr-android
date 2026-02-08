@@ -4,10 +4,14 @@ import com.vettr.android.core.data.repository.FilingRepository
 import com.vettr.android.core.data.repository.StockRepository
 import com.vettr.android.core.model.Filing
 import com.vettr.android.core.model.Stock
+import com.vettr.android.core.util.NetworkMonitor
+import com.vettr.android.core.util.ObservabilityService
 import io.mockk.coEvery
+import io.mockk.every
 import io.mockk.mockk
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.test.StandardTestDispatcher
 import kotlinx.coroutines.test.advanceUntilIdle
@@ -30,6 +34,8 @@ class PulseViewModelTest {
     private lateinit var viewModel: PulseViewModel
     private lateinit var stockRepository: StockRepository
     private lateinit var filingRepository: FilingRepository
+    private lateinit var observabilityService: ObservabilityService
+    private lateinit var networkMonitor: NetworkMonitor
 
     private val testDispatcher = StandardTestDispatcher()
 
@@ -38,6 +44,10 @@ class PulseViewModelTest {
         Dispatchers.setMain(testDispatcher)
         stockRepository = mockk()
         filingRepository = mockk()
+        observabilityService = mockk(relaxed = true)
+        networkMonitor = mockk {
+            every { isOnline } returns MutableStateFlow(true)
+        }
     }
 
     @After
@@ -79,7 +89,7 @@ class PulseViewModelTest {
         coEvery { filingRepository.getLatestFilings(any()) } returns flowOf(emptyList())
 
         // When
-        viewModel = PulseViewModel(stockRepository, filingRepository)
+        viewModel = PulseViewModel(stockRepository, filingRepository, observabilityService, networkMonitor)
         advanceUntilIdle()
 
         // Then
@@ -115,7 +125,7 @@ class PulseViewModelTest {
         coEvery { filingRepository.getLatestFilings(10) } returns flowOf(mockFilings)
 
         // When
-        viewModel = PulseViewModel(stockRepository, filingRepository)
+        viewModel = PulseViewModel(stockRepository, filingRepository, observabilityService, networkMonitor)
         advanceUntilIdle()
 
         // Then
@@ -130,7 +140,7 @@ class PulseViewModelTest {
         coEvery { filingRepository.getLatestFilings(any()) } returns flowOf(emptyList())
 
         // When
-        viewModel = PulseViewModel(stockRepository, filingRepository)
+        viewModel = PulseViewModel(stockRepository, filingRepository, observabilityService, networkMonitor)
         advanceUntilIdle()
 
         // Then - loading is false after data loads
@@ -144,7 +154,7 @@ class PulseViewModelTest {
         coEvery { filingRepository.getLatestFilings(any()) } returns flowOf(emptyList())
 
         // When
-        viewModel = PulseViewModel(stockRepository, filingRepository)
+        viewModel = PulseViewModel(stockRepository, filingRepository, observabilityService, networkMonitor)
         advanceUntilIdle()
 
         // Then - ViewModel completes loading even with empty data
@@ -191,7 +201,7 @@ class PulseViewModelTest {
         )
         coEvery { filingRepository.getLatestFilings(any()) } returns flowOf(emptyList())
 
-        viewModel = PulseViewModel(stockRepository, filingRepository)
+        viewModel = PulseViewModel(stockRepository, filingRepository, observabilityService, networkMonitor)
         advanceUntilIdle()
 
         // Verify initial state
