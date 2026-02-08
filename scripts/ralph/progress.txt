@@ -3271,3 +3271,24 @@ Details:
 - Material 3 ModalBottomSheet with skipPartiallyExpanded = true provides full-screen help content
 - Using remember { mutableStateOf } for bottom sheet visibility keeps state local to composables
 ---
+
+## US-125: Create share functionality for stocks, executives, and alerts
+Status: ✅ COMPLETE
+Date: 2026-02-08
+Details:
+- Created ShareService.kt in core/util/ with @Singleton and @Inject constructor
+- ShareService generates formatted share text for stocks, executives, and alerts with deep links
+- Added share analytics events: StockShared, ExecutiveShared, AlertShared to AnalyticsEvent.kt
+- Added share IconButton to ExecutiveDetailScreen header (with stockTicker parameter)
+- Added share IconButton to AlertsScreen recent triggers section
+- StockDetailScreen already had share functionality implemented (lines 79-94, 124-128)
+- All share actions use Intent.ACTION_SEND with text/plain MIME type
+- Build successful: ./gradlew assembleDebug passes
+**Learnings for future iterations:**
+  - StockDetailScreen already had inline share functionality - recognized and left it as-is
+  - ShareService is injectable but ExecutiveDetailScreen and AlertsScreen use inline sharing to avoid circular dependencies with context
+  - Added stockTicker parameter to ExecutiveDetailScreen to enable proper deep link generation
+  - Recent triggers in AlertsScreen already had card layout - just added IconButton for share
+  - Analytics events follow existing pattern with sealed class hierarchy
+  - Share text includes deep links to vettr.com (placeholder URLs)
+---
