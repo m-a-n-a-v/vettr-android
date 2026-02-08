@@ -39,4 +39,21 @@ interface StockRepository {
      * @param stockId Stock ID to toggle favorite
      */
     suspend fun toggleFavorite(stockId: String)
+
+    /**
+     * Get stocks with pagination.
+     * @param limit Number of items to fetch
+     * @param offset Starting position
+     * @return List of stocks for the requested page
+     */
+    suspend fun getStocksPaginated(limit: Int, offset: Int): List<Stock>
+
+    /**
+     * Search stocks with pagination.
+     * @param query Search query string
+     * @param limit Number of items to fetch
+     * @param offset Starting position
+     * @return List of matching stocks for the requested page
+     */
+    suspend fun searchStocksPaginated(query: String, limit: Int, offset: Int): List<Stock>
 }

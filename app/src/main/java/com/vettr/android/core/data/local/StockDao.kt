@@ -26,6 +26,19 @@ interface StockDao {
     @Query("SELECT * FROM stocks WHERE is_favorite = 1")
     fun getFavorites(): Flow<List<Stock>>
 
+    // Pagination queries
+    @Query("SELECT * FROM stocks ORDER BY ticker ASC LIMIT :limit OFFSET :offset")
+    suspend fun getStocksPaginated(limit: Int, offset: Int): List<Stock>
+
+    @Query("SELECT * FROM stocks WHERE name LIKE '%' || :query || '%' OR ticker LIKE '%' || :query || '%' ORDER BY ticker ASC LIMIT :limit OFFSET :offset")
+    suspend fun searchByNamePaginated(query: String, limit: Int, offset: Int): List<Stock>
+
+    @Query("SELECT COUNT(*) FROM stocks")
+    suspend fun getStocksCount(): Int
+
+    @Query("SELECT COUNT(*) FROM stocks WHERE name LIKE '%' || :query || '%' OR ticker LIKE '%' || :query || '%'")
+    suspend fun getSearchResultsCount(query: String): Int
+
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insert(stock: Stock)
 

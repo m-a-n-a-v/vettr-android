@@ -32,4 +32,12 @@ class StockRepositoryImpl @Inject constructor(
     override suspend fun toggleFavorite(stockId: String) {
         stockDao.toggleFavorite(stockId)
     }
+
+    override suspend fun getStocksPaginated(limit: Int, offset: Int): List<Stock> {
+        return stockDao.getStocksPaginated(limit, offset)
+    }
+
+    override suspend fun searchStocksPaginated(query: String, limit: Int, offset: Int): List<Stock> {
+        return stockDao.searchByNamePaginated(query, limit, offset)
+    }
 }
