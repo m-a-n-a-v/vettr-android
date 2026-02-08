@@ -453,3 +453,25 @@ Files changed:
   - Preview composables with dark background (0xFF0D1B2A) demonstrate component in the VETTR dark theme
   - titleMedium typography (20sp, SemiBold) provides proper visual hierarchy for section headers
 ---
+
+## US-024: Create LoadingView composable component
+Status: ✅ COMPLETE
+Date: 2026-02-07
+Details:
+- Created designsystem/component/LoadingView.kt @Composable function
+- Implemented centered Box with CircularProgressIndicator using VettrAccent color
+- Added optional message parameter that displays Text below spinner when provided
+- Used Column with vertical spacing (Spacing.md) to arrange spinner and message
+- Added 2 @Preview composables: LoadingViewPreview (no message) and LoadingViewWithMessagePreview (with message)
+- Build successful: ./gradlew assembleDebug passes
+Files changed:
+- app/src/main/java/com/vettr/android/designsystem/component/LoadingView.kt (created)
+**Learnings for future iterations:**
+  - LoadingView provides consistent loading indicator throughout app for data fetching states
+  - CircularProgressIndicator with VettrAccent color maintains brand consistency
+  - Optional message parameter adds flexibility for contextual loading messages (e.g., "Loading stocks...", "Syncing data...")
+  - Box with fillMaxSize and Center alignment ensures spinner is properly centered on screen
+  - Column with Arrangement.spacedBy provides consistent spacing between spinner and message text
+  - Using MaterialTheme.colorScheme.onSurfaceVariant for message text ensures proper contrast in dark theme
+  - Preview composables with dark background (0xFF0D1B2A) validate appearance in VETTR dark theme
+---
