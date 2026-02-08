@@ -166,6 +166,12 @@ fun MainScreen(
                     },
                     onNavigateToAbout = {
                         navController.navigate("onboarding")
+                    },
+                    onNavigateToGlossary = {
+                        navController.navigate("glossary")
+                    },
+                    onNavigateToFaq = {
+                        navController.navigate("faq")
                     }
                 )
             }
@@ -183,6 +189,22 @@ fun MainScreen(
                 OnboardingScreen(
                     onComplete = { navController.navigateUp() },
                     onSkip = { navController.navigateUp() }
+                )
+            }
+
+            // Glossary screen
+            composable("glossary") {
+                com.vettr.android.feature.profile.GlossaryScreen(
+                    onBackClick = { navController.navigateUp() },
+                    modifier = Modifier.fillMaxSize()
+                )
+            }
+
+            // FAQ screen
+            composable("faq") {
+                com.vettr.android.feature.profile.FaqScreen(
+                    onBackClick = { navController.navigateUp() },
+                    modifier = Modifier.fillMaxSize()
                 )
             }
 

@@ -18,6 +18,7 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.filled.Info
 import androidx.compose.material.icons.filled.Share
 import androidx.compose.material.icons.filled.Star
 import androidx.compose.material.icons.filled.StarBorder
@@ -38,6 +39,7 @@ import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
@@ -159,6 +161,10 @@ fun StockDetailScreen(
     onTabSelected: (Int) -> Unit = {},
     modifier: Modifier = Modifier
 ) {
+    var showVetrScoreHelp by remember { mutableStateOf(false) }
+    var showPedigreeHelp by remember { mutableStateOf(false) }
+    var showRedFlagHelp by remember { mutableStateOf(false) }
+
     Scaffold(
         modifier = modifier,
         topBar = {
@@ -245,9 +251,17 @@ fun StockDetailScreen(
 
                 // Tab content
                 when (selectedTab) {
-                    0 -> OverviewTab(stock = stock)
-                    1 -> PedigreeScreen()
-                    2 -> RedFlagsTab(stock = stock)
+                    0 -> OverviewTab(
+                        stock = stock,
+                        onShowVetrScoreHelp = { showVetrScoreHelp = true }
+                    )
+                    1 -> PedigreeTabWrapper(
+                        onShowPedigreeHelp = { showPedigreeHelp = true }
+                    )
+                    2 -> RedFlagsTab(
+                        stock = stock,
+                        onShowRedFlagHelp = { showRedFlagHelp = true }
+                    )
                 }
             }
         } else {
@@ -265,6 +279,17 @@ fun StockDetailScreen(
                 )
             }
         }
+    }
+
+    // Help bottom sheets
+    if (showVetrScoreHelp) {
+        VetrScoreHelpBottomSheet(onDismiss = { showVetrScoreHelp = false })
+    }
+    if (showPedigreeHelp) {
+        PedigreeHelpBottomSheet(onDismiss = { showPedigreeHelp = false })
+    }
+    if (showRedFlagHelp) {
+        RedFlagHelpBottomSheet(onDismiss = { showRedFlagHelp = false })
     }
 }
 
@@ -529,6 +554,7 @@ private fun StockDetailTabs(
 @Composable
 private fun OverviewTab(
     stock: Stock,
+    onShowVetrScoreHelp: () -> Unit = {},
     modifier: Modifier = Modifier
 ) {
     val currencyFormat = NumberFormat.getCurrencyInstance(Locale.CANADA)
@@ -564,13 +590,28 @@ private fun OverviewTab(
 
         Spacer(modifier = Modifier.height(Spacing.sm))
 
-        // Key metrics section
-        Text(
-            text = "Key Metrics",
-            style = MaterialTheme.typography.titleMedium,
-            fontWeight = FontWeight.Bold,
-            color = MaterialTheme.colorScheme.onSurface
-        )
+        // Key metrics section with VETR Score info button
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Text(
+                text = "Key Metrics",
+                style = MaterialTheme.typography.titleMedium,
+                fontWeight = FontWeight.Bold,
+                color = MaterialTheme.colorScheme.onSurface
+            )
+
+            IconButton(onClick = onShowVetrScoreHelp) {
+                Icon(
+                    imageVector = Icons.Default.Info,
+                    contentDescription = "VETR Score Help",
+                    tint = VettrAccent,
+                    modifier = Modifier.size(20.dp)
+                )
+            }
+        }
 
         // Metrics grid
         Column(
@@ -758,17 +799,85 @@ private fun FilingCard(
 }
 
 /**
+ * Pedigree tab wrapper with help button.
+ */
+@Composable
+private fun PedigreeTabWrapper(
+    onShowPedigreeHelp: () -> Unit = {},
+    modifier: Modifier = Modifier
+) {
+    Column(modifier = modifier.fillMaxWidth()) {
+        // Header with info button
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Text(
+                text = "Executive Team",
+                style = MaterialTheme.typography.titleMedium,
+                fontWeight = FontWeight.Bold,
+                color = MaterialTheme.colorScheme.onSurface
+            )
+
+            IconButton(onClick = onShowPedigreeHelp) {
+                Icon(
+                    imageVector = Icons.Default.Info,
+                    contentDescription = "Pedigree Help",
+                    tint = VettrAccent,
+                    modifier = Modifier.size(20.dp)
+                )
+            }
+        }
+
+        Spacer(modifier = Modifier.height(Spacing.sm))
+
+        // Pedigree content
+        PedigreeScreen()
+    }
+}
+
+/**
  * Red Flags tab content showing red flag analysis.
  */
 @Composable
 private fun RedFlagsTab(
     stock: Stock,
+    onShowRedFlagHelp: () -> Unit = {},
     modifier: Modifier = Modifier
 ) {
-    RedFlagScreen(
-        ticker = stock.ticker,
-        modifier = modifier
-    )
+    Column(modifier = modifier.fillMaxWidth()) {
+        // Header with info button
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Text(
+                text = "Risk Analysis",
+                style = MaterialTheme.typography.titleMedium,
+                fontWeight = FontWeight.Bold,
+                color = MaterialTheme.colorScheme.onSurface
+            )
+
+            IconButton(onClick = onShowRedFlagHelp) {
+                Icon(
+                    imageVector = Icons.Default.Info,
+                    contentDescription = "Red Flag Help",
+                    tint = VettrAccent,
+                    modifier = Modifier.size(20.dp)
+                )
+            }
+        }
+
+        Spacer(modifier = Modifier.height(Spacing.sm))
+
+        // Red flag content
+        RedFlagScreen(
+            ticker = stock.ticker,
+            modifier = Modifier.weight(1f)
+        )
+    }
 }
 
 @Preview(showBackground = true, backgroundColor = 0xFF0D1B2A)

@@ -76,6 +76,8 @@ fun ProfileScreen(
     onLogout: () -> Unit = {},
     onNavigateToSettings: () -> Unit = {},
     onNavigateToAbout: () -> Unit = {},
+    onNavigateToGlossary: () -> Unit = {},
+    onNavigateToFaq: () -> Unit = {},
     modifier: Modifier = Modifier
 ) {
     val user by viewModel.user.collectAsStateWithLifecycle()
@@ -98,6 +100,8 @@ fun ProfileScreen(
         onManualSync = { viewModel.triggerManualSync() },
         onNavigateToSettings = onNavigateToSettings,
         onNavigateToAbout = onNavigateToAbout,
+        onNavigateToGlossary = onNavigateToGlossary,
+        onNavigateToFaq = onNavigateToFaq,
         onLogout = {
             viewModel.logout()
             onLogout()
@@ -119,6 +123,8 @@ private fun ProfileScreenContent(
     onManualSync: () -> Unit,
     onNavigateToSettings: () -> Unit,
     onNavigateToAbout: () -> Unit,
+    onNavigateToGlossary: () -> Unit,
+    onNavigateToFaq: () -> Unit,
     onLogout: () -> Unit,
     modifier: Modifier = Modifier
 ) {
@@ -157,10 +163,27 @@ private fun ProfileScreenContent(
 
             Spacer(modifier = Modifier.height(Spacing.sm))
 
+            // Help & Learning section
+            Text(
+                text = "Help & Learning",
+                style = MaterialTheme.typography.titleMedium,
+                color = VettrAccent,
+                fontWeight = FontWeight.Bold,
+                modifier = Modifier.padding(top = Spacing.md, bottom = Spacing.sm)
+            )
+
             MenuRow(
                 icon = Icons.Default.School,
-                title = "Educational Hub",
-                onClick = { /* TODO: Navigate to educational hub */ }
+                title = "Glossary",
+                onClick = onNavigateToGlossary
+            )
+
+            Spacer(modifier = Modifier.height(Spacing.sm))
+
+            MenuRow(
+                icon = Icons.AutoMirrored.Filled.Help,
+                title = "FAQ",
+                onClick = onNavigateToFaq
             )
 
             // Upgrade to Pro card (only show for free tier)
@@ -170,13 +193,6 @@ private fun ProfileScreenContent(
             }
 
             Spacer(modifier = Modifier.height(Spacing.lg))
-
-            // Help & Support
-            MenuRow(
-                icon = Icons.AutoMirrored.Filled.Help,
-                title = "Help & Support",
-                onClick = { /* TODO: Navigate to help & support */ }
-            )
 
             Spacer(modifier = Modifier.height(Spacing.sm))
 
@@ -702,6 +718,8 @@ fun ProfileScreenPreview() {
             onManualSync = {},
             onNavigateToSettings = {},
             onNavigateToAbout = {},
+            onNavigateToGlossary = {},
+            onNavigateToFaq = {},
             onLogout = {}
         )
     }
@@ -730,6 +748,8 @@ fun ProfileScreenProPreview() {
             onManualSync = {},
             onNavigateToSettings = {},
             onNavigateToAbout = {},
+            onNavigateToGlossary = {},
+            onNavigateToFaq = {},
             onLogout = {}
         )
     }
