@@ -119,3 +119,55 @@ Details:
   - Google Sign-In One Tap requires both the legacy play-services-auth and new Credentials API libraries
   - Version catalog pattern in libs.versions.toml allows centralized dependency management
 ---
+## US-008: Add EncryptedSharedPreferences dependency
+Status: ✅ COMPLETE
+Date: 2026-02-07
+Details:
+- Added androidx.security:security-crypto version 1.1.0-alpha06 to gradle/libs.versions.toml
+- Added security-crypto dependency to app/build.gradle.kts
+- Created EncryptedPreferencesVerification.kt to verify import compiles
+- Verified EncryptedSharedPreferences and MasterKey imports work correctly
+- Build successful: ./gradlew assembleDebug passes
+**Learnings for future iterations:**
+  - androidx.security:security-crypto provides EncryptedSharedPreferences for secure local storage
+  - Version 1.1.0-alpha06 is the latest stable alpha with AES256_GCM encryption scheme
+  - MasterKey.Builder with AES256_GCM is recommended for creating encryption keys
+  - EncryptedSharedPreferences will be used for storing OAuth tokens, API keys, and sensitive user data
+  - Verification pattern: create a utility object with example usage to confirm imports compile
+---
+## US-009: Add WorkManager dependency for background tasks
+Status: ✅ COMPLETE
+Date: 2026-02-07
+Details:
+- Added WorkManager version 2.10.0 to gradle/libs.versions.toml
+- Added Hilt WorkManager integration version 1.2.0 to gradle/libs.versions.toml
+- Added androidx.work:work-runtime-ktx dependency to app/build.gradle.kts
+- Added androidx.hilt:hilt-work dependencies (implementation and ksp) to app/build.gradle.kts
+- Build successful: ./gradlew assembleDebug passes
+**Learnings for future iterations:**
+  - WorkManager requires two dependencies: work-runtime-ktx for core functionality and hilt-work for Hilt integration
+  - Hilt WorkManager integration requires both implementation and ksp (annotation processing) dependencies
+  - WorkManager 2.10.0 is the latest stable version for reliable background task scheduling
+  - WorkManager will be used for periodic data sync, such as fetching stock prices, filings, and alerts
+  - androidx.hilt:hilt-work enables @HiltWorker annotation for dependency injection in Worker classes
+---
+
+## US-010: Add BiometricPrompt dependency
+Status: ✅ COMPLETE
+Date: 2026-02-07
+Details:
+- Added androidx.biometric:biometric dependency (version 1.4.0-alpha02) to build.gradle.kts
+- Added biometric version to gradle/libs.versions.toml version catalog
+- Added androidx-biometric library reference to libs.versions.toml
+- Verified that import androidx.biometric.BiometricPrompt compiles successfully
+- Build passes: ./gradlew assembleDebug completes successfully
+Files changed:
+- gradle/libs.versions.toml (added biometric version and library)
+- app/build.gradle.kts (added BiometricPrompt implementation dependency)
+
+**Learnings for future iterations:**
+- BiometricPrompt is part of androidx.biometric library, standard for fingerprint and face authentication
+- Version 1.4.0-alpha02 is the latest stable alpha release as of early 2026
+- Following the established pattern of using version catalog for all dependencies maintains consistency
+- BiometricPrompt will be used for secure authentication alongside Google Sign-In
+---
