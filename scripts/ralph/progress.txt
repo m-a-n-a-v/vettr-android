@@ -1056,3 +1056,101 @@ Files changed:
   - DTOs should mirror Room entity structure but use Gson annotations instead of Room annotations
   - UserDto in AuthResponse provides user profile data that will be stored in User Room entity
 ---
+
+## US-050: Create NetworkModule for Hilt DI
+Status: ✅ COMPLETE
+Date: 2026-02-07
+Details:
+- Created core/di/NetworkModule.kt annotated with @Module @InstallIn(SingletonComponent::class)
+- Implemented provideOkHttpClient() @Provides @Singleton method with HttpLoggingInterceptor
+- HttpLoggingInterceptor uses BODY level logging in debug builds, NONE in release builds
+- Added connection, read, and write timeouts (30 seconds each) to OkHttpClient
+- Implemented provideRetrofit() @Provides @Singleton method with base URL "https://api.vettr.com/"
+- Added GsonConverterFactory to Retrofit for JSON serialization/deserialization
+- Implemented provideVettrApi() @Provides @Singleton method to create VettrApi instance
+- Build successful: ./gradlew assembleDebug passes
+Files changed:
+- app/src/main/java/com/vettr/android/core/di/NetworkModule.kt (created)
+- scripts/ralph/prd.json (updated passes to true)
+**Learnings for future iterations:**
+  - NetworkModule follows standard Hilt pattern: @Module + @InstallIn(SingletonComponent::class) for app-level dependencies
+  - HttpLoggingInterceptor.Level.BODY logs full request/response bodies in debug builds for debugging network calls
+  - HttpLoggingInterceptor.Level.NONE disables logging in release builds to avoid performance overhead and security issues
+  - BuildConfig.DEBUG flag enables conditional logic for debug vs release builds
+  - OkHttpClient timeout configuration (connectTimeout, readTimeout, writeTimeout) prevents hanging network calls
+  - Retrofit dependency injection: OkHttpClient → Retrofit → VettrApi with Hilt resolving the dependency graph
+  - GsonConverterFactory.create() uses default Gson configuration for JSON serialization
+  - BASE_URL constant allows easy configuration change for different environments (dev, staging, production)
+  - retrofit.create(VettrApi::class.java) generates implementation of VettrApi interface at runtime
+---
+
+## US-051: Create StockRepository interface and implementation
+Status: ✅ COMPLETE
+Date: 2026-02-07
+Details:
+- Created core/data/repository/StockRepository.kt interface with methods: getStocks(), getStock(), searchStocks(), getFavorites(), toggleFavorite()
+- Created core/data/repository/StockRepositoryImpl.kt implementing StockRepository with @Inject constructor
+- StockRepositoryImpl delegates to StockDao for all operations
+- Added toggleFavorite() method to StockDao using SQL UPDATE query with NOT operator for efficient toggle
+- Build successful: ./gradlew assembleDebug passes
+Files changed:
+- app/src/main/java/com/vettr/android/core/data/repository/StockRepository.kt (created)
+- app/src/main/java/com/vettr/android/core/data/repository/StockRepositoryImpl.kt (created)
+- app/src/main/java/com/vettr/android/core/data/local/StockDao.kt (added toggleFavorite method)
+- scripts/ralph/prd.json (updated passes to true)
+**Learnings for future iterations:**
+  - Repository pattern provides abstraction over data sources (DAO, API, cache) for testability and maintainability
+  - StockRepositoryImpl uses @Inject constructor for Hilt dependency injection
+  - Flow return types from DAO methods propagate through repository for reactive UI updates
+  - toggleFavorite() implementation uses SQL UPDATE query with NOT operator for efficient boolean toggle
+  - Added toggleFavorite() query to StockDao for efficient in-place update without fetching stock first
+  - Repository layer enables future addition of remote data sources and caching strategies
+  - All query methods return Flow for reactive data observation, mutation methods are suspend functions
+---
+
+## US-052: Create FilingRepository interface and implementation
+Status: ✅ COMPLETE
+Date: 2026-02-07
+Details:
+- Created core/data/repository/FilingRepository.kt interface with three methods
+- getFilingsForStock(stockId: String): Flow<List<Filing>> for stock-specific filings
+- getLatestFilings(limit: Int): Flow<List<Filing>> for recent filings across all stocks
+- markAsRead(filingId: String) for updating filing read status
+- Created core/data/repository/FilingRepositoryImpl.kt implementing FilingRepository
+- FilingRepositoryImpl uses @Inject constructor with FilingDao dependency
+- All methods delegate to FilingDao for data access
+- Build successful: ./gradlew assembleDebug passes
+Files changed:
+- app/src/main/java/com/vettr/android/core/data/repository/FilingRepository.kt (created)
+- app/src/main/java/com/vettr/android/core/data/repository/FilingRepositoryImpl.kt (created)
+- scripts/ralph/prd.json (updated passes to true)
+**Learnings for future iterations:**
+  - FilingRepository follows same pattern as StockRepository: interface with implementation class
+  - Repository pattern abstracts data sources (DAO) for testability and maintainability
+  - All query methods return Flow for reactive UI updates, mutation methods are suspend functions
+  - @Inject constructor enables Hilt dependency injection of FilingDao
+  - Repository implementations delegate to DAO methods without additional business logic at this stage
+  - Future enhancements could add remote data sources and caching strategies to repository layer
+---
+
+## US-053: Create RepositoryModule for Hilt DI
+Status: ✅ COMPLETE
+Date: 2026-02-07
+Details:
+- Created core/di/RepositoryModule.kt annotated with @Module @InstallIn(SingletonComponent::class)
+- Used @Binds abstract methods to bind repository implementations to interfaces
+- Bound StockRepositoryImpl to StockRepository with @Singleton scope
+- Bound FilingRepositoryImpl to FilingRepository with @Singleton scope
+- Build successful: ./gradlew assembleDebug passes
+Files changed:
+- app/src/main/java/com/vettr/android/core/di/RepositoryModule.kt (created)
+- scripts/ralph/prd.json (updated passes to true)
+**Learnings for future iterations:**
+  - RepositoryModule uses @Binds annotation for interface-to-implementation binding (more efficient than @Provides)
+  - @Binds methods must be abstract and take implementation as parameter, return interface type
+  - @Binds is preferred over @Provides for simple interface delegation as it generates less code
+  - Module must be abstract class when using @Binds annotations
+  - All repository bindings use @Singleton scope to ensure single instance throughout app lifecycle
+  - Hilt automatically resolves repository implementations when injecting repository interfaces into ViewModels
+  - Pattern follows dependency inversion principle: high-level code depends on abstractions (interfaces), not implementations
+---
