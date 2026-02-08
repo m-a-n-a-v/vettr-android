@@ -475,3 +475,26 @@ Files changed:
   - Using MaterialTheme.colorScheme.onSurfaceVariant for message text ensures proper contrast in dark theme
   - Preview composables with dark background (0xFF0D1B2A) validate appearance in VETTR dark theme
 ---
+
+## US-025: Create ErrorView composable component
+Status: ✅ COMPLETE
+Date: 2026-02-07
+Details:
+- Created designsystem/component/ErrorView.kt @Composable function
+- Displays red error icon (Icons.Default.Error), error message text, and Retry button
+- Parameters: message: String, onRetry: () -> Unit
+- Used Material3 Button with VettrAccent background and white text for Retry button
+- Centered layout with Box, vertical arrangement with Column
+- Added @Preview composable with sample error message
+- Build successful: ./gradlew assembleDebug passes
+Files changed:
+- app/src/main/java/com/vettr/android/designsystem/component/ErrorView.kt (created)
+**Learnings for future iterations:**
+  - ErrorView provides consistent error state handling across all screens with retry capability
+  - Uses Icons.Default.Error from Material Icons with VettrRed tint for visual error indication
+  - Material3 Button with ButtonDefaults.buttonColors() allows customization of container and content colors
+  - Box with fillMaxSize and Center alignment ensures error message is centered on screen
+  - Column with Arrangement.spacedBy provides consistent spacing between icon, message, and button
+  - Avoided forward reference to PrimaryButton (US-027) by using Material3 Button directly
+  - Preview with dark background (0xFF0D1B2A) validates appearance in VETTR dark theme
+---
