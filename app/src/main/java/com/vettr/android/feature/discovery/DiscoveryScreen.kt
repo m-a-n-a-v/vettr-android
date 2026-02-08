@@ -47,6 +47,7 @@ import com.vettr.android.designsystem.theme.VettrYellow
 @Composable
 fun DiscoveryScreen(
     modifier: Modifier = Modifier,
+    onStockClick: (String) -> Unit = {},
     viewModel: DiscoveryViewModel = hiltViewModel()
 ) {
     val selectedFilter by viewModel.selectedFilter.collectAsStateWithLifecycle()
@@ -169,7 +170,7 @@ fun DiscoveryScreen(
                     subtitle = event.second,
                     date = "${index + 1} hour${if (index == 0) "" else "s"} ago",
                     indicatorColor = event.third,
-                    onClick = { /* TODO: Navigate to event detail */ }
+                    onClick = { /* TODO: Navigate to event/stock detail based on event type */ }
                 )
             }
         }

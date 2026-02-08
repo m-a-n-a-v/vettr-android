@@ -28,6 +28,8 @@ import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
+import androidx.navigation.NavType
+import androidx.navigation.navArgument
 import com.vettr.android.designsystem.theme.VettrAccent
 import com.vettr.android.designsystem.theme.VettrNavy
 import com.vettr.android.designsystem.theme.VettrTextSecondary
@@ -36,6 +38,7 @@ import com.vettr.android.feature.alerts.AlertsScreen
 import com.vettr.android.feature.discovery.DiscoveryScreen
 import com.vettr.android.feature.profile.ProfileScreen
 import com.vettr.android.feature.pulse.PulseScreen
+import com.vettr.android.feature.stockdetail.StockDetailRoute
 import com.vettr.android.feature.stockdetail.StocksScreen
 
 /**
@@ -122,19 +125,45 @@ fun MainScreen(
             modifier = Modifier.padding(paddingValues)
         ) {
             composable(BottomNavDestination.Pulse.route) {
-                PulseScreen(modifier = Modifier.fillMaxSize())
+                PulseScreen(
+                    modifier = Modifier.fillMaxSize(),
+                    onStockClick = { stockId ->
+                        navController.navigate("stock_detail/$stockId")
+                    }
+                )
             }
             composable(BottomNavDestination.Discovery.route) {
-                DiscoveryScreen(modifier = Modifier.fillMaxSize())
+                DiscoveryScreen(
+                    modifier = Modifier.fillMaxSize(),
+                    onStockClick = { stockId ->
+                        navController.navigate("stock_detail/$stockId")
+                    }
+                )
             }
             composable(BottomNavDestination.Stocks.route) {
-                StocksScreen(modifier = Modifier.fillMaxSize())
+                StocksScreen(
+                    modifier = Modifier.fillMaxSize(),
+                    onStockClick = { stockId ->
+                        navController.navigate("stock_detail/$stockId")
+                    }
+                )
             }
             composable(BottomNavDestination.Alerts.route) {
                 AlertsScreen(modifier = Modifier.fillMaxSize())
             }
             composable(BottomNavDestination.Profile.route) {
                 ProfileScreen(modifier = Modifier.fillMaxSize())
+            }
+
+            // Stock detail screen
+            composable(
+                route = "stock_detail/{stockId}",
+                arguments = listOf(navArgument("stockId") { type = NavType.StringType })
+            ) {
+                StockDetailRoute(
+                    onBackClick = { navController.navigateUp() },
+                    modifier = Modifier.fillMaxSize()
+                )
             }
         }
     }

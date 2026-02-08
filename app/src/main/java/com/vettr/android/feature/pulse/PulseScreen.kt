@@ -58,6 +58,7 @@ import com.vettr.android.designsystem.theme.VettrYellow
 @Composable
 fun PulseScreen(
     modifier: Modifier = Modifier,
+    onStockClick: (String) -> Unit = {},
     viewModel: PulseViewModel = hiltViewModel()
 ) {
     val stocks by viewModel.stocks.collectAsStateWithLifecycle()
@@ -231,7 +232,7 @@ fun PulseScreen(
                             price = stock.price,
                             priceChange = stock.priceChange,
                             logoUrl = null, // TODO: Add logo URL when available
-                            onClick = { /* TODO: Navigate to StockDetailScreen */ },
+                            onClick = { onStockClick(stock.id) },
                             modifier = Modifier.width(280.dp)
                         )
                     }

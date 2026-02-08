@@ -22,7 +22,8 @@ import com.vettr.android.designsystem.theme.VettrTheme
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun StocksScreen(
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    onStockClick: (String) -> Unit = {}
 ) {
     Scaffold(
         modifier = modifier,
