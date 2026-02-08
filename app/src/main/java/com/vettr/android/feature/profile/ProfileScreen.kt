@@ -22,7 +22,6 @@ import androidx.compose.material.icons.automirrored.filled.Help
 import androidx.compose.material.icons.automirrored.filled.Logout
 import androidx.compose.material.icons.filled.AccountCircle
 import androidx.compose.material.icons.filled.Info
-import androidx.compose.material.icons.filled.Notifications
 import androidx.compose.material.icons.filled.School
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material.icons.filled.Sync
@@ -32,7 +31,6 @@ import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
@@ -95,6 +93,8 @@ fun ProfileScreen(
         lastSyncTime = lastSyncTime,
         isSyncing = isSyncing,
         nextSyncEta = viewModel.getNextSyncEta(),
+        appVersion = viewModel.getAppVersion(),
+        buildType = viewModel.getBuildType(),
         showLogoutDialog = showLogoutDialog,
         onShowLogoutDialog = { showLogoutDialog = it },
         onManualSync = { viewModel.triggerManualSync() },
@@ -118,6 +118,8 @@ private fun ProfileScreenContent(
     lastSyncTime: Long?,
     isSyncing: Boolean,
     nextSyncEta: Long?,
+    appVersion: String,
+    buildType: String,
     showLogoutDialog: Boolean,
     onShowLogoutDialog: (Boolean) -> Unit,
     onManualSync: () -> Unit,
@@ -213,6 +215,26 @@ private fun ProfileScreenContent(
             )
 
             Spacer(modifier = Modifier.height(Spacing.xl))
+
+            // Version info at the bottom
+            Column(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalAlignment = Alignment.CenterHorizontally
+            ) {
+                Text(
+                    text = "VETTR v$appVersion",
+                    style = MaterialTheme.typography.bodySmall,
+                    color = VettrTextSecondary
+                )
+                Spacer(modifier = Modifier.height(Spacing.xs))
+                Text(
+                    text = "Build: $buildType",
+                    style = MaterialTheme.typography.bodySmall,
+                    color = VettrTextSecondary.copy(alpha = 0.7f)
+                )
+            }
+
+            Spacer(modifier = Modifier.height(Spacing.md))
         }
     }
 
@@ -713,6 +735,8 @@ fun ProfileScreenPreview() {
             lastSyncTime = System.currentTimeMillis() - (2 * 60 * 1000), // 2 minutes ago
             isSyncing = false,
             nextSyncEta = System.currentTimeMillis() + (23 * 60 * 60 * 1000), // 23 hours from now
+            appVersion = "1.0.0 (1)",
+            buildType = "Debug",
             showLogoutDialog = false,
             onShowLogoutDialog = {},
             onManualSync = {},
@@ -743,6 +767,8 @@ fun ProfileScreenProPreview() {
             lastSyncTime = System.currentTimeMillis() - (60 * 60 * 1000), // 1 hour ago
             isSyncing = true, // Show syncing state
             nextSyncEta = System.currentTimeMillis() + (11 * 60 * 60 * 1000), // 11 hours from now
+            appVersion = "1.0.0 (1)",
+            buildType = "Debug",
             showLogoutDialog = false,
             onShowLogoutDialog = {},
             onManualSync = {},

@@ -7,6 +7,7 @@ import com.vettr.android.core.data.repository.AuthRepository
 import com.vettr.android.core.model.User
 import com.vettr.android.core.model.VettrTier
 import com.vettr.android.core.sync.SyncManager
+import com.vettr.android.core.util.VersionManager
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -23,7 +24,8 @@ import javax.inject.Inject
 class ProfileViewModel @Inject constructor(
     private val authRepository: AuthRepository,
     private val syncManager: SyncManager,
-    private val syncHistoryDao: SyncHistoryDao
+    private val syncHistoryDao: SyncHistoryDao,
+    private val versionManager: VersionManager
 ) : ViewModel() {
 
     private val _user = MutableStateFlow<User?>(null)
@@ -121,5 +123,19 @@ class ProfileViewModel @Inject constructor(
             _tier.update { VettrTier.FREE }
             _isLoading.update { false }
         }
+    }
+
+    /**
+     * Get formatted app version (e.g., "1.0.0 (1)").
+     */
+    fun getAppVersion(): String {
+        return versionManager.getFormattedVersion()
+    }
+
+    /**
+     * Get build type (Debug or Release).
+     */
+    fun getBuildType(): String {
+        return versionManager.getBuildType()
     }
 }

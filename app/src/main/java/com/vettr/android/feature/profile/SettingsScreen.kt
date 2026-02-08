@@ -10,7 +10,6 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -307,6 +306,28 @@ private fun SettingsScreenContent(
                 }
             }
 
+            Spacer(modifier = Modifier.height(Spacing.lg))
+
+            // About Section
+            SectionHeader(title = "About")
+            Spacer(modifier = Modifier.height(Spacing.sm))
+
+            SettingCard {
+                Column {
+                    SettingRow(
+                        title = "App Version",
+                        subtitle = "${BuildConfig.VERSION_NAME} (${BuildConfig.VERSION_CODE})"
+                    ) { }
+
+                    SettingDivider()
+
+                    SettingRow(
+                        title = "Build Type",
+                        subtitle = if (BuildConfig.DEBUG) "Debug" else "Release"
+                    ) { }
+                }
+            }
+
             // Developer Section (only in debug builds)
             if (BuildConfig.DEBUG) {
                 Spacer(modifier = Modifier.height(Spacing.lg))
@@ -316,13 +337,6 @@ private fun SettingsScreenContent(
 
                 SettingCard {
                     Column {
-                        SettingRow(
-                            title = "Build Version",
-                            subtitle = "${BuildConfig.VERSION_NAME} (${BuildConfig.VERSION_CODE})"
-                        ) { }
-
-                        SettingDivider()
-
                         SettingRow(
                             title = "Device",
                             subtitle = "${Build.MANUFACTURER} ${Build.MODEL} (Android ${Build.VERSION.RELEASE})"
@@ -345,6 +359,8 @@ private fun SettingsScreenContent(
                     }
                 }
 
+                Spacer(modifier = Modifier.height(Spacing.xl))
+            } else {
                 Spacer(modifier = Modifier.height(Spacing.xl))
             }
         }
