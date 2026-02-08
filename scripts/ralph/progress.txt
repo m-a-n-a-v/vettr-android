@@ -3586,3 +3586,43 @@ Details:
   - Comprehensive keep rules prevent runtime reflection errors for Room, Retrofit, Hilt, and Gson
   - ProGuard file organized by library sections makes rules easier to maintain
 ---
+
+## US-135: Create security audit and input validation
+Status: ✅ COMPLETE
+Date: 2026-02-08
+Details:
+- Completed comprehensive security audit:
+  - Verified tokens stored in EncryptedSharedPreferences with AES256_GCM encryption (TokenManager.kt)
+  - Verified all API calls use HTTPS (NetworkModule.kt BASE_URL = https://api.vettr.com/)
+  - Verified no hardcoded API keys or secrets in codebase
+- Created InputValidator utility (core/util/InputValidator.kt) with:
+  - SQL injection prevention (detects patterns like ', --, /*, xp_)
+  - XSS sanitization (escapes <, >, ", ', &, /)
+  - Email, URL, ticker, and name format validation
+  - Search query sanitization with DoS protection (200 char limit)
+  - Numeric validation with range support
+  - Comprehensive input validation with ValidationResult
+- Added network_security_config.xml:
+  - Enforces HTTPS-only traffic (cleartextTrafficPermitted="false")
+  - Allows localhost for debug builds
+  - Includes certificate pinning configuration placeholder
+  - Updated AndroidManifest.xml to reference security config
+- Created InputValidatorTest with 36 comprehensive unit tests:
+  - XSS prevention tests (HTML escape, pattern detection)
+  - SQL injection prevention tests (pattern detection, sanitization)
+  - Email/URL/ticker/name validation tests
+  - Search query sanitization tests
+  - Numeric validation and range tests
+  - Common attack payload tests
+- Fixed ProfileViewModelTest compilation issues (added versionManager parameter from US-133)
+- All tests passing: 252 tests completed, 0 failed
+- Build successful: ./gradlew assembleDebug passes
+**Learnings for future iterations:**
+  - Room uses parameterized queries which already prevent SQL injection, but InputValidator provides defense-in-depth
+  - Android Patterns class is not available in unit tests - must use standard Java regex patterns
+  - Double.MIN_VALUE is the smallest positive value, not the most negative - use Double.NEGATIVE_INFINITY for minimum range
+  - Network security config allows debug builds to use localhost for development while enforcing HTTPS in production
+  - XSS pattern detection should focus on dangerous characters (<>"'&) rather than trying to detect all possible payloads
+  - Input validation should be applied at UI boundaries (user input, external APIs) but trust internal code
+  - EncryptedSharedPreferences provides hardware-backed encryption on devices with secure hardware
+---
