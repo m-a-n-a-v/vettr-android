@@ -3324,3 +3324,43 @@ Details:
   - 90-day cooldown prevents review spam
   - Feedback screen is standalone and needs to be integrated into navigation graph (not done in this story - will be done when navigation is expanded)
 ---
+
+## US-127: Create localization infrastructure for multi-language
+Status: ✅ COMPLETE
+Date: 2026-02-08
+Details:
+- Extracted ~200 hardcoded strings from Kotlin and Compose files to res/values/strings.xml
+- Implemented structured naming convention: section_field_label format
+  - Examples: auth_button_login, pulse_section_trending, alerts_filter_active, profile_tier_badge_pro
+- Created comprehensive strings.xml with organized sections:
+  - Common/Shared strings (buttons, time formats, errors)
+  - Welcome & Auth screens (login, signup, welcome)
+  - Navigation labels (5 bottom nav items)
+  - Feature-specific strings (Pulse, Discovery, Stocks, Alerts, Profile)
+  - Alert Rule Creator (multi-step wizard with 5 steps)
+  - Settings screen (general, notifications, privacy, security, accessibility, developer)
+  - Empty states and error messages
+- Created res/values-fr/strings.xml with 5 example French translations:
+  - welcome_tagline: "Investissement intelligent pour les Canadiens"
+  - welcome_button_getstarted: "Commencer"
+  - welcome_button_login: "Se connecter"
+  - nav_pulse: "Pouls"
+  - nav_discovery: "Découverte"
+- Updated WelcomeScreen.kt to demonstrate stringResource(R.string.key) pattern:
+  - Added import androidx.compose.ui.res.stringResource
+  - Replaced all 7 hardcoded strings with stringResource() calls
+  - Pattern: Text(text = stringResource(R.string.welcome_tagline))
+- Build successful: ./gradlew assembleDebug passes
+- Committed with message: "feat: US-127 - Create localization infrastructure for multi-language"
+**Learnings for future iterations:**
+  - Android string resources use XML format with <string name="key">value</string> syntax
+  - String resource naming should follow section_field_label pattern for clarity and organization
+  - Use stringResource(R.string.key) in @Composable functions (Jetpack Compose)
+  - French translation files go in res/values-fr/ directory with same structure
+  - String formatting uses %s, %d, %1$s for positional arguments
+  - Special XML characters need escaping: &amp; for &, \' for apostrophe
+  - Total ~200 strings catalogued across all features for future translation
+  - Infrastructure is now ready for Phase 2 full French localization
+  - Demonstrated pattern in WelcomeScreen.kt can be replicated across all other screens
+  - Build system automatically picks up locale-specific resources based on device language
+---
