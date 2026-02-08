@@ -1,0 +1,122 @@
+package com.vettr.android.feature.stockdetail
+
+import androidx.lifecycle.SavedStateHandle
+import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
+import com.vettr.android.core.data.repository.FilingRepository
+import com.vettr.android.core.data.repository.StockRepository
+import com.vettr.android.core.model.Filing
+import com.vettr.android.core.model.Stock
+import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.catch
+import kotlinx.coroutines.launch
+import javax.inject.Inject
+
+/**
+ * Tab options for Stock Detail screen.
+ */
+enum class StockDetailTab {
+    OVERVIEW,
+    ANALYSIS,
+    NEWS
+}
+
+/**
+ * ViewModel for the Stock Detail screen.
+ * Manages UI state for stock details, filings, and tab navigation.
+ */
+@HiltViewModel
+class StockDetailViewModel @Inject constructor(
+    private val stockRepository: StockRepository,
+    private val filingRepository: FilingRepository,
+    savedStateHandle: SavedStateHandle
+) : ViewModel() {
+
+    private val stockId: String = savedStateHandle.get<String>("stockId") ?: ""
+
+    private val _stock = MutableStateFlow<Stock?>(null)
+    val stock: StateFlow<Stock?> = _stock.asStateFlow()
+
+    private val _filings = MutableStateFlow<List<Filing>>(emptyList())
+    val filings: StateFlow<List<Filing>> = _filings.asStateFlow()
+
+    private val _selectedTab = MutableStateFlow(StockDetailTab.OVERVIEW)
+    val selectedTab: StateFlow<StockDetailTab> = _selectedTab.asStateFlow()
+
+    private val _isLoading = MutableStateFlow(false)
+    val isLoading: StateFlow<Boolean> = _isLoading.asStateFlow()
+
+    private val _errorMessage = MutableStateFlow<String?>(null)
+    val errorMessage: StateFlow<String?> = _errorMessage.asStateFlow()
+
+    init {
+        loadStock()
+    }
+
+    /**
+     * Load stock details and associated filings from repositories.
+     */
+    fun loadStock() {
+        if (stockId.isEmpty()) {
+            _errorMessage.value = "Invalid stock ID"
+            return
+        }
+
+        viewModelScope.launch {
+            _isLoading.value = true
+            _errorMessage.value = null
+
+            try {
+                // Load stock details
+                launch {
+                    stockRepository.getStock(stockId)
+                        .catch { error ->
+                            _errorMessage.value = "Failed to load stock: ${error.message}"
+                        }
+                        .collect { stockData ->
+                            _stock.value = stockData
+                        }
+                }
+
+                // Load filings for this stock
+                launch {
+                    filingRepository.getFilingsForStock(stockId)
+                        .catch { error ->
+                            _errorMessage.value = "Failed to load filings: ${error.message}"
+                        }
+                        .collect { filingList ->
+                            _filings.value = filingList
+                        }
+                }
+            } finally {
+                _isLoading.value = false
+            }
+        }
+    }
+
+    /**
+     * Toggle favorite status for the current stock.
+     */
+    fun toggleFavorite() {
+        if (stockId.isEmpty()) return
+
+        viewModelScope.launch {
+            try {
+                stockRepository.toggleFavorite(stockId)
+            } catch (e: Exception) {
+                _errorMessage.value = "Failed to toggle favorite: ${e.message}"
+            }
+        }
+    }
+
+    /**
+     * Select a tab on the stock detail screen.
+     * @param tab The tab to select
+     */
+    fun selectTab(tab: StockDetailTab) {
+        _selectedTab.value = tab
+    }
+}
