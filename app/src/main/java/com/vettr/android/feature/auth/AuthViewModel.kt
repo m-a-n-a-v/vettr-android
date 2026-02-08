@@ -170,6 +170,7 @@ class AuthViewModel @Inject constructor(
 /**
  * UI state for authentication screen.
  */
+@androidx.compose.runtime.Immutable
 data class AuthUiState(
     val email: String = "",
     val password: String = "",

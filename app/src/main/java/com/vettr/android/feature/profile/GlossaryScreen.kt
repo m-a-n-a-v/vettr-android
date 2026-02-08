@@ -33,6 +33,7 @@ import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -53,6 +54,7 @@ import com.vettr.android.designsystem.theme.VettrTheme
 /**
  * Data class representing a glossary term.
  */
+@androidx.compose.runtime.Immutable
 data class GlossaryTerm(
     val term: String,
     val definition: String,
@@ -84,16 +86,20 @@ fun GlossaryScreen(
     var searchQuery by remember { mutableStateOf("") }
     var selectedCategory by remember { mutableStateOf(GlossaryCategory.ALL) }
 
-    val allTerms = getAllGlossaryTerms()
+    val allTerms = remember { getAllGlossaryTerms() }
 
     // Filter terms based on search query and selected category
-    val filteredTerms = allTerms.filter { term ->
-        val matchesSearch = searchQuery.isEmpty() ||
-            term.term.contains(searchQuery, ignoreCase = true) ||
-            term.definition.contains(searchQuery, ignoreCase = true)
-        val matchesCategory = selectedCategory == GlossaryCategory.ALL ||
-            term.category == selectedCategory
-        matchesSearch && matchesCategory
+    val filteredTerms by remember {
+        derivedStateOf {
+            allTerms.filter { term ->
+                val matchesSearch = searchQuery.isEmpty() ||
+                    term.term.contains(searchQuery, ignoreCase = true) ||
+                    term.definition.contains(searchQuery, ignoreCase = true)
+                val matchesCategory = selectedCategory == GlossaryCategory.ALL ||
+                    term.category == selectedCategory
+                matchesSearch && matchesCategory
+            }
+        }
     }
 
     Scaffold(
@@ -161,7 +167,7 @@ fun GlossaryScreen(
                     Spacer(modifier = Modifier.height(Spacing.xs))
                 }
 
-                items(filteredTerms) { term ->
+                items(filteredTerms, key = { it.term }) { term ->
                     GlossaryTermCard(
                         term = term,
                         modifier = Modifier.padding(horizontal = Spacing.md)

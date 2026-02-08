@@ -153,7 +153,7 @@ fun RedFlagScreenContent(
                     )
                 }
 
-                items(uiState.currentFlags) { flag ->
+                items(uiState.currentFlags, key = { it.type.name }) { flag ->
                     FlagRow(
                         flag = flag,
                         isExpanded = uiState.expandedFlags.contains(flag.type.name),

@@ -29,7 +29,9 @@ import androidx.compose.material3.windowsizeclass.WindowSizeClass
 import androidx.compose.material3.windowsizeclass.WindowWidthSizeClass
 import androidx.compose.ui.unit.DpSize
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
@@ -120,7 +122,7 @@ fun DiscoveryScreen(
 
                         // Top Sectors skeleton
                         item {
-                            val isExpanded = windowSizeClass.widthSizeClass == WindowWidthSizeClass.Expanded
+                            val isExpanded by remember { derivedStateOf { windowSizeClass.widthSizeClass == WindowWidthSizeClass.Expanded } }
 
                             Column(
                                 verticalArrangement = Arrangement.spacedBy(Spacing.md)
@@ -134,7 +136,7 @@ fun DiscoveryScreen(
                                     verticalArrangement = Arrangement.spacedBy(Spacing.md),
                                     contentPadding = PaddingValues(0.dp)
                                 ) {
-                                    items(4) {
+                                    items(4, key = { it }) {
                                         SkeletonMetricCard()
                                     }
                                 }
@@ -146,7 +148,7 @@ fun DiscoveryScreen(
                             SectionHeader(title = "Recent Updates")
                         }
 
-                        items(8) {
+                        items(8, key = { it }) {
                             SkeletonEventCard()
                         }
                     }
@@ -206,7 +208,7 @@ fun DiscoveryScreen(
 
                         // Top Sectors Section
                         item {
-                            val isExpanded = windowSizeClass.widthSizeClass == WindowWidthSizeClass.Expanded
+                            val isExpanded by remember { derivedStateOf { windowSizeClass.widthSizeClass == WindowWidthSizeClass.Expanded } }
 
                             Column(
                                 verticalArrangement = Arrangement.spacedBy(Spacing.md)
@@ -220,7 +222,7 @@ fun DiscoveryScreen(
                                     verticalArrangement = Arrangement.spacedBy(Spacing.md),
                                     contentPadding = PaddingValues(0.dp)
                                 ) {
-                                    items(sectors) { sector ->
+                                    items(sectors, key = { it }) { sector ->
                                         SectorCard(
                                             name = sector,
                                             percentage = when (sector) {

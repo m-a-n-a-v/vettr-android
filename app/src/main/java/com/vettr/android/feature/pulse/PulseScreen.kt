@@ -33,6 +33,7 @@ import androidx.compose.material3.windowsizeclass.WindowSizeClass
 import androidx.compose.material3.windowsizeclass.WindowWidthSizeClass
 import androidx.compose.ui.unit.DpSize
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -140,7 +141,7 @@ fun PulseScreen(
                                 horizontalArrangement = Arrangement.spacedBy(Spacing.md),
                                 contentPadding = PaddingValues(horizontal = 0.dp)
                             ) {
-                                items(3) {
+                                items(3, key = { it }) {
                                     SkeletonMetricCard(modifier = Modifier.width(150.dp))
                                 }
                             }
@@ -171,7 +172,7 @@ fun PulseScreen(
                                 horizontalArrangement = Arrangement.spacedBy(Spacing.md),
                                 contentPadding = PaddingValues(horizontal = 0.dp)
                             ) {
-                                items(6) {
+                                items(6, key = { it }) {
                                     SkeletonStockRow(modifier = Modifier.width(280.dp))
                                 }
                             }
@@ -258,13 +259,15 @@ fun PulseScreen(
                         ) {
                             SectionHeader(title = "Strategic Events")
 
-                            val eventCards = listOf(
-                                Triple("Discovery Drill Hit", "BBB.V - Significant gold discovery announced", VettrGreen) to "2 hours ago",
-                                Triple("Red Flag Alert", "XYZ.TO - Unusual insider selling detected", VettrRed) to "4 hours ago",
-                                Triple("New Financing", "ABC.V - $10M private placement completed", VettrYellow) to "1 day ago"
-                            )
+                            val eventCards = remember {
+                                listOf(
+                                    Triple("Discovery Drill Hit", "BBB.V - Significant gold discovery announced", VettrGreen) to "2 hours ago",
+                                    Triple("Red Flag Alert", "XYZ.TO - Unusual insider selling detected", VettrRed) to "4 hours ago",
+                                    Triple("New Financing", "ABC.V - $10M private placement completed", VettrYellow) to "1 day ago"
+                                )
+                            }
 
-                            val isExpanded = windowSizeClass.widthSizeClass == WindowWidthSizeClass.Expanded
+                            val isExpanded by remember { derivedStateOf { windowSizeClass.widthSizeClass == WindowWidthSizeClass.Expanded } }
 
                             if (isExpanded) {
                                 // 2-column grid layout for expanded screens
@@ -274,7 +277,7 @@ fun PulseScreen(
                                     verticalArrangement = Arrangement.spacedBy(Spacing.sm),
                                     modifier = Modifier.height(300.dp) // Fixed height to prevent layout issues
                                 ) {
-                                    items(eventCards) { (event, date) ->
+                                    items(eventCards, key = { it.first.first }) { (event, date) ->
                                         val (title, subtitle, color) = event
                                         EventCard(
                                             title = title,
@@ -313,7 +316,7 @@ fun PulseScreen(
                                 onSeeAllClick = { /* TODO: Navigate to full stock list */ }
                             )
 
-                            val isExpanded = windowSizeClass.widthSizeClass == WindowWidthSizeClass.Expanded
+                            val isExpanded by remember { derivedStateOf { windowSizeClass.widthSizeClass == WindowWidthSizeClass.Expanded } }
 
                             if (isExpanded) {
                                 // 2-column grid layout for expanded screens
@@ -323,7 +326,7 @@ fun PulseScreen(
                                     verticalArrangement = Arrangement.spacedBy(Spacing.sm),
                                     modifier = Modifier.height(400.dp) // Fixed height to prevent layout issues
                                 ) {
-                                    items(stocks.take(6)) { stock ->
+                                    items(stocks.take(6), key = { it.id }) { stock ->
                                         StockRowView(
                                             ticker = stock.ticker,
                                             companyName = stock.name,
@@ -340,7 +343,7 @@ fun PulseScreen(
                                     horizontalArrangement = Arrangement.spacedBy(Spacing.md),
                                     contentPadding = PaddingValues(horizontal = 0.dp)
                                 ) {
-                                    items(stocks.take(6)) { stock ->
+                                    items(stocks.take(6), key = { it.id }) { stock ->
                                         StockRowView(
                                             ticker = stock.ticker,
                                             companyName = stock.name,

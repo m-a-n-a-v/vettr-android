@@ -156,6 +156,7 @@ class RedFlagViewModel @Inject constructor(
 /**
  * UI state for Red Flag screen.
  */
+@androidx.compose.runtime.Immutable
 data class RedFlagUiState(
     val currentFlags: List<DetectedFlag> = emptyList(),
     val compositeScore: RedFlagScore? = null,

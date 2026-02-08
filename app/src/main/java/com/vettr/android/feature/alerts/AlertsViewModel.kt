@@ -163,6 +163,7 @@ class AlertsViewModel @Inject constructor(
 /**
  * UI state for the Alerts screen.
  */
+@androidx.compose.runtime.Immutable
 data class AlertsUiState(
     val alertRules: List<AlertRule> = emptyList(),
     val groupedAlertRules: Map<String, List<AlertRule>> = emptyMap(),

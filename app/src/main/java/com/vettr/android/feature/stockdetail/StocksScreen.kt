@@ -103,7 +103,7 @@ fun StocksScreen(
                                 modifier = Modifier.fillMaxSize(),
                                 verticalArrangement = Arrangement.spacedBy(Spacing.xs)
                             ) {
-                                items(8) {
+                                items(8, key = { it }) {
                                     SkeletonStockRow()
                                     HorizontalDivider(
                                         color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.1f)

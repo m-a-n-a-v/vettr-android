@@ -221,6 +221,7 @@ class AlertRuleCreatorViewModel @Inject constructor(
 /**
  * UI state for the Alert Rule Creator screen.
  */
+@androidx.compose.runtime.Immutable
 data class AlertRuleCreatorUiState(
     val currentStep: Int = 1,
     val availableStocks: List<Stock> = emptyList(),

@@ -40,6 +40,7 @@ import androidx.compose.material3.windowsizeclass.WindowSizeClass
 import androidx.compose.material3.windowsizeclass.WindowWidthSizeClass
 import androidx.compose.ui.unit.DpSize
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -215,7 +216,7 @@ fun StockDetailScreen(
         }
     ) { paddingValues ->
         if (stock != null) {
-            val isExpanded = windowSizeClass.widthSizeClass == WindowWidthSizeClass.Expanded
+            val isExpanded by remember { derivedStateOf { windowSizeClass.widthSizeClass == WindowWidthSizeClass.Expanded } }
 
             if (isExpanded) {
                 // Side-by-side layout for expanded screens (tablets/landscape)
@@ -821,7 +822,7 @@ private fun NewsTab(
             modifier = modifier.fillMaxWidth(),
             verticalArrangement = Arrangement.spacedBy(Spacing.sm)
         ) {
-            items(filings) { filing ->
+            items(filings, key = { it.id }) { filing ->
                 FilingCard(filing = filing)
             }
         }

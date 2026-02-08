@@ -17,6 +17,7 @@ import javax.inject.Inject
 /**
  * UI state for the Settings screen.
  */
+@androidx.compose.runtime.Immutable
 data class SettingsUiState(
     val currency: String = "CAD",
     val darkMode: Boolean = true,

@@ -54,6 +54,7 @@ import com.vettr.android.designsystem.theme.VettrTheme
 /**
  * Data class representing an FAQ item.
  */
+@androidx.compose.runtime.Immutable
 data class FaqItem(
     val question: String,
     val answer: String,
@@ -81,8 +82,8 @@ fun FaqScreen(
     onBackClick: () -> Unit = {},
     modifier: Modifier = Modifier
 ) {
-    val faqItems = getAllFaqItems()
-    val groupedFaqs = faqItems.groupBy { it.category }
+    val faqItems = remember { getAllFaqItems() }
+    val groupedFaqs = remember { faqItems.groupBy { it.category } }
 
     Scaffold(
         modifier = modifier,
@@ -133,7 +134,7 @@ fun FaqScreen(
                         )
                     }
 
-                    items(categoryItems) { faqItem ->
+                    items(categoryItems, key = { it.question }) { faqItem ->
                         ExpandableFaqCard(
                             faqItem = faqItem,
                             modifier = Modifier.padding(horizontal = Spacing.md)
