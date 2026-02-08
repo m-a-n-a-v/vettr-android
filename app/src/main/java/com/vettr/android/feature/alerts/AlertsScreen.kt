@@ -15,6 +15,7 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
+import android.content.Intent
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.semantics.stateDescription
 import androidx.compose.material.icons.Icons
@@ -22,6 +23,7 @@ import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.MonetizationOn
 import androidx.compose.material.icons.filled.Notifications
+import androidx.compose.material.icons.filled.Share
 import androidx.compose.material.icons.filled.TrendingDown
 import androidx.compose.material.icons.filled.TrendingUp
 import androidx.compose.material3.Card
@@ -31,6 +33,7 @@ import androidx.compose.material3.FilterChip
 import androidx.compose.material3.FilterChipDefaults
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
@@ -51,6 +54,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
@@ -158,8 +162,6 @@ fun AlertsScreen(
                         item {
                             RecentTriggersSection(
                                 rules = recentlyTriggeredRules,
-                                onToggle = { viewModel.toggleRule(it) },
-                                onDelete = { viewModel.deleteRule(it, view) },
                                 modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp)
                             )
                         }
@@ -355,10 +357,10 @@ private fun AlertRuleRow(
 @Composable
 private fun RecentTriggersSection(
     rules: List<AlertRule>,
-    onToggle: (String) -> Unit,
-    onDelete: (String) -> Unit,
     modifier: Modifier = Modifier
 ) {
+    val context = LocalContext.current
+
     Column(
         modifier = modifier,
         verticalArrangement = Arrangement.spacedBy(8.dp)
@@ -408,6 +410,39 @@ private fun RecentTriggersSection(
                                 color = MaterialTheme.colorScheme.onSecondaryContainer
                             )
                         }
+                    }
+
+                    // Share button
+                    IconButton(
+                        onClick = {
+                            val shareText = buildString {
+                                append("VETTR Alert: ${rule.stockTicker}\n")
+                                append("${rule.triggerCondition}\n")
+                                append("Frequency: ${rule.frequency}\n")
+
+                                rule.lastTriggeredAt?.let { timestamp ->
+                                    val timeAgo = formatTimestamp(timestamp)
+                                    append("Last triggered: $timeAgo\n")
+                                }
+
+                                append("\nCreate your own alerts on VETTR: https://vettr.com/alerts")
+                            }
+
+                            val sendIntent = Intent().apply {
+                                action = Intent.ACTION_SEND
+                                putExtra(Intent.EXTRA_TEXT, shareText)
+                                type = "text/plain"
+                            }
+
+                            val shareIntent = Intent.createChooser(sendIntent, null)
+                            context.startActivity(shareIntent)
+                        }
+                    ) {
+                        Icon(
+                            imageVector = Icons.Default.Share,
+                            contentDescription = "Share alert",
+                            tint = MaterialTheme.colorScheme.primary
+                        )
                     }
                 }
             }

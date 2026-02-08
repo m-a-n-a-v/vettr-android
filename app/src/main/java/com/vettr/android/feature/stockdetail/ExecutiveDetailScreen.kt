@@ -19,10 +19,12 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
+import androidx.compose.material3.IconButton
 import androidx.compose.material.icons.filled.Business
 import androidx.compose.material.icons.filled.Email
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.School
+import androidx.compose.material.icons.filled.Share
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
@@ -59,6 +61,7 @@ import java.util.UUID
 @Composable
 fun ExecutiveDetailScreen(
     executive: Executive,
+    stockTicker: String = "",
     onDismiss: () -> Unit,
     sheetState: SheetState = rememberModalBottomSheetState()
 ) {
@@ -67,13 +70,17 @@ fun ExecutiveDetailScreen(
         sheetState = sheetState,
         containerColor = MaterialTheme.colorScheme.background
     ) {
-        ExecutiveDetailContent(executive = executive)
+        ExecutiveDetailContent(
+            executive = executive,
+            stockTicker = stockTicker
+        )
     }
 }
 
 @Composable
 fun ExecutiveDetailContent(
     executive: Executive,
+    stockTicker: String = "",
     modifier: Modifier = Modifier
 ) {
     val context = LocalContext.current
@@ -85,8 +92,11 @@ fun ExecutiveDetailContent(
             .verticalScroll(scrollState)
             .padding(Spacing.lg)
     ) {
-        // Header with photo, name, title, tenure
-        ExecutiveHeader(executive = executive)
+        // Header with share button, photo, name, title, tenure
+        ExecutiveHeaderWithShare(
+            executive = executive,
+            stockTicker = stockTicker
+        )
 
         Spacer(modifier = Modifier.height(Spacing.lg))
 
@@ -172,6 +182,58 @@ fun ExecutiveDetailContent(
         )
 
         Spacer(modifier = Modifier.height(Spacing.xl))
+    }
+}
+
+/**
+ * Header section with share button, photo, name, title, and tenure.
+ */
+@Composable
+fun ExecutiveHeaderWithShare(
+    executive: Executive,
+    stockTicker: String,
+    modifier: Modifier = Modifier
+) {
+    val context = LocalContext.current
+
+    Column(modifier = modifier.fillMaxWidth()) {
+        // Share button row
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.End
+        ) {
+            IconButton(
+                onClick = {
+                    val shareText = buildString {
+                        append("${executive.name} - ${executive.title}\n")
+                        append("Tenure: ${String.format("%.1f", executive.yearsAtCompany)} years\n")
+                        append("Education: ${executive.education}\n")
+                        if (executive.specialization.isNotBlank()) {
+                            append("Specialization: ${executive.specialization}\n")
+                        }
+                        append("\nView executive profile on VETTR: https://vettr.com/stocks/$stockTicker/executives/${executive.id}")
+                    }
+
+                    val sendIntent = Intent().apply {
+                        action = Intent.ACTION_SEND
+                        putExtra(Intent.EXTRA_TEXT, shareText)
+                        type = "text/plain"
+                    }
+
+                    val shareIntent = Intent.createChooser(sendIntent, null)
+                    context.startActivity(shareIntent)
+                }
+            ) {
+                Icon(
+                    imageVector = Icons.Default.Share,
+                    contentDescription = "Share executive",
+                    tint = VettrAccent
+                )
+            }
+        }
+
+        // Header content
+        ExecutiveHeader(executive = executive)
     }
 }
 
@@ -360,7 +422,8 @@ fun ExecutiveDetailContentPreview() {
                 specialization = "Technology & Innovation",
                 socialLinkedIn = "https://linkedin.com/in/johnsmith",
                 socialTwitter = "https://twitter.com/johnsmith"
-            )
+            ),
+            stockTicker = "SHOP"
         )
     }
 }
@@ -382,7 +445,8 @@ fun ExecutiveDetailContentRiskPreview() {
                 specialization = "Financial Planning & Analysis",
                 socialLinkedIn = null,
                 socialTwitter = null
-            )
+            ),
+            stockTicker = "WEED"
         )
     }
 }

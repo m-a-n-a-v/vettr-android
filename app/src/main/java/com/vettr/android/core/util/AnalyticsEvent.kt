@@ -45,6 +45,10 @@ sealed class AnalyticsEvent(
         name = "stock_unfavorited",
         params = mapOf("ticker" to ticker, "stock_id" to stockId)
     )
+    data class StockShared(val ticker: String, val stockId: String) : AnalyticsEvent(
+        name = "stock_shared",
+        params = mapOf("ticker" to ticker, "stock_id" to stockId)
+    )
 
     // Alert Events
     data class AlertCreated(val ruleType: String) : AnalyticsEvent(
@@ -62,6 +66,10 @@ sealed class AnalyticsEvent(
     data class NotificationOpened(val alertId: String) : AnalyticsEvent(
         name = "notification_opened",
         params = mapOf("alert_id" to alertId)
+    )
+    data class AlertShared(val alertId: String, val ruleType: String) : AnalyticsEvent(
+        name = "alert_shared",
+        params = mapOf("alert_id" to alertId, "rule_type" to ruleType)
     )
 
     // Search & Discovery Events
@@ -96,6 +104,10 @@ sealed class AnalyticsEvent(
     data class PedigreeTabViewed(val tabName: String) : AnalyticsEvent(
         name = "pedigree_tab_viewed",
         params = mapOf("tab_name" to tabName)
+    )
+    data class ExecutiveShared(val executiveId: String) : AnalyticsEvent(
+        name = "executive_shared",
+        params = mapOf("executive_id" to executiveId)
     )
 
     // Sync Events
