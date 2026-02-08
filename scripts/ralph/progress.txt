@@ -1678,3 +1678,47 @@ Details:
   - Early returns with return@Scaffold keep UI state logic clean and readable
   - Always import Box when wrapping components that don't accept modifiers
 ---
+## US-075: Create DiscoveryViewModel with Hilt
+Status: ✅ COMPLETE
+Date: 2026-02-07
+Details:
+- Created feature/discovery/DiscoveryViewModel.kt with @HiltViewModel annotation
+- Injected StockRepository and FilingRepository via @Inject constructor
+- Added StateFlow fields: stocks, sectors, selectedFilter (DiscoveryFilter enum), searchQuery
+- Implemented loadData() method that loads stocks based on selectedFilter (WATCHLIST or ALERTS)
+- Implemented toggleFilter() method to switch between Watchlist and Alerts views
+- Implemented searchStocks(query: String) method for stock search functionality
+- Added loading and error state management with isLoading and errorMessage StateFlows
+- Included DiscoveryFilter enum with WATCHLIST and ALERTS options
+- Build successful: ./gradlew assembleDebug passes
+**Learnings for future iterations:**
+  - Discovery screen supports two filter modes: Watchlist (favorite stocks) and Alerts
+  - Used same ViewModel pattern as PulseViewModel: @HiltViewModel, StateFlow, viewModelScope
+  - Sectors list initialized with: Critical Minerals, AI Technology, Energy Juniors, Clean Tech
+  - Search functionality clears when query is empty and reverts to filtered view
+  - Alert filtering currently loads all stocks - will be enhanced when AlertRepository is available
+---
+
+## US-076: Build DiscoveryScreen with filter tabs and sectors grid
+Status: ✅ COMPLETE
+Date: 2026-02-07
+Details:
+- Updated DiscoveryScreen.kt to use hiltViewModel() and DiscoveryViewModel
+- Added My Watchlist / Alerts Only segmented FilterChip toggle for filtering stocks
+- Implemented Top Sectors section with 2x2 LazyVerticalGrid displaying:
+  - Critical Minerals (+12.5%)
+  - AI Technology (+8.3%)
+  - Energy Juniors (-3.2%)
+  - Clean Tech (+5.7%)
+- Created SectorCard composable with name and percentage display
+- Added Recent Updates section with LazyColumn of EventCard components
+- Displayed 5 sample recent events with color-coded indicators (green, red, yellow)
+- Build successful: ./gradlew assembleDebug passes
+**Learnings for future iterations:**
+  - FilterChip from Material 3 provides built-in segmented control functionality
+  - LazyVerticalGrid with GridCells.Fixed(2) creates perfect 2x2 grid layout
+  - LazyColumn can contain both regular items and LazyVerticalGrid for nested scrolling
+  - EventCard component from designsystem is reusable across Pulse and Discovery screens
+  - SectorCard follows same design pattern as other card components (cardStyle + vettrPadding)
+  - Color-coded indicators (VettrGreen, VettrRed, VettrYellow) provide visual status differentiation
+---
