@@ -23,11 +23,14 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.dp
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import com.vettr.android.designsystem.theme.VettrAccent
+import com.vettr.android.designsystem.theme.VettrNavy
+import com.vettr.android.designsystem.theme.VettrTextSecondary
 import com.vettr.android.designsystem.theme.VettrTheme
 import com.vettr.android.feature.alerts.AlertsScreen
 import com.vettr.android.feature.discovery.DiscoveryScreen
@@ -72,8 +75,9 @@ fun MainScreen(
         modifier = modifier,
         bottomBar = {
             NavigationBar(
-                containerColor = MaterialTheme.colorScheme.surface,
-                contentColor = MaterialTheme.colorScheme.onSurface
+                containerColor = VettrNavy,
+                contentColor = VettrTextSecondary,
+                tonalElevation = 8.dp
             ) {
                 BottomNavDestination.items.forEachIndexed { index, destination ->
                     NavigationBarItem(
@@ -103,9 +107,9 @@ fun MainScreen(
                         colors = NavigationBarItemDefaults.colors(
                             selectedIconColor = VettrAccent,
                             selectedTextColor = VettrAccent,
-                            indicatorColor = MaterialTheme.colorScheme.surface,
-                            unselectedIconColor = MaterialTheme.colorScheme.onSurfaceVariant,
-                            unselectedTextColor = MaterialTheme.colorScheme.onSurfaceVariant
+                            indicatorColor = VettrNavy,
+                            unselectedIconColor = VettrTextSecondary,
+                            unselectedTextColor = VettrTextSecondary
                         )
                     )
                 }
