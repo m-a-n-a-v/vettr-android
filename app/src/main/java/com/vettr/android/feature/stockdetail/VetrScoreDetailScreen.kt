@@ -248,10 +248,9 @@ private fun LargeScoreBadge(
 
             Text(
                 text = normalizedScore.toString(),
-                style = MaterialTheme.typography.displayLarge,
+                style = MaterialTheme.typography.displayMedium,
                 color = Color.White,
-                fontWeight = FontWeight.Bold,
-                fontSize = 48.sp
+                fontWeight = FontWeight.Bold
             )
         }
 
@@ -508,8 +507,7 @@ private fun ComponentScoreRow(
                         text = score.toString(),
                         style = MaterialTheme.typography.labelSmall,
                         color = Color.White,
-                        fontWeight = FontWeight.Bold,
-                        fontSize = 11.sp
+                        fontWeight = FontWeight.Bold
                     )
                 }
 

@@ -127,8 +127,7 @@ fun VettrScoreView(
             text = scoreLabel,
             style = MaterialTheme.typography.bodySmall,
             color = scoreColor,
-            fontWeight = FontWeight.SemiBold,
-            fontSize = 12.sp
+            fontWeight = FontWeight.SemiBold
         )
     }
 }

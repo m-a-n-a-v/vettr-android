@@ -123,7 +123,7 @@ fun DiscoveryScreen(
                     SectionHeader(title = "Top Sectors")
 
                     LazyVerticalGrid(
-                        columns = GridCells.Fixed(2),
+                        columns = GridCells.Adaptive(minSize = 140.dp),
                         modifier = Modifier.height(200.dp),
                         horizontalArrangement = Arrangement.spacedBy(Spacing.md),
                         verticalArrangement = Arrangement.spacedBy(Spacing.md),

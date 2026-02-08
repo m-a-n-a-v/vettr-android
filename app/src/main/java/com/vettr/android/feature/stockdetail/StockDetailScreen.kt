@@ -309,7 +309,6 @@ private fun StockDetailHeader(
                     Text(
                         text = stock.exchange,
                         style = MaterialTheme.typography.labelSmall,
-                        fontSize = 10.sp,
                         fontWeight = FontWeight.SemiBold,
                         color = VettrTextSecondary
                     )
