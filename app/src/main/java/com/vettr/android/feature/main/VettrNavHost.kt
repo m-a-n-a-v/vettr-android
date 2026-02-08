@@ -3,6 +3,7 @@ package com.vettr.android.feature.main
 import android.net.Uri
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.SnackbarHostState
+import androidx.compose.material3.windowsizeclass.WindowSizeClass
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -46,6 +47,7 @@ sealed class Screen(val route: String) {
  * @param authRepository Repository for checking authentication state.
  * @param deepLinkUri Deep link URI to navigate to, if any.
  * @param onDeepLinkHandled Callback when deep link has been handled.
+ * @param windowSizeClass WindowSizeClass for adaptive layouts.
  */
 @Composable
 fun VettrNavHost(
@@ -53,7 +55,8 @@ fun VettrNavHost(
     navController: NavHostController = rememberNavController(),
     authRepository: AuthRepository,
     deepLinkUri: Uri? = null,
-    onDeepLinkHandled: () -> Unit = {}
+    onDeepLinkHandled: () -> Unit = {},
+    windowSizeClass: WindowSizeClass
 ) {
     // Observe authentication state to handle navigation to/from auth
     val isAuthenticated by authRepository.isAuthenticated().collectAsStateWithLifecycle(initialValue = false)
@@ -144,7 +147,10 @@ fun VettrNavHost(
             route = Screen.MainGraph.route
         ) {
             composable(Screen.Main.route) {
-                MainScreen(modifier = Modifier.fillMaxSize())
+                MainScreen(
+                    modifier = Modifier.fillMaxSize(),
+                    windowSizeClass = windowSizeClass
+                )
             }
         }
     }

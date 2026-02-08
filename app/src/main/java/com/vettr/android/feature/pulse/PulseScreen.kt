@@ -13,6 +13,9 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyRow
+import androidx.compose.foundation.lazy.grid.GridCells
+import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
+import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
@@ -25,6 +28,10 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.pulltorefresh.PullToRefreshBox
+import androidx.compose.material3.windowsizeclass.ExperimentalMaterial3WindowSizeClassApi
+import androidx.compose.material3.windowsizeclass.WindowSizeClass
+import androidx.compose.material3.windowsizeclass.WindowWidthSizeClass
+import androidx.compose.ui.unit.DpSize
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -60,6 +67,7 @@ import com.vettr.android.designsystem.theme.VettrYellow
 @Composable
 fun PulseScreen(
     modifier: Modifier = Modifier,
+    windowSizeClass: WindowSizeClass,
     onStockClick: (String) -> Unit = {},
     viewModel: PulseViewModel = hiltViewModel()
 ) {
@@ -250,32 +258,49 @@ fun PulseScreen(
                         ) {
                             SectionHeader(title = "Strategic Events")
 
-                            Column(
-                                verticalArrangement = Arrangement.spacedBy(Spacing.sm)
-                            ) {
-                                EventCard(
-                                    title = "Discovery Drill Hit",
-                                    subtitle = "BBB.V - Significant gold discovery announced",
-                                    date = "2 hours ago",
-                                    indicatorColor = VettrGreen,
-                                    onClick = {}
-                                )
+                            val eventCards = listOf(
+                                Triple("Discovery Drill Hit", "BBB.V - Significant gold discovery announced", VettrGreen) to "2 hours ago",
+                                Triple("Red Flag Alert", "XYZ.TO - Unusual insider selling detected", VettrRed) to "4 hours ago",
+                                Triple("New Financing", "ABC.V - $10M private placement completed", VettrYellow) to "1 day ago"
+                            )
 
-                                EventCard(
-                                    title = "Red Flag Alert",
-                                    subtitle = "XYZ.TO - Unusual insider selling detected",
-                                    date = "4 hours ago",
-                                    indicatorColor = VettrRed,
-                                    onClick = {}
-                                )
+                            val isExpanded = windowSizeClass.widthSizeClass == WindowWidthSizeClass.Expanded
 
-                                EventCard(
-                                    title = "New Financing",
-                                    subtitle = "ABC.V - $10M private placement completed",
-                                    date = "1 day ago",
-                                    indicatorColor = VettrYellow,
-                                    onClick = {}
-                                )
+                            if (isExpanded) {
+                                // 2-column grid layout for expanded screens
+                                LazyVerticalGrid(
+                                    columns = GridCells.Fixed(2),
+                                    horizontalArrangement = Arrangement.spacedBy(Spacing.md),
+                                    verticalArrangement = Arrangement.spacedBy(Spacing.sm),
+                                    modifier = Modifier.height(300.dp) // Fixed height to prevent layout issues
+                                ) {
+                                    items(eventCards) { (event, date) ->
+                                        val (title, subtitle, color) = event
+                                        EventCard(
+                                            title = title,
+                                            subtitle = subtitle,
+                                            date = date,
+                                            indicatorColor = color,
+                                            onClick = {}
+                                        )
+                                    }
+                                }
+                            } else {
+                                // Single column layout for compact/medium screens
+                                Column(
+                                    verticalArrangement = Arrangement.spacedBy(Spacing.sm)
+                                ) {
+                                    eventCards.forEach { (event, date) ->
+                                        val (title, subtitle, color) = event
+                                        EventCard(
+                                            title = title,
+                                            subtitle = subtitle,
+                                            date = date,
+                                            indicatorColor = color,
+                                            onClick = {}
+                                        )
+                                    }
+                                }
                             }
                         }
 
@@ -288,20 +313,44 @@ fun PulseScreen(
                                 onSeeAllClick = { /* TODO: Navigate to full stock list */ }
                             )
 
-                            LazyRow(
-                                horizontalArrangement = Arrangement.spacedBy(Spacing.md),
-                                contentPadding = PaddingValues(horizontal = 0.dp)
-                            ) {
-                                items(stocks.take(6)) { stock ->
-                                    StockRowView(
-                                        ticker = stock.ticker,
-                                        companyName = stock.name,
-                                        price = stock.price,
-                                        priceChange = stock.priceChange,
-                                        logoUrl = null, // TODO: Add logo URL when available
-                                        onClick = { onStockClick(stock.id) },
-                                        modifier = Modifier.width(280.dp)
-                                    )
+                            val isExpanded = windowSizeClass.widthSizeClass == WindowWidthSizeClass.Expanded
+
+                            if (isExpanded) {
+                                // 2-column grid layout for expanded screens
+                                LazyVerticalGrid(
+                                    columns = GridCells.Fixed(2),
+                                    horizontalArrangement = Arrangement.spacedBy(Spacing.md),
+                                    verticalArrangement = Arrangement.spacedBy(Spacing.sm),
+                                    modifier = Modifier.height(400.dp) // Fixed height to prevent layout issues
+                                ) {
+                                    items(stocks.take(6)) { stock ->
+                                        StockRowView(
+                                            ticker = stock.ticker,
+                                            companyName = stock.name,
+                                            price = stock.price,
+                                            priceChange = stock.priceChange,
+                                            logoUrl = null, // TODO: Add logo URL when available
+                                            onClick = { onStockClick(stock.id) }
+                                        )
+                                    }
+                                }
+                            } else {
+                                // Horizontal scroll layout for compact/medium screens
+                                LazyRow(
+                                    horizontalArrangement = Arrangement.spacedBy(Spacing.md),
+                                    contentPadding = PaddingValues(horizontal = 0.dp)
+                                ) {
+                                    items(stocks.take(6)) { stock ->
+                                        StockRowView(
+                                            ticker = stock.ticker,
+                                            companyName = stock.name,
+                                            price = stock.price,
+                                            priceChange = stock.priceChange,
+                                            logoUrl = null, // TODO: Add logo URL when available
+                                            onClick = { onStockClick(stock.id) },
+                                            modifier = Modifier.width(280.dp)
+                                        )
+                                    }
                                 }
                             }
                         }
@@ -315,18 +364,24 @@ fun PulseScreen(
     }
 }
 
+@OptIn(ExperimentalMaterial3WindowSizeClassApi::class)
 @Preview(name = "Phone", showBackground = true, backgroundColor = 0xFF0D1B2A)
 @Composable
 fun PulseScreenPreview() {
     VettrTheme {
-        PulseScreen()
+        PulseScreen(
+            windowSizeClass = WindowSizeClass.calculateFromSize(DpSize(400.dp, 800.dp))
+        )
     }
 }
 
+@OptIn(ExperimentalMaterial3WindowSizeClassApi::class)
 @Preview(name = "Tablet", showBackground = true, backgroundColor = 0xFF0D1B2A, widthDp = 840)
 @Composable
 fun PulseScreenTabletPreview() {
     VettrTheme {
-        PulseScreen()
+        PulseScreen(
+            windowSizeClass = WindowSizeClass.calculateFromSize(DpSize(840.dp, 1200.dp))
+        )
     }
 }

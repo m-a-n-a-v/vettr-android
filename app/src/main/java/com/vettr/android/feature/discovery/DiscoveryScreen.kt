@@ -24,6 +24,10 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.material3.pulltorefresh.PullToRefreshBox
+import androidx.compose.material3.windowsizeclass.ExperimentalMaterial3WindowSizeClassApi
+import androidx.compose.material3.windowsizeclass.WindowSizeClass
+import androidx.compose.material3.windowsizeclass.WindowWidthSizeClass
+import androidx.compose.ui.unit.DpSize
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
@@ -52,6 +56,7 @@ import com.vettr.android.designsystem.theme.VettrYellow
 @Composable
 fun DiscoveryScreen(
     modifier: Modifier = Modifier,
+    windowSizeClass: WindowSizeClass,
     onStockClick: (String) -> Unit = {},
     viewModel: DiscoveryViewModel = hiltViewModel()
 ) {
@@ -115,13 +120,15 @@ fun DiscoveryScreen(
 
                         // Top Sectors skeleton
                         item {
+                            val isExpanded = windowSizeClass.widthSizeClass == WindowWidthSizeClass.Expanded
+
                             Column(
                                 verticalArrangement = Arrangement.spacedBy(Spacing.md)
                             ) {
                                 SectionHeader(title = "Top Sectors")
 
                                 LazyVerticalGrid(
-                                    columns = GridCells.Adaptive(minSize = 140.dp),
+                                    columns = if (isExpanded) GridCells.Fixed(3) else GridCells.Adaptive(minSize = 140.dp),
                                     modifier = Modifier.height(200.dp),
                                     horizontalArrangement = Arrangement.spacedBy(Spacing.md),
                                     verticalArrangement = Arrangement.spacedBy(Spacing.md),
@@ -199,13 +206,15 @@ fun DiscoveryScreen(
 
                         // Top Sectors Section
                         item {
+                            val isExpanded = windowSizeClass.widthSizeClass == WindowWidthSizeClass.Expanded
+
                             Column(
                                 verticalArrangement = Arrangement.spacedBy(Spacing.md)
                             ) {
                                 SectionHeader(title = "Top Sectors")
 
                                 LazyVerticalGrid(
-                                    columns = GridCells.Adaptive(minSize = 140.dp),
+                                    columns = if (isExpanded) GridCells.Fixed(3) else GridCells.Adaptive(minSize = 140.dp),
                                     modifier = Modifier.height(200.dp),
                                     horizontalArrangement = Arrangement.spacedBy(Spacing.md),
                                     verticalArrangement = Arrangement.spacedBy(Spacing.md),
@@ -305,18 +314,24 @@ fun SectorCardPreview() {
     }
 }
 
+@OptIn(ExperimentalMaterial3WindowSizeClassApi::class)
 @Preview(name = "Phone", showBackground = true, backgroundColor = 0xFF0D1B2A)
 @Composable
 fun DiscoveryScreenPreview() {
     VettrTheme {
-        DiscoveryScreen()
+        DiscoveryScreen(
+            windowSizeClass = WindowSizeClass.calculateFromSize(DpSize(400.dp, 800.dp))
+        )
     }
 }
 
+@OptIn(ExperimentalMaterial3WindowSizeClassApi::class)
 @Preview(name = "Tablet", showBackground = true, backgroundColor = 0xFF0D1B2A, widthDp = 840)
 @Composable
 fun DiscoveryScreenTabletPreview() {
     VettrTheme {
-        DiscoveryScreen()
+        DiscoveryScreen(
+            windowSizeClass = WindowSizeClass.calculateFromSize(DpSize(840.dp, 1200.dp))
+        )
     }
 }

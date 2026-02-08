@@ -6,6 +6,8 @@ import android.os.Bundle
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.material3.windowsizeclass.ExperimentalMaterial3WindowSizeClassApi
+import androidx.compose.material3.windowsizeclass.calculateWindowSizeClass
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
@@ -21,6 +23,7 @@ import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
+@OptIn(ExperimentalMaterial3WindowSizeClassApi::class)
 @AndroidEntryPoint
 class MainActivity : FragmentActivity() {
     @Inject
@@ -44,12 +47,14 @@ class MainActivity : FragmentActivity() {
         isAppUnlocked = true
 
         setContent {
+            val windowSizeClass = calculateWindowSizeClass(this)
             VettrTheme {
                 VettrNavHost(
                     modifier = Modifier.fillMaxSize(),
                     authRepository = authRepository,
                     deepLinkUri = deepLinkUri,
-                    onDeepLinkHandled = { deepLinkUri = null }
+                    onDeepLinkHandled = { deepLinkUri = null },
+                    windowSizeClass = windowSizeClass
                 )
             }
         }

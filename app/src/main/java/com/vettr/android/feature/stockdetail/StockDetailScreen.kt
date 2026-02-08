@@ -35,6 +35,10 @@ import androidx.compose.material3.TabRowDefaults.tabIndicatorOffset
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
+import androidx.compose.material3.windowsizeclass.ExperimentalMaterial3WindowSizeClassApi
+import androidx.compose.material3.windowsizeclass.WindowSizeClass
+import androidx.compose.material3.windowsizeclass.WindowWidthSizeClass
+import androidx.compose.ui.unit.DpSize
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -96,6 +100,7 @@ private fun shareStock(context: android.content.Context, stock: Stock) {
 @Composable
 fun StockDetailRoute(
     onBackClick: () -> Unit,
+    windowSizeClass: WindowSizeClass,
     onShareClick: () -> Unit = {},
     viewModel: StockDetailViewModel = hiltViewModel(),
     modifier: Modifier = Modifier
@@ -116,6 +121,7 @@ fun StockDetailRoute(
             StockDetailTab.PEDIGREE -> 1
             StockDetailTab.RED_FLAGS -> 2
         },
+        windowSizeClass = windowSizeClass,
         onBackClick = onBackClick,
         onShareClick = {
             stock?.let { stockData ->
@@ -150,6 +156,7 @@ fun StockDetailScreen(
     filings: List<Filing> = emptyList(),
     selectedTimeRange: TimeRange = TimeRange.ONE_DAY,
     selectedTab: Int = 0,
+    windowSizeClass: WindowSizeClass,
     onBackClick: () -> Unit = {},
     onShareClick: () -> Unit = {},
     onFavoriteClick: () -> Unit = {},
@@ -208,56 +215,128 @@ fun StockDetailScreen(
         }
     ) { paddingValues ->
         if (stock != null) {
-            Column(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .padding(paddingValues)
-                    .padding(Spacing.md)
-            ) {
-                // Header section with ticker, exchange badge, company name, and VETR score
-                StockDetailHeader(stock = stock)
+            val isExpanded = windowSizeClass.widthSizeClass == WindowWidthSizeClass.Expanded
 
-                Spacer(modifier = Modifier.height(Spacing.lg))
+            if (isExpanded) {
+                // Side-by-side layout for expanded screens (tablets/landscape)
+                Row(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .padding(paddingValues)
+                        .padding(Spacing.md),
+                    horizontalArrangement = Arrangement.spacedBy(Spacing.lg)
+                ) {
+                    // Left column: Header, Price, Chart
+                    Column(
+                        modifier = Modifier
+                            .weight(1f)
+                            .fillMaxSize()
+                    ) {
+                        // Header section with ticker, exchange badge, company name, and VETR score
+                        StockDetailHeader(stock = stock)
 
-                // Price display section
-                PriceSection(stock = stock)
+                        Spacer(modifier = Modifier.height(Spacing.lg))
 
-                Spacer(modifier = Modifier.height(Spacing.lg))
+                        // Price display section
+                        PriceSection(stock = stock)
 
-                // Mini chart placeholder
-                ChartPlaceholder()
+                        Spacer(modifier = Modifier.height(Spacing.lg))
 
-                Spacer(modifier = Modifier.height(Spacing.md))
+                        // Mini chart placeholder
+                        ChartPlaceholder()
 
-                // Time range selector
-                TimeRangeSelector(
-                    selectedTimeRange = selectedTimeRange,
-                    onTimeRangeSelected = onTimeRangeSelected
-                )
+                        Spacer(modifier = Modifier.height(Spacing.md))
 
-                Spacer(modifier = Modifier.height(Spacing.lg))
+                        // Time range selector
+                        TimeRangeSelector(
+                            selectedTimeRange = selectedTimeRange,
+                            onTimeRangeSelected = onTimeRangeSelected
+                        )
+                    }
 
-                // Tab navigation
-                StockDetailTabs(
-                    selectedTabIndex = selectedTab,
-                    onTabSelected = onTabSelected
-                )
+                    // Right column: Tabs and content
+                    Column(
+                        modifier = Modifier
+                            .weight(1f)
+                            .fillMaxSize()
+                    ) {
+                        // Tab navigation
+                        StockDetailTabs(
+                            selectedTabIndex = selectedTab,
+                            onTabSelected = onTabSelected
+                        )
 
-                Spacer(modifier = Modifier.height(Spacing.md))
+                        Spacer(modifier = Modifier.height(Spacing.md))
 
-                // Tab content
-                when (selectedTab) {
-                    0 -> OverviewTab(
-                        stock = stock,
-                        onShowVetrScoreHelp = { showVetrScoreHelp = true }
+                        // Tab content
+                        when (selectedTab) {
+                            0 -> OverviewTab(
+                                stock = stock,
+                                onShowVetrScoreHelp = { showVetrScoreHelp = true }
+                            )
+                            1 -> PedigreeTabWrapper(
+                                onShowPedigreeHelp = { showPedigreeHelp = true }
+                            )
+                            2 -> RedFlagsTab(
+                                stock = stock,
+                                onShowRedFlagHelp = { showRedFlagHelp = true }
+                            )
+                        }
+                    }
+                }
+            } else {
+                // Single column layout for compact/medium screens
+                Column(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .padding(paddingValues)
+                        .padding(Spacing.md)
+                ) {
+                    // Header section with ticker, exchange badge, company name, and VETR score
+                    StockDetailHeader(stock = stock)
+
+                    Spacer(modifier = Modifier.height(Spacing.lg))
+
+                    // Price display section
+                    PriceSection(stock = stock)
+
+                    Spacer(modifier = Modifier.height(Spacing.lg))
+
+                    // Mini chart placeholder
+                    ChartPlaceholder()
+
+                    Spacer(modifier = Modifier.height(Spacing.md))
+
+                    // Time range selector
+                    TimeRangeSelector(
+                        selectedTimeRange = selectedTimeRange,
+                        onTimeRangeSelected = onTimeRangeSelected
                     )
-                    1 -> PedigreeTabWrapper(
-                        onShowPedigreeHelp = { showPedigreeHelp = true }
+
+                    Spacer(modifier = Modifier.height(Spacing.lg))
+
+                    // Tab navigation
+                    StockDetailTabs(
+                        selectedTabIndex = selectedTab,
+                        onTabSelected = onTabSelected
                     )
-                    2 -> RedFlagsTab(
-                        stock = stock,
-                        onShowRedFlagHelp = { showRedFlagHelp = true }
-                    )
+
+                    Spacer(modifier = Modifier.height(Spacing.md))
+
+                    // Tab content
+                    when (selectedTab) {
+                        0 -> OverviewTab(
+                            stock = stock,
+                            onShowVetrScoreHelp = { showVetrScoreHelp = true }
+                        )
+                        1 -> PedigreeTabWrapper(
+                            onShowPedigreeHelp = { showPedigreeHelp = true }
+                        )
+                        2 -> RedFlagsTab(
+                            stock = stock,
+                            onShowRedFlagHelp = { showRedFlagHelp = true }
+                        )
+                    }
                 }
             }
         } else {
@@ -876,6 +955,7 @@ private fun RedFlagsTab(
     }
 }
 
+@OptIn(ExperimentalMaterial3WindowSizeClassApi::class)
 @Preview(name = "Phone", showBackground = true, backgroundColor = 0xFF0D1B2A)
 @Composable
 fun StockDetailScreenPreview() {
@@ -911,11 +991,13 @@ fun StockDetailScreenPreview() {
                     summary = "Annual financial statements showing improved profitability and market expansion."
                 )
             ),
-            selectedTab = 0
+            selectedTab = 0,
+            windowSizeClass = WindowSizeClass.calculateFromSize(DpSize(400.dp, 800.dp))
         )
     }
 }
 
+@OptIn(ExperimentalMaterial3WindowSizeClassApi::class)
 @Preview(name = "Tablet", showBackground = true, backgroundColor = 0xFF0D1B2A, widthDp = 840)
 @Composable
 fun StockDetailScreenTabletPreview() {
@@ -951,7 +1033,8 @@ fun StockDetailScreenTabletPreview() {
                     summary = "Annual financial statements showing improved profitability and market expansion."
                 )
             ),
-            selectedTab = 0
+            selectedTab = 0,
+            windowSizeClass = WindowSizeClass.calculateFromSize(DpSize(840.dp, 1200.dp))
         )
     }
 }

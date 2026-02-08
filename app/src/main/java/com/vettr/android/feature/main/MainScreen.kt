@@ -2,6 +2,9 @@ package com.vettr.android.feature.main
 
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
+import androidx.compose.material3.windowsizeclass.ExperimentalMaterial3WindowSizeClassApi
+import androidx.compose.material3.windowsizeclass.WindowSizeClass
+import androidx.compose.ui.unit.DpSize
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.List
 import androidx.compose.material.icons.automirrored.filled.TrendingUp
@@ -67,11 +70,13 @@ sealed class BottomNavDestination(
  *
  * @param modifier Modifier to be applied to the MainScreen.
  * @param navController NavHostController for nested navigation between bottom tabs.
+ * @param windowSizeClass WindowSizeClass for adaptive layouts.
  */
 @Composable
 fun MainScreen(
     modifier: Modifier = Modifier,
-    navController: NavHostController = rememberNavController()
+    navController: NavHostController = rememberNavController(),
+    windowSizeClass: WindowSizeClass
 ) {
     var selectedItemIndex by rememberSaveable { mutableIntStateOf(0) }
 
@@ -128,6 +133,7 @@ fun MainScreen(
             composable(BottomNavDestination.Pulse.route) {
                 PulseScreen(
                     modifier = Modifier.fillMaxSize(),
+                    windowSizeClass = windowSizeClass,
                     onStockClick = { stockId ->
                         navController.navigate("stock_detail/$stockId")
                     }
@@ -136,6 +142,7 @@ fun MainScreen(
             composable(BottomNavDestination.Discovery.route) {
                 DiscoveryScreen(
                     modifier = Modifier.fillMaxSize(),
+                    windowSizeClass = windowSizeClass,
                     onStockClick = { stockId ->
                         navController.navigate("stock_detail/$stockId")
                     }
@@ -221,6 +228,7 @@ fun MainScreen(
             ) {
                 StockDetailRoute(
                     onBackClick = { navController.navigateUp() },
+                    windowSizeClass = windowSizeClass,
                     modifier = Modifier.fillMaxSize()
                 )
             }
@@ -237,18 +245,24 @@ fun MainScreen(
     }
 }
 
+@OptIn(ExperimentalMaterial3WindowSizeClassApi::class)
 @Preview(name = "Phone", showBackground = true, backgroundColor = 0xFF0D1B2A)
 @Composable
 fun MainScreenPreview() {
     VettrTheme {
-        MainScreen()
+        MainScreen(
+            windowSizeClass = WindowSizeClass.calculateFromSize(DpSize(400.dp, 800.dp))
+        )
     }
 }
 
+@OptIn(ExperimentalMaterial3WindowSizeClassApi::class)
 @Preview(name = "Tablet", showBackground = true, backgroundColor = 0xFF0D1B2A, widthDp = 840)
 @Composable
 fun MainScreenTabletPreview() {
     VettrTheme {
-        MainScreen()
+        MainScreen(
+            windowSizeClass = WindowSizeClass.calculateFromSize(DpSize(840.dp, 1200.dp))
+        )
     }
 }
