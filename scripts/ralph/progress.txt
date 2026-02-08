@@ -1618,3 +1618,63 @@ Files changed:
   - Icons.Default.Notifications is available in material.icons.filled package
   - collectAsStateWithLifecycle() should be used for collecting StateFlow in Compose
 ---
+
+## US-072: Add Strategic Events section to PulseScreen
+Status: ✅ COMPLETE
+Date: 2026-02-07
+Details:
+- Added Strategic Events section to PulseScreen below Market Overview section
+- Used existing EventCard component with 3 sample events
+- Sample events included:
+  - Discovery Drill Hit (green indicator) - BBB.V gold discovery
+  - Red Flag Alert (red indicator) - XYZ.TO insider selling
+  - New Financing (yellow indicator) - ABC.V $10M private placement
+- Added imports: LazyColumn, EventCard, VettrGreen, VettrRed, VettrYellow
+- Used Column with vertical spacing instead of LazyColumn for better scrolling in nested scroll context
+- Build verified successful: ./gradlew assembleDebug passes
+**Learnings for future iterations:**
+  - EventCard component was already created in previous stories - reused successfully
+  - Used Column instead of LazyColumn for events list since PulseScreen already has verticalScroll on parent
+  - LazyColumn cannot be nested inside verticalScroll - use Column with spacedBy for vertical lists in scrollable parents
+  - Color tokens (VettrGreen, VettrRed, VettrYellow) already defined in designsystem/theme/Color.kt
+  - SectionHeader composable provides consistent section titles across the app
+---
+
+## US-073: Add Trending Stocks section to PulseScreen
+Status: ✅ COMPLETE
+Date: 2026-02-07
+Details:
+- Added Trending Stocks section to PulseScreen.kt after Strategic Events section
+- Implemented horizontal LazyRow with StockRowView composables
+- Shows first 6 stocks from PulseViewModel.stocks using .take(6)
+- Added SectionHeader with "See All" button (placeholder navigation)
+- Each stock displays ticker, company name, price, and price change
+- Stock rows are 280dp wide for proper horizontal scrolling
+- Clicking a stock has placeholder navigation to StockDetailScreen
+- Build successful: ./gradlew assembleDebug passes
+**Learnings for future iterations:**
+  - StockRowView component already existed in designsystem/component/
+  - Used LazyRow with items() extension function for efficient horizontal list
+  - SectionHeader accepts optional onSeeAllClick callback for "See All" button
+  - Used .take(6) on stocks list to show only 5-6 trending stocks
+  - StockRowView requires explicit width modifier (280.dp) when used in horizontal LazyRow
+  - Logo URL currently null as Stock model doesn't have logo field yet
+---
+
+## US-074: Add loading, error, and empty states to PulseScreen
+Status: ✅ COMPLETE
+Date: 2026-02-07
+Details:
+- Added LoadingView when isLoading is true and stocks list is empty (PulseScreen.kt:84-90)
+- Added ErrorView with retry button when errorMessage is not null (PulseScreen.kt:74-81)
+- Added EmptyStateView when no data is available after loading (PulseScreen.kt:93-103)
+- Implemented pull-to-refresh using Material 3's PullToRefreshBox (PulseScreen.kt:104-110)
+- All state collected using collectAsStateWithLifecycle() (PulseScreen.kt:63-66)
+- Build successful: ./gradlew assembleDebug passes
+**Learnings for future iterations:**
+  - Material 3 uses PullToRefreshBox (requires @OptIn(ExperimentalMaterial3Api::class))
+  - EmptyStateView component doesn't have a modifier parameter - wrap in Box if padding needed
+  - State handling should check isLoading with data emptiness for proper loading state display
+  - Early returns with return@Scaffold keep UI state logic clean and readable
+  - Always import Box when wrapping components that don't accept modifiers
+---
