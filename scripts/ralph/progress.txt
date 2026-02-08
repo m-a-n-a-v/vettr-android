@@ -13,3 +13,47 @@ Project: VETTR Android
 - JAVA_HOME must point to Android Studio JBR: /Applications/Android Studio.app/Contents/jbr/Contents/Home
 - Build command: JAVA_HOME="/Applications/Android Studio.app/Contents/jbr/Contents/Home" ./gradlew assembleDebug
 ---
+
+## US-001: Verify minSdk 26 and compileSdk 35 configuration
+Status: ✅ COMPLETE
+Date: 2026-02-07
+Details:
+- Updated app/build.gradle.kts: compileSdk 36 → 35, targetSdk 36 → 35
+- Verified minSdk = 26 (already correct)
+- Verified Java 17 compatibility (already correct)
+- Build successful: ./gradlew assembleDebug passes
+**Learnings for future iterations:**
+  - JAVA_HOME must be set to Android Studio JBR for builds
+  - Use sed for PRD updates: `sed -i '' 's/"passes": false/"passes": true/' prd.json` within story context
+  - Build warnings about deprecated statusBarColor/navigationBarColor are expected (deprecated in API)
+---
+## US-002: Create package folder structure
+Status: ✅ COMPLETE
+Date: 2026-02-07
+Details:
+- Created core packages: core/, core/model/, core/data/, core/data/local/, core/data/remote/, core/data/repository/, core/di/, core/util/
+- Created designsystem packages: designsystem/component/, designsystem/icon/
+- Created feature packages: feature/auth/, feature/pulse/, feature/discovery/, feature/stockdetail/, feature/alerts/, feature/profile/, feature/main/
+- Added .gitkeep files to all 18 new directories for Git tracking
+- Verified build: ./gradlew assembleDebug succeeds
+**Learnings for future iterations:**
+  - Use `find ... -type d -exec touch {}/.gitkeep \;` to add .gitkeep files to multiple directories efficiently
+  - Package structure follows clean architecture: core (data/business logic), designsystem (UI components), feature (screens)
+  - .gitkeep files are necessary to track empty directories in Git
+---
+## US-003: Verify Hilt dependency injection setup
+Status: ✅ COMPLETE
+Date: 2026-02-07
+Details:
+- Verified @HiltAndroidApp annotation on VettrApp (VettrApp.kt:6)
+- Verified @AndroidEntryPoint annotation on MainActivity (MainActivity.kt:19)
+- Verified hilt-android and hilt-android-compiler dependencies (build.gradle.kts:84-85)
+- Verified ksp plugin applied (build.gradle.kts:6)
+- Verified VettrApp registered in AndroidManifest.xml (android:name=".VettrApp")
+- Build successful: ./gradlew assembleDebug passes
+**Learnings for future iterations:**
+  - Hilt was already properly configured in the initial scaffold
+  - Key Hilt setup components: @HiltAndroidApp on Application, @AndroidEntryPoint on Activity, ksp plugin for annotation processing
+  - Hilt version 2.53.1 with androidx.hilt:hilt-navigation-compose 1.2.0 for Compose integration
+  - ksp tasks (kspDebugKotlin, hiltAggregateDepsDebug, hiltJavaCompileDebug) run automatically during build
+---
