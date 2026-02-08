@@ -576,3 +576,124 @@ Files changed:
   - Preview composables with realistic Canadian stock events (SHOP, RY, ENB) demonstrate different indicator colors
   - Red/Yellow/Green color coding follows common severity conventions: red (critical/negative), yellow (warning/moderate), green (positive/informational)
 ---
+
+## US-029: Add unit tests for design system components
+Status: ✅ COMPLETE
+Date: 2026-02-07
+Details:
+- Created app/src/test/java/com/vettr/android/designsystem/DesignSystemTest.kt with comprehensive unit tests
+- Refactored VettrScoreView to extract testable functions: getScoreColor() and getScoreLabel()
+- Refactored MetricCard to extract testable function: getChangeColor()
+- Implemented tests for VettrScoreView color logic: score 85 -> green, 70 -> yellow, 50 -> orange, 30 -> red
+- Implemented tests for VettrScoreView label logic: score 85 -> Strong Buy, 70 -> Buy, 50 -> Hold, 30 -> Caution
+- Implemented tests for MetricCard change indicator: positive -> green, negative -> red, zero -> green
+- Added edge case tests for boundary conditions (80, 60, 40, 0, 100, negative scores)
+- All 24 tests pass successfully: ./gradlew testDebugUnitTest completes successfully
+Files changed:
+- app/src/test/java/com/vettr/android/designsystem/DesignSystemTest.kt (created with 24 unit tests)
+- app/src/main/java/com/vettr/android/designsystem/component/VettrScoreView.kt (extracted helper functions)
+- app/src/main/java/com/vettr/android/designsystem/component/MetricCard.kt (extracted helper function)
+**Learnings for future iterations:**
+  - To test Composable logic, extract business logic into pure functions that can be tested without UI framework
+  - Helper functions can be package-private (no visibility modifier) to keep them internal to the module but accessible to tests
+  - JUnit tests on Android use org.junit.Assert.assertEquals for assertions
+  - Test boundary conditions thoroughly: edge cases at score thresholds (80, 60, 40) ensure correct range logic
+  - Test directory structure: app/src/test/java/com/vettr/android/ mirrors main source structure
+  - Refactoring for testability improves code architecture: separates presentation from business logic
+  - Zero change (0.0) is treated as positive (green) per MetricCard implementation
+---
+
+## US-030: Create Stock Room entity
+Status: ✅ COMPLETE
+Date: 2026-02-07
+Details:
+- Created core/model/Stock.kt data class annotated with @Entity(tableName = "stocks")
+- Added all required properties: id (String, @PrimaryKey), ticker, name, exchange, sector, marketCap, price, priceChange, vetrScore, isFavorite
+- Added @ColumnInfo annotations for snake_case column names: market_cap, price_change, vetr_score, is_favorite
+- Used UUID.randomUUID().toString() for default id generation
+- Updated VettrDatabase.kt to include Stock entity in entities array
+- Build successful: ./gradlew assembleDebug passes
+Files changed:
+- app/src/main/java/com/vettr/android/core/model/Stock.kt (created)
+- app/src/main/java/com/vettr/android/core/data/local/VettrDatabase.kt (added Stock to entities)
+**Learnings for future iterations:**
+  - Room entities follow data class pattern with @Entity annotation and @PrimaryKey
+  - @ColumnInfo annotation required for column names that don't match property names (e.g., camelCase to snake_case)
+  - UUID.randomUUID().toString() provides unique primary key generation with default parameter
+  - Boolean properties should have default values (isFavorite = false) for convenience
+  - VettrDatabase must be updated to include all new entities in the entities array
+  - Room compiles entity classes at build time with KSP annotation processor
+---
+## US-031: Create Filing Room entity
+Status: ✅ COMPLETE
+Date: 2026-02-07
+Details:
+- Created core/model/Filing.kt data class annotated with @Entity(tableName = "filings")
+- Added all required properties: id (String, @PrimaryKey), stockId, type, title, date (Long), summary, isRead, isMaterial
+- Added @ColumnInfo annotations for snake_case column names: stock_id, is_read, is_material
+- Added @ForeignKey reference to Stock entity on stockId with CASCADE delete
+- Added @Index on stock_id column to optimize foreign key queries and eliminate Room warning
+- Updated VettrDatabase.kt to include Filing entity in entities array
+- Build successful: ./gradlew assembleDebug passes
+Files changed:
+- app/src/main/java/com/vettr/android/core/model/Filing.kt (created)
+- app/src/main/java/com/vettr/android/core/data/local/VettrDatabase.kt (added Filing to entities)
+**Learnings for future iterations:**
+  - Foreign key columns should have an index to optimize join queries and prevent full table scans
+  - @Index annotation in @Entity declaration creates database index: indices = [Index(value = ["stock_id"])]
+  - ForeignKey.CASCADE onDelete ensures filings are automatically deleted when parent stock is deleted
+  - Date stored as Long (Unix timestamp) for efficient date/time storage and queries in Room
+  - Boolean properties (isRead, isMaterial) should have default values (false) for convenience
+  - Room KSP warns about unindexed foreign keys - adding index eliminates warning and improves performance
+---
+## US-032: Create Executive Room entity
+Status: ✅ COMPLETE
+Date: 2026-02-07
+Details:
+- Created core/model/Executive.kt entity with @Entity annotation and @PrimaryKey
+- Added all required properties: id, stockId, name, title, yearsAtCompany, previousCompanies, education, specialization, socialLinkedIn, socialTwitter
+- Added @ColumnInfo annotations for snake_case column names
+- Added @ForeignKey reference to Stock entity with CASCADE delete
+- Added @Index on stock_id column to optimize foreign key queries
+- Created core/util/Converters.kt TypeConverter class for JSON serialization of List<String>
+- Used Gson for JSON serialization/deserialization with TypeToken for List<String> type
+- Updated VettrDatabase.kt to include Executive in entities array
+- Added @TypeConverters(Converters::class) annotation to VettrDatabase
+- Build successful: ./gradlew assembleDebug passes
+Files changed:
+- app/src/main/java/com/vettr/android/core/model/Executive.kt (created)
+- app/src/main/java/com/vettr/android/core/util/Converters.kt (created)
+- app/src/main/java/com/vettr/android/core/data/local/VettrDatabase.kt (updated)
+**Learnings for future iterations:**
+  - TypeConverter pattern allows Room to handle complex types like List<String> by converting to/from JSON
+  - Gson is already a project dependency (via Retrofit) and can be reused for TypeConverter serialization
+  - TypeToken from Gson is required to deserialize generic types like List<String> correctly
+  - @TypeConverters annotation must be added to the Database class to register converters
+  - TypeConverter methods are called automatically by Room during database operations
+  - Executive entity follows same pattern as Filing: ForeignKey to Stock with CASCADE delete and index on foreign key column
+  - previousCompanies stored as JSON string allows flexible list storage without additional junction table
+---
+## US-033: Create User Room entity
+Status: ✅ COMPLETE
+Date: 2026-02-07
+Details:
+- Created core/model/VettrTier.kt enum class with FREE, PRO, PREMIUM tiers
+- Each tier has watchlistLimit, pulseDelayHours, and syncIntervalHours properties
+- Created core/model/User.kt data class annotated with @Entity(tableName = "users")
+- User properties: id (String, @PrimaryKey), email, displayName, avatarUrl (nullable), tier (String), createdAt (Long)
+- Added TypeConverter methods to core/util/Converters.kt for VettrTier enum (fromVettrTier/toVettrTier)
+- Updated VettrDatabase.kt to include User entity in entities array
+- Build successful: ./gradlew assembleDebug passes
+Files changed:
+- app/src/main/java/com/vettr/android/core/model/VettrTier.kt (created)
+- app/src/main/java/com/vettr/android/core/model/User.kt (created)
+- app/src/main/java/com/vettr/android/core/util/Converters.kt (updated with VettrTier converters)
+- app/src/main/java/com/vettr/android/core/data/local/VettrDatabase.kt (added User to entities)
+**Learnings for future iterations:**
+  - User entity depends on VettrTier enum, so enum must be created first
+  - VettrTier stored as String in database using TypeConverter pattern (enum.name/valueOf)
+  - TypeConverter pattern allows Room to handle custom types like enums by converting to/from database-compatible types
+  - User avatarUrl is nullable (String?) since users may not have an avatar initially
+  - VettrTier enum properties encapsulate tier-specific feature limits for easy access throughout the app
+  - TypeConverter methods must be simple and symmetric: fromType converts to String, toType converts from String
+---
