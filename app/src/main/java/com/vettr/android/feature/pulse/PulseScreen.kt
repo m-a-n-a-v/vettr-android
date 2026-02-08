@@ -1,6 +1,7 @@
 package com.vettr.android.feature.pulse
 
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
@@ -16,11 +17,15 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Inbox
 import androidx.compose.material.icons.filled.Notifications
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.pulltorefresh.PullToRefreshBox
+import androidx.compose.material3.pulltorefresh.rememberPullToRefreshState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -32,7 +37,10 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.vettr.android.designsystem.component.EmptyStateView
+import com.vettr.android.designsystem.component.ErrorView
 import com.vettr.android.designsystem.component.EventCard
+import com.vettr.android.designsystem.component.LoadingView
 import com.vettr.android.designsystem.component.MetricCard
 import com.vettr.android.designsystem.component.SearchBarView
 import com.vettr.android.designsystem.component.SectionHeader
@@ -46,6 +54,7 @@ import com.vettr.android.designsystem.theme.VettrYellow
 /**
  * Pulse screen - displays market overview and strategic events.
  */
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun PulseScreen(
     modifier: Modifier = Modifier,
@@ -61,14 +70,52 @@ fun PulseScreen(
     Scaffold(
         modifier = modifier
     ) { paddingValues ->
-        Column(
+        // Handle error state
+        if (errorMessage != null) {
+            ErrorView(
+                message = errorMessage ?: "An error occurred",
+                onRetry = { viewModel.refresh() },
+                modifier = Modifier.padding(paddingValues)
+            )
+            return@Scaffold
+        }
+
+        // Handle loading state
+        if (isLoading && stocks.isEmpty()) {
+            LoadingView(
+                message = "Loading market data...",
+                modifier = Modifier.padding(paddingValues)
+            )
+            return@Scaffold
+        }
+
+        // Handle empty state
+        if (!isLoading && stocks.isEmpty()) {
+            Box(modifier = Modifier.padding(paddingValues)) {
+                EmptyStateView(
+                    icon = Icons.Default.Inbox,
+                    title = "No Market Data",
+                    subtitle = "Unable to load market data. Pull down to refresh."
+                )
+            }
+            return@Scaffold
+        }
+
+        // Main content with pull-to-refresh
+        PullToRefreshBox(
+            isRefreshing = isLoading,
+            onRefresh = { viewModel.refresh() },
             modifier = Modifier
                 .fillMaxSize()
                 .padding(paddingValues)
-                .verticalScroll(rememberScrollState())
-                .padding(Spacing.md),
-            verticalArrangement = Arrangement.spacedBy(Spacing.lg)
         ) {
+            Column(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .verticalScroll(rememberScrollState())
+                    .padding(Spacing.md),
+                verticalArrangement = Arrangement.spacedBy(Spacing.lg)
+            ) {
             // Search bar with notification bell
             Row(
                 modifier = Modifier.fillMaxWidth(),
@@ -191,8 +238,9 @@ fun PulseScreen(
                 }
             }
 
-            // Placeholder for future sections
-            Spacer(modifier = Modifier.height(Spacing.md))
+                // Placeholder for future sections
+                Spacer(modifier = Modifier.height(Spacing.md))
+            }
         }
     }
 }
