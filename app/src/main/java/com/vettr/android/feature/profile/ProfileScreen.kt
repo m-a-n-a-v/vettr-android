@@ -310,7 +310,7 @@ private fun SyncSection(
             ) {
                 Icon(
                     imageVector = Icons.Default.Sync,
-                    contentDescription = null,
+                    contentDescription = "Sync",
                     tint = VettrAccent,
                     modifier = Modifier.size(24.dp)
                 )
@@ -412,7 +412,7 @@ private fun SyncSection(
                 } else {
                     Icon(
                         imageVector = Icons.Default.Sync,
-                        contentDescription = null,
+                        contentDescription = "Sync Now",
                         modifier = Modifier.size(20.dp)
                     )
                     Spacer(modifier = Modifier.width(Spacing.sm))
@@ -543,7 +543,7 @@ private fun MenuRow(
         ) {
             Icon(
                 imageVector = icon,
-                contentDescription = null,
+                contentDescription = title,
                 tint = VettrAccent,
                 modifier = Modifier.size(24.dp)
             )

@@ -176,7 +176,7 @@ fun RedFlagScreenContent(
                         ) {
                             Icon(
                                 imageVector = Icons.Default.CheckCircle,
-                                contentDescription = null,
+                                contentDescription = "Acknowledge All",
                                 modifier = Modifier.size(20.dp)
                             )
                             Spacer(modifier = Modifier.width(Spacing.sm))
@@ -218,7 +218,7 @@ fun RedFlagScreenContent(
                     ) {
                         Icon(
                             imageVector = Icons.Default.Info,
-                            contentDescription = null,
+                            contentDescription = "Info",
                             modifier = Modifier.size(20.dp)
                         )
                         Spacer(modifier = Modifier.width(Spacing.sm))
@@ -376,7 +376,7 @@ private fun FlagRow(
                 ) {
                     Icon(
                         imageVector = Icons.Default.Warning,
-                        contentDescription = null,
+                        contentDescription = "Warning",
                         tint = getFlagColor(flag.score),
                         modifier = Modifier.size(24.dp)
                     )
@@ -558,7 +558,7 @@ private fun EmptyRedFlagState(
         ) {
             Icon(
                 imageVector = Icons.Default.CheckCircle,
-                contentDescription = null,
+                contentDescription = "Success",
                 tint = VettrGreen,
                 modifier = Modifier.size(60.dp)
             )
@@ -603,7 +603,7 @@ private fun EmptyRedFlagState(
         ) {
             Icon(
                 imageVector = Icons.Default.Info,
-                contentDescription = null,
+                contentDescription = "Info",
                 modifier = Modifier.size(20.dp)
             )
             Spacer(modifier = Modifier.width(Spacing.sm))

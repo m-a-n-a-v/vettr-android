@@ -15,6 +15,8 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.semantics.stateDescription
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Delete
@@ -318,7 +320,10 @@ private fun AlertRuleRow(
                     colors = SwitchDefaults.colors(
                         checkedThumbColor = MaterialTheme.colorScheme.primary,
                         checkedTrackColor = MaterialTheme.colorScheme.primaryContainer
-                    )
+                    ),
+                    modifier = Modifier.semantics {
+                        stateDescription = if (rule.isActive) "Active" else "Inactive"
+                    }
                 )
             }
         }
@@ -408,7 +413,7 @@ private fun EmptyStateView(
         ) {
             Icon(
                 imageVector = Icons.Default.Notifications,
-                contentDescription = null,
+                contentDescription = "No alerts",
                 tint = MaterialTheme.colorScheme.onSurfaceVariant,
                 modifier = Modifier.size(64.dp)
             )

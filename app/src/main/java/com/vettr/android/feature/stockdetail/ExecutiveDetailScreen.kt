@@ -292,7 +292,7 @@ fun InfoCard(
     ) {
         Icon(
             imageVector = icon,
-            contentDescription = null,
+            contentDescription = text,
             tint = VettrAccent,
             modifier = Modifier.size(24.dp)
         )
@@ -327,7 +327,7 @@ fun SocialLinkButton(
             if (icon != null) {
                 Icon(
                     imageVector = icon,
-                    contentDescription = null,
+                    contentDescription = label,
                     tint = VettrAccent,
                     modifier = Modifier.size(20.dp)
                 )

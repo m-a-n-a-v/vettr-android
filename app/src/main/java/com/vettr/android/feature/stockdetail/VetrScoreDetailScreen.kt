@@ -805,7 +805,7 @@ private fun ImprovementInsightsSection(
         ) {
             Icon(
                 imageVector = Icons.Default.Info,
-                contentDescription = null,
+                contentDescription = "Info",
                 tint = VettrAccent,
                 modifier = Modifier.size(20.dp)
             )
