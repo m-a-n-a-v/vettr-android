@@ -186,10 +186,17 @@ fun MainScreen(
                 )
             }
 
-            // Stock detail screen
+            // Stock detail screen with optional tab query parameter
             composable(
-                route = "stock_detail/{stockId}",
-                arguments = listOf(navArgument("stockId") { type = NavType.StringType })
+                route = "stock_detail/{stockId}?tab={tab}",
+                arguments = listOf(
+                    navArgument("stockId") { type = NavType.StringType },
+                    navArgument("tab") {
+                        type = NavType.StringType
+                        nullable = true
+                        defaultValue = null
+                    }
+                )
             ) {
                 StockDetailRoute(
                     onBackClick = { navController.navigateUp() },

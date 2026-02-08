@@ -103,12 +103,11 @@ class NotificationService @Inject constructor(
             return // Skip duplicate notification
         }
 
-        // Create deep link intent to StockDetailScreen
-        val intent = Intent(context, MainActivity::class.java).apply {
+        // Create deep link URI to StockDetailScreen using vettr:// scheme
+        val deepLinkUri = android.net.Uri.parse("vettr://stock/$stockTicker")
+        val intent = Intent(Intent.ACTION_VIEW, deepLinkUri).apply {
+            setClass(context, MainActivity::class.java)
             flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TOP
-            putExtra("destination", "stock_detail")
-            putExtra("stock_ticker", stockTicker)
-            alertId?.let { putExtra("alert_id", it) }
         }
 
         val pendingIntent = PendingIntent.getActivity(
