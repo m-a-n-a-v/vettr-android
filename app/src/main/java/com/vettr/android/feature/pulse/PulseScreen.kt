@@ -1,5 +1,6 @@
 package com.vettr.android.feature.pulse
 
+import androidx.compose.animation.Crossfade
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -45,6 +46,9 @@ import com.vettr.android.designsystem.component.LoadingView
 import com.vettr.android.designsystem.component.MetricCard
 import com.vettr.android.designsystem.component.SearchBarView
 import com.vettr.android.designsystem.component.SectionHeader
+import com.vettr.android.designsystem.component.SkeletonEventCard
+import com.vettr.android.designsystem.component.SkeletonMetricCard
+import com.vettr.android.designsystem.component.SkeletonStockRow
 import com.vettr.android.designsystem.component.StockRowView
 import com.vettr.android.designsystem.theme.Spacing
 import com.vettr.android.designsystem.theme.VettrGreen
@@ -83,16 +87,7 @@ fun PulseScreen(
             return@Scaffold
         }
 
-        // Handle loading state
-        if (isLoading && stocks.isEmpty()) {
-            LoadingView(
-                message = "Loading market data...",
-                modifier = Modifier.padding(paddingValues)
-            )
-            return@Scaffold
-        }
-
-        // Handle empty state
+        // Handle empty state (only when not loading)
         if (!isLoading && stocks.isEmpty()) {
             Box(modifier = Modifier.padding(paddingValues)) {
                 EmptyStateView(
@@ -106,149 +101,218 @@ fun PulseScreen(
 
         // Main content with pull-to-refresh
         PullToRefreshBox(
-            isRefreshing = isLoading,
+            isRefreshing = isLoading && stocks.isNotEmpty(),
             onRefresh = { viewModel.refresh() },
             modifier = Modifier
                 .fillMaxSize()
                 .padding(paddingValues)
         ) {
-            Column(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .verticalScroll(rememberScrollState())
-                    .padding(Spacing.md),
-                verticalArrangement = Arrangement.spacedBy(Spacing.lg)
-            ) {
-            // Last updated timestamp
-            LastUpdatedText(
-                lastUpdatedAt = lastUpdatedAt,
-                modifier = Modifier.fillMaxWidth()
-            )
+            // Use Crossfade to transition between skeleton and content
+            Crossfade(
+                targetState = isLoading && stocks.isEmpty(),
+                label = "pulseContentCrossfade",
+                modifier = Modifier.fillMaxSize()
+            ) { showSkeleton ->
+                if (showSkeleton) {
+                    // Skeleton loading state
+                    Column(
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .verticalScroll(rememberScrollState())
+                            .padding(Spacing.md),
+                        verticalArrangement = Arrangement.spacedBy(Spacing.lg)
+                    ) {
+                        // Search bar skeleton
+                        Spacer(modifier = Modifier.height(48.dp))
 
-            // Search bar with notification bell
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.spacedBy(Spacing.sm),
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                SearchBarView(
-                    query = searchQuery,
-                    onQueryChange = { searchQuery = it },
-                    modifier = Modifier.weight(1f)
-                )
+                        // Market Overview Skeleton
+                        Column(
+                            verticalArrangement = Arrangement.spacedBy(Spacing.md)
+                        ) {
+                            SectionHeader(title = "Market Overview")
 
-                IconButton(
-                    onClick = { /* TODO: Navigate to notifications */ }
-                ) {
-                    Icon(
-                        imageVector = Icons.Default.Notifications,
-                        contentDescription = "Notifications",
-                        tint = MaterialTheme.colorScheme.onSurface
-                    )
-                }
-            }
+                            LazyRow(
+                                horizontalArrangement = Arrangement.spacedBy(Spacing.md),
+                                contentPadding = PaddingValues(horizontal = 0.dp)
+                            ) {
+                                items(3) {
+                                    SkeletonMetricCard(modifier = Modifier.width(150.dp))
+                                }
+                            }
+                        }
 
-            // Market Overview Section
-            Column(
-                verticalArrangement = Arrangement.spacedBy(Spacing.md)
-            ) {
-                SectionHeader(title = "Market Overview")
+                        // Strategic Events Skeleton
+                        Column(
+                            verticalArrangement = Arrangement.spacedBy(Spacing.md)
+                        ) {
+                            SectionHeader(title = "Strategic Events")
 
-                LazyRow(
-                    horizontalArrangement = Arrangement.spacedBy(Spacing.md),
-                    contentPadding = PaddingValues(horizontal = 0.dp)
-                ) {
-                    item {
-                        MetricCard(
-                            title = "TSX",
-                            value = "21,543.25",
-                            change = 1.25,
-                            modifier = Modifier.width(150.dp)
-                        )
+                            Column(
+                                verticalArrangement = Arrangement.spacedBy(Spacing.sm)
+                            ) {
+                                repeat(5) {
+                                    SkeletonEventCard()
+                                }
+                            }
+                        }
+
+                        // Trending Stocks Skeleton
+                        Column(
+                            verticalArrangement = Arrangement.spacedBy(Spacing.md)
+                        ) {
+                            SectionHeader(title = "Trending Stocks")
+
+                            LazyRow(
+                                horizontalArrangement = Arrangement.spacedBy(Spacing.md),
+                                contentPadding = PaddingValues(horizontal = 0.dp)
+                            ) {
+                                items(6) {
+                                    SkeletonStockRow(modifier = Modifier.width(280.dp))
+                                }
+                            }
+                        }
                     }
-                    item {
-                        MetricCard(
-                            title = "S&P 500",
-                            value = "4,783.45",
-                            change = 0.85,
-                            modifier = Modifier.width(150.dp)
+                } else {
+                    // Actual content
+                    Column(
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .verticalScroll(rememberScrollState())
+                            .padding(Spacing.md),
+                        verticalArrangement = Arrangement.spacedBy(Spacing.lg)
+                    ) {
+                        // Last updated timestamp
+                        LastUpdatedText(
+                            lastUpdatedAt = lastUpdatedAt,
+                            modifier = Modifier.fillMaxWidth()
                         )
-                    }
-                    item {
-                        MetricCard(
-                            title = "NASDAQ",
-                            value = "15,095.14",
-                            change = -0.45,
-                            modifier = Modifier.width(150.dp)
-                        )
+
+                        // Search bar with notification bell
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.spacedBy(Spacing.sm),
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            SearchBarView(
+                                query = searchQuery,
+                                onQueryChange = { searchQuery = it },
+                                modifier = Modifier.weight(1f)
+                            )
+
+                            IconButton(
+                                onClick = { /* TODO: Navigate to notifications */ }
+                            ) {
+                                Icon(
+                                    imageVector = Icons.Default.Notifications,
+                                    contentDescription = "Notifications",
+                                    tint = MaterialTheme.colorScheme.onSurface
+                                )
+                            }
+                        }
+
+                        // Market Overview Section
+                        Column(
+                            verticalArrangement = Arrangement.spacedBy(Spacing.md)
+                        ) {
+                            SectionHeader(title = "Market Overview")
+
+                            LazyRow(
+                                horizontalArrangement = Arrangement.spacedBy(Spacing.md),
+                                contentPadding = PaddingValues(horizontal = 0.dp)
+                            ) {
+                                item {
+                                    MetricCard(
+                                        title = "TSX",
+                                        value = "21,543.25",
+                                        change = 1.25,
+                                        modifier = Modifier.width(150.dp)
+                                    )
+                                }
+                                item {
+                                    MetricCard(
+                                        title = "S&P 500",
+                                        value = "4,783.45",
+                                        change = 0.85,
+                                        modifier = Modifier.width(150.dp)
+                                    )
+                                }
+                                item {
+                                    MetricCard(
+                                        title = "NASDAQ",
+                                        value = "15,095.14",
+                                        change = -0.45,
+                                        modifier = Modifier.width(150.dp)
+                                    )
+                                }
+                            }
+                        }
+
+                        // Strategic Events Section
+                        Column(
+                            verticalArrangement = Arrangement.spacedBy(Spacing.md)
+                        ) {
+                            SectionHeader(title = "Strategic Events")
+
+                            Column(
+                                verticalArrangement = Arrangement.spacedBy(Spacing.sm)
+                            ) {
+                                EventCard(
+                                    title = "Discovery Drill Hit",
+                                    subtitle = "BBB.V - Significant gold discovery announced",
+                                    date = "2 hours ago",
+                                    indicatorColor = VettrGreen,
+                                    onClick = {}
+                                )
+
+                                EventCard(
+                                    title = "Red Flag Alert",
+                                    subtitle = "XYZ.TO - Unusual insider selling detected",
+                                    date = "4 hours ago",
+                                    indicatorColor = VettrRed,
+                                    onClick = {}
+                                )
+
+                                EventCard(
+                                    title = "New Financing",
+                                    subtitle = "ABC.V - $10M private placement completed",
+                                    date = "1 day ago",
+                                    indicatorColor = VettrYellow,
+                                    onClick = {}
+                                )
+                            }
+                        }
+
+                        // Trending Stocks Section
+                        Column(
+                            verticalArrangement = Arrangement.spacedBy(Spacing.md)
+                        ) {
+                            SectionHeader(
+                                title = "Trending Stocks",
+                                onSeeAllClick = { /* TODO: Navigate to full stock list */ }
+                            )
+
+                            LazyRow(
+                                horizontalArrangement = Arrangement.spacedBy(Spacing.md),
+                                contentPadding = PaddingValues(horizontal = 0.dp)
+                            ) {
+                                items(stocks.take(6)) { stock ->
+                                    StockRowView(
+                                        ticker = stock.ticker,
+                                        companyName = stock.name,
+                                        price = stock.price,
+                                        priceChange = stock.priceChange,
+                                        logoUrl = null, // TODO: Add logo URL when available
+                                        onClick = { onStockClick(stock.id) },
+                                        modifier = Modifier.width(280.dp)
+                                    )
+                                }
+                            }
+                        }
+
+                        // Placeholder for future sections
+                        Spacer(modifier = Modifier.height(Spacing.md))
                     }
                 }
-            }
-
-            // Strategic Events Section
-            Column(
-                verticalArrangement = Arrangement.spacedBy(Spacing.md)
-            ) {
-                SectionHeader(title = "Strategic Events")
-
-                Column(
-                    verticalArrangement = Arrangement.spacedBy(Spacing.sm)
-                ) {
-                    EventCard(
-                        title = "Discovery Drill Hit",
-                        subtitle = "BBB.V - Significant gold discovery announced",
-                        date = "2 hours ago",
-                        indicatorColor = VettrGreen,
-                        onClick = {}
-                    )
-
-                    EventCard(
-                        title = "Red Flag Alert",
-                        subtitle = "XYZ.TO - Unusual insider selling detected",
-                        date = "4 hours ago",
-                        indicatorColor = VettrRed,
-                        onClick = {}
-                    )
-
-                    EventCard(
-                        title = "New Financing",
-                        subtitle = "ABC.V - $10M private placement completed",
-                        date = "1 day ago",
-                        indicatorColor = VettrYellow,
-                        onClick = {}
-                    )
-                }
-            }
-
-            // Trending Stocks Section
-            Column(
-                verticalArrangement = Arrangement.spacedBy(Spacing.md)
-            ) {
-                SectionHeader(
-                    title = "Trending Stocks",
-                    onSeeAllClick = { /* TODO: Navigate to full stock list */ }
-                )
-
-                LazyRow(
-                    horizontalArrangement = Arrangement.spacedBy(Spacing.md),
-                    contentPadding = PaddingValues(horizontal = 0.dp)
-                ) {
-                    items(stocks.take(6)) { stock ->
-                        StockRowView(
-                            ticker = stock.ticker,
-                            companyName = stock.name,
-                            price = stock.price,
-                            priceChange = stock.priceChange,
-                            logoUrl = null, // TODO: Add logo URL when available
-                            onClick = { onStockClick(stock.id) },
-                            modifier = Modifier.width(280.dp)
-                        )
-                    }
-                }
-            }
-
-                // Placeholder for future sections
-                Spacer(modifier = Modifier.height(Spacing.md))
             }
         }
     }

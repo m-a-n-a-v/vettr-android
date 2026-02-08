@@ -1,5 +1,6 @@
 package com.vettr.android.feature.stockdetail
 
+import androidx.compose.animation.Crossfade
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
@@ -27,6 +28,7 @@ import com.vettr.android.designsystem.component.EmptyStateView
 import com.vettr.android.designsystem.component.LastUpdatedText
 import com.vettr.android.designsystem.component.LoadingView
 import com.vettr.android.designsystem.component.SearchBarView
+import com.vettr.android.designsystem.component.SkeletonStockRow
 import com.vettr.android.designsystem.component.StockRowView
 import com.vettr.android.designsystem.theme.Spacing
 import com.vettr.android.designsystem.theme.VettrTheme
@@ -65,7 +67,7 @@ fun StocksScreen(
         }
     ) { paddingValues ->
         PullToRefreshBox(
-            isRefreshing = isLoading,
+            isRefreshing = isLoading && filteredStocks.isNotEmpty(),
             onRefresh = { viewModel.refresh() },
             modifier = Modifier
                 .fillMaxSize()
@@ -89,50 +91,68 @@ fun StocksScreen(
                     modifier = Modifier.padding(Spacing.md)
                 )
 
-                // Content based on loading/empty/data states
-                when {
-                isLoading -> {
-                    LoadingView(message = "Loading stocks...")
-                }
-                filteredStocks.isEmpty() && searchQuery.isNotBlank() -> {
-                    EmptyStateView(
-                        icon = Icons.Default.SearchOff,
-                        title = "No Results Found",
-                        subtitle = "Try adjusting your search query"
-                    )
-                }
-                filteredStocks.isEmpty() -> {
-                    EmptyStateView(
-                        icon = Icons.Default.SearchOff,
-                        title = "No Stocks Available",
-                        subtitle = "Stocks will appear here once data is loaded"
-                    )
-                }
-                else -> {
-                    LazyColumn(
-                        modifier = Modifier.fillMaxSize(),
-                        verticalArrangement = Arrangement.spacedBy(Spacing.xs)
-                    ) {
-                        items(
-                            items = filteredStocks,
-                            key = { stock -> stock.id }
-                        ) { stock ->
-                            StockRowView(
-                                ticker = stock.ticker,
-                                companyName = stock.name,
-                                price = stock.price,
-                                priceChange = stock.priceChange,
-                                logoUrl = "https://logo.clearbit.com/${stock.ticker.lowercase()}.com",
-                                onClick = { onStockClick(stock.ticker) }
+                // Use Crossfade to transition between skeleton and content
+                Crossfade(
+                    targetState = isLoading && filteredStocks.isEmpty(),
+                    label = "stocksContentCrossfade",
+                    modifier = Modifier.fillMaxSize()
+                ) { showSkeleton ->
+                    when {
+                        showSkeleton -> {
+                            // Skeleton loading state
+                            LazyColumn(
+                                modifier = Modifier.fillMaxSize(),
+                                verticalArrangement = Arrangement.spacedBy(Spacing.xs)
+                            ) {
+                                items(8) {
+                                    SkeletonStockRow()
+                                    HorizontalDivider(
+                                        color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.1f)
+                                    )
+                                }
+                            }
+                        }
+                        filteredStocks.isEmpty() && searchQuery.isNotBlank() -> {
+                            EmptyStateView(
+                                icon = Icons.Default.SearchOff,
+                                title = "No Results Found",
+                                subtitle = "Try adjusting your search query"
                             )
-                            HorizontalDivider(
-                                color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.1f)
+                        }
+                        filteredStocks.isEmpty() -> {
+                            EmptyStateView(
+                                icon = Icons.Default.SearchOff,
+                                title = "No Stocks Available",
+                                subtitle = "Stocks will appear here once data is loaded"
                             )
+                        }
+                        else -> {
+                            // Actual content
+                            LazyColumn(
+                                modifier = Modifier.fillMaxSize(),
+                                verticalArrangement = Arrangement.spacedBy(Spacing.xs)
+                            ) {
+                                items(
+                                    items = filteredStocks,
+                                    key = { stock -> stock.id }
+                                ) { stock ->
+                                    StockRowView(
+                                        ticker = stock.ticker,
+                                        companyName = stock.name,
+                                        price = stock.price,
+                                        priceChange = stock.priceChange,
+                                        logoUrl = "https://logo.clearbit.com/${stock.ticker.lowercase()}.com",
+                                        onClick = { onStockClick(stock.ticker) }
+                                    )
+                                    HorizontalDivider(
+                                        color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.1f)
+                                    )
+                                }
+                            }
                         }
                     }
                 }
             }
-        }
         }
     }
 }
