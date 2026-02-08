@@ -24,7 +24,7 @@ class SeedDataService @Inject constructor(
     private val filingDao: FilingDao,
     private val executiveDao: ExecutiveDao
 ) {
-    private val SEED_COMPLETE_KEY = booleanPreferencesKey("seed_complete")
+    private val seedCompleteKey = booleanPreferencesKey("seed_complete")
 
     /**
      * Populates database with pilot seed data.
@@ -576,7 +576,7 @@ class SeedDataService @Inject constructor(
     suspend fun isSeedComplete(): Boolean {
         return context.dataStore.data
             .map { preferences ->
-                preferences[SEED_COMPLETE_KEY] ?: false
+                preferences[seedCompleteKey] ?: false
             }
             .first()
     }
@@ -586,7 +586,7 @@ class SeedDataService @Inject constructor(
      */
     suspend fun markSeedComplete() {
         context.dataStore.edit { preferences ->
-            preferences[SEED_COMPLETE_KEY] = true
+            preferences[seedCompleteKey] = true
         }
     }
 }
