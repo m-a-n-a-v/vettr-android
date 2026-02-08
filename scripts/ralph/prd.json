@@ -1891,7 +1891,7 @@
         "Document required release notes for version 1.0.0"
       ],
       "priority": 136,
-      "passes": false
+      "passes": true
     },
     {
       "id": "US-137",

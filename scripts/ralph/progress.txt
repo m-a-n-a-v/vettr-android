@@ -3626,3 +3626,42 @@ Details:
   - Input validation should be applied at UI boundaries (user input, external APIs) but trust internal code
   - EncryptedSharedPreferences provides hardware-backed encryption on devices with secure hardware
 ---
+
+## US-136: Create Google Play Store submission assets
+Status: ✅ COMPLETE
+Date: 2026-02-08
+Details:
+- Created comprehensive Play Store assets documentation (docs/PLAY_STORE_ASSETS.md)
+- Documented complete app listing information: app name, descriptions, category, contact info
+- Created detailed screenshot specifications for phone, 7-inch tablet, and 10-inch tablet
+- Documented feature graphic specifications (1024x500) with design requirements
+- Completed app rating questionnaire with content rating and COPPA compliance
+- Created release notes for version 1.0.0 with feature highlights
+- Created comprehensive Privacy Policy (docs/PRIVACY_POLICY.md) covering:
+  - Data collection and usage (Google Sign-In, Firebase, usage analytics)
+  - Security measures (encryption, biometric auth)
+  - User rights (access, delete, export data)
+  - GDPR and CCPA compliance
+  - Third-party service integrations
+- Created Terms of Service (docs/TERMS_OF_SERVICE.md) covering:
+  - Investment disclaimers and risk warnings
+  - Acceptable use policy
+  - Intellectual property rights
+  - Limitation of liability
+  - Dispute resolution and arbitration
+  - Data accuracy disclaimers
+- All documents are production-ready and comprehensive
+- Files changed: 3 new documentation files created
+
+**Learnings for future iterations:**
+- Play Store submission requires extensive documentation beyond just the app itself
+- Privacy policies must cover GDPR (EU) and CCPA (California) compliance even for Canadian apps
+- Investment apps require strong disclaimers about not providing financial advice
+- Terms of Service should include binding arbitration clauses and class action waivers
+- Documentation should specify placeholder values (URLs, addresses) that need to be finalized before submission
+- Screenshot specifications vary by device type - phone, 7-inch tablet, 10-inch tablet all have different requirements
+- Feature graphic (1024x500) is displayed prominently and should be professionally designed
+- Release notes should be user-focused, highlighting benefits not technical details
+- Legal documents should include both detailed legal text and TL;DR summaries for user convenience
+- All Play Store assets should be stored in docs/ folder for easy access during submission
+---
