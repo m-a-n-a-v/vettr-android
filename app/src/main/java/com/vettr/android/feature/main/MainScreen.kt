@@ -158,7 +158,20 @@ fun MainScreen(
                 )
             }
             composable(BottomNavDestination.Profile.route) {
-                ProfileScreen(modifier = Modifier.fillMaxSize())
+                ProfileScreen(
+                    modifier = Modifier.fillMaxSize(),
+                    onNavigateToSettings = {
+                        navController.navigate("settings")
+                    }
+                )
+            }
+
+            // Settings screen
+            composable("settings") {
+                com.vettr.android.feature.profile.SettingsScreen(
+                    onBackClick = { navController.navigateUp() },
+                    modifier = Modifier.fillMaxSize()
+                )
             }
 
             // Stock detail screen

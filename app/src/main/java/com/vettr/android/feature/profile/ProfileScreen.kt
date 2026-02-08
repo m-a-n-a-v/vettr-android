@@ -73,6 +73,7 @@ import com.vettr.android.designsystem.theme.VettrTheme
 fun ProfileScreen(
     viewModel: ProfileViewModel = hiltViewModel(),
     onLogout: () -> Unit = {},
+    onNavigateToSettings: () -> Unit = {},
     modifier: Modifier = Modifier
 ) {
     val user by viewModel.user.collectAsStateWithLifecycle()
@@ -93,6 +94,7 @@ fun ProfileScreen(
         showLogoutDialog = showLogoutDialog,
         onShowLogoutDialog = { showLogoutDialog = it },
         onManualSync = { viewModel.triggerManualSync() },
+        onNavigateToSettings = onNavigateToSettings,
         onLogout = {
             viewModel.logout()
             onLogout()
@@ -112,6 +114,7 @@ private fun ProfileScreenContent(
     showLogoutDialog: Boolean,
     onShowLogoutDialog: (Boolean) -> Unit,
     onManualSync: () -> Unit,
+    onNavigateToSettings: () -> Unit,
     onLogout: () -> Unit,
     modifier: Modifier = Modifier
 ) {
@@ -143,17 +146,9 @@ private fun ProfileScreenContent(
 
             // Menu items
             MenuRow(
-                icon = Icons.Default.AccountCircle,
-                title = "My Account & Settings",
-                onClick = { /* TODO: Navigate to account settings */ }
-            )
-
-            Spacer(modifier = Modifier.height(Spacing.sm))
-
-            MenuRow(
-                icon = Icons.Default.Notifications,
-                title = "Notification Settings",
-                onClick = { /* TODO: Navigate to notification settings */ }
+                icon = Icons.Default.Settings,
+                title = "Settings",
+                onClick = onNavigateToSettings
             )
 
             Spacer(modifier = Modifier.height(Spacing.sm))
@@ -692,6 +687,7 @@ fun ProfileScreenPreview() {
             showLogoutDialog = false,
             onShowLogoutDialog = {},
             onManualSync = {},
+            onNavigateToSettings = {},
             onLogout = {}
         )
     }
@@ -718,6 +714,7 @@ fun ProfileScreenProPreview() {
             showLogoutDialog = false,
             onShowLogoutDialog = {},
             onManualSync = {},
+            onNavigateToSettings = {},
             onLogout = {}
         )
     }
