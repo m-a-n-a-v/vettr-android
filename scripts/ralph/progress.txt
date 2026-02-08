@@ -294,3 +294,24 @@ Files changed:
   - Material3 colorScheme includes comprehensive surface hierarchy: surface, surfaceVariant, surfaceContainer variants for different elevations
   - SideEffect with WindowCompat sets status bar and navigation bar to dark mode (isAppearanceLightStatusBars = false)
 ---
+
+## US-017: Create Modifier extensions for design system
+Status: ✅ COMPLETE
+Date: 2026-02-07
+Details:
+- Created designsystem/component/ModifierExtensions.kt with reusable Modifier extensions
+- Added Modifier.cardStyle() extension: applies VettrCardBackground, RoundedCornerShape(12.dp), and shadow(2.dp)
+- Added Modifier.vettrPadding() extension: applies padding with default Spacing.md (16.dp)
+- Added two @Preview composables: CardStylePreview and VettrPaddingPreview demonstrating usage
+- Build successful: ./gradlew assembleDebug passes
+Files changed:
+- app/src/main/java/com/vettr/android/designsystem/component/ModifierExtensions.kt (created)
+**Learnings for future iterations:**
+  - Modifier extensions provide reusable styling patterns that promote consistency across the app
+  - cardStyle() applies all card styling in correct order: shadow first (before clip), then clip, then background
+  - The shadow must be applied before clip() to ensure the elevation effect is visible
+  - vettrPadding() provides a convenient way to use standard spacing tokens with customization option
+  - Preview composables with showBackground and backgroundColor help visualize dark theme components in Android Studio
+  - Modifier extension functions follow Kotlin convention: they are top-level functions that extend Modifier and return Modifier
+  - Design token objects (Spacing, Dimensions, VettrCardBackground) ensure all styling uses centralized values
+---
