@@ -1,0 +1,2193 @@
+{
+  "project": "VETTR Android",
+  "phase": "Complete (1A + 1B)",
+  "branchName": "ralph/vettr-android",
+  "description": "Complete VETTR Android app - investment intelligence platform for TSX-V & CSE. Built with Jetpack Compose, Room, Hilt, Retrofit, Navigation Compose. Combines Phase 1A (foundation, auth, core screens) and Phase 1B (Pedigree, Alerts, Red Flags, VETR Score, polish).",
+  "totalStories": 155,
+  "userStories": [
+    {
+      "id": "US-001",
+      "title": "Verify minSdk 26 and compileSdk 35 configuration",
+      "description": "As a developer, I need the app to target minSdk 26 for modern Android API support (Java 8 time APIs, Autofill, etc.).",
+      "acceptanceCriteria": [
+        "Verify minSdk = 26 in app/build.gradle.kts defaultConfig",
+        "Verify compileSdk = 35 and targetSdk = 35",
+        "Verify compileOptions sourceCompatibility and targetCompatibility = JavaVersion.VERSION_17",
+        "./gradlew assembleDebug succeeds without errors"
+      ],
+      "priority": 1,
+      "passes": false
+    },
+    {
+      "id": "US-002",
+      "title": "Create package folder structure",
+      "description": "As a developer, I need organized packages to maintain a clean codebase architecture.",
+      "acceptanceCriteria": [
+        "Create packages under com.vettr.android: core/, core/model/, core/data/, core/data/local/, core/data/remote/, core/data/repository/, core/di/, core/util/",
+        "Create packages: designsystem/, designsystem/component/, designsystem/icon/",
+        "Create packages: feature/, feature/auth/, feature/pulse/, feature/discovery/, feature/stockdetail/, feature/alerts/, feature/profile/, feature/main/",
+        "Add placeholder .gitkeep or Kotlin file in each package so Git tracks them",
+        "./gradlew assembleDebug succeeds"
+      ],
+      "priority": 2,
+      "passes": false
+    },
+    {
+      "id": "US-003",
+      "title": "Verify Hilt dependency injection setup",
+      "description": "As a developer, I need Hilt configured for dependency injection across the app.",
+      "acceptanceCriteria": [
+        "Verify @HiltAndroidApp annotation on VettrApp Application class",
+        "Verify @AndroidEntryPoint annotation on MainActivity",
+        "Verify hilt-android and hilt-android-compiler dependencies in build.gradle.kts",
+        "Verify ksp plugin applied for Hilt annotation processing",
+        "./gradlew assembleDebug succeeds"
+      ],
+      "priority": 3,
+      "passes": false
+    },
+    {
+      "id": "US-004",
+      "title": "Verify Room database dependencies",
+      "description": "As a developer, I need Room configured for local data persistence.",
+      "acceptanceCriteria": [
+        "Verify room-runtime, room-ktx, and room-compiler (ksp) dependencies",
+        "Verify KSP plugin is applied in build.gradle.kts",
+        "Create placeholder VettrDatabase abstract class annotated with @Database in core/data/local/",
+        "./gradlew assembleDebug succeeds"
+      ],
+      "priority": 4,
+      "passes": false
+    },
+    {
+      "id": "US-005",
+      "title": "Verify Retrofit and OkHttp networking dependencies",
+      "description": "As a developer, I need Retrofit configured for API networking.",
+      "acceptanceCriteria": [
+        "Verify retrofit, retrofit-converter-gson, okhttp, and okhttp-logging-interceptor dependencies",
+        "Verify kotlinx-coroutines-android and kotlinx-coroutines-core dependencies",
+        "./gradlew assembleDebug succeeds"
+      ],
+      "priority": 5,
+      "passes": false
+    },
+    {
+      "id": "US-006",
+      "title": "Verify Coil image loading dependency",
+      "description": "As a developer, I need Coil for efficient async image loading in Compose.",
+      "acceptanceCriteria": [
+        "Verify coil-compose and coil-network-okhttp dependencies in build.gradle.kts",
+        "Verify import coil3.compose.AsyncImage compiles without error",
+        "./gradlew assembleDebug succeeds"
+      ],
+      "priority": 6,
+      "passes": false
+    },
+    {
+      "id": "US-007",
+      "title": "Add Google Sign-In dependency",
+      "description": "As a developer, I need Google Sign-In SDK for Google authentication (One Tap).",
+      "acceptanceCriteria": [
+        "Add com.google.android.gms:play-services-auth dependency to build.gradle.kts",
+        "Add com.google.android.libraries.identity.googleid:googleid dependency",
+        "Add androidx.credentials:credentials and credentials-play-services-auth dependencies",
+        "./gradlew assembleDebug succeeds"
+      ],
+      "priority": 7,
+      "passes": false
+    },
+    {
+      "id": "US-008",
+      "title": "Add EncryptedSharedPreferences dependency",
+      "description": "As a developer, I need secure token storage via AndroidX Security.",
+      "acceptanceCriteria": [
+        "Add androidx.security:security-crypto dependency to build.gradle.kts",
+        "Verify import androidx.security.crypto.EncryptedSharedPreferences compiles",
+        "./gradlew assembleDebug succeeds"
+      ],
+      "priority": 8,
+      "passes": false
+    },
+    {
+      "id": "US-009",
+      "title": "Add WorkManager dependency for background tasks",
+      "description": "As a developer, I need WorkManager for reliable background data sync.",
+      "acceptanceCriteria": [
+        "Add androidx.work:work-runtime-ktx dependency to build.gradle.kts",
+        "Add androidx.hilt:hilt-work dependency for Hilt WorkManager integration",
+        "./gradlew assembleDebug succeeds"
+      ],
+      "priority": 9,
+      "passes": false
+    },
+    {
+      "id": "US-010",
+      "title": "Add BiometricPrompt dependency",
+      "description": "As a developer, I need biometric authentication support (fingerprint, face).",
+      "acceptanceCriteria": [
+        "Add androidx.biometric:biometric dependency to build.gradle.kts",
+        "Verify import androidx.biometric.BiometricPrompt compiles",
+        "./gradlew assembleDebug succeeds"
+      ],
+      "priority": 10,
+      "passes": false
+    },
+    {
+      "id": "US-011",
+      "title": "Create .gitignore for Android project",
+      "description": "As a developer, I need to exclude build artifacts from version control.",
+      "acceptanceCriteria": [
+        "Verify .gitignore in project root includes: .gradle/, build/, .idea/, *.iml, local.properties, .DS_Store",
+        "Include captures/, .externalNativeBuild/, .cxx/",
+        "Git status shows no ignored files tracked",
+        "./gradlew assembleDebug succeeds"
+      ],
+      "priority": 11,
+      "passes": false
+    },
+    {
+      "id": "US-012",
+      "title": "Create GitHub Actions workflow for build and test",
+      "description": "As a developer, I need CI to validate builds on every push.",
+      "acceptanceCriteria": [
+        "Create .github/workflows/build.yml",
+        "Workflow triggers on push and pull_request to main",
+        "Workflow runs ./gradlew assembleDebug",
+        "Workflow runs ./gradlew testDebugUnitTest",
+        "Uses ubuntu-latest runner with JDK 17",
+        "Workflow file is valid YAML"
+      ],
+      "priority": 12,
+      "passes": false
+    },
+    {
+      "id": "US-013",
+      "title": "Create Color.kt with brand design tokens",
+      "description": "As a developer, I need centralized color definitions for consistent theming.",
+      "acceptanceCriteria": [
+        "Update designsystem/theme/Color.kt with VETTR brand colors",
+        "Define VettrNavy (0xFF0D1B2A), VettrAccent (0xFF00C853), VettrCardBackground (0xFF1B2838)",
+        "Define VettrTextPrimary (Color.White), VettrTextSecondary (0xFFA0A0A0)",
+        "Define risk colors: VettrGreen, VettrYellow, VettrRed for score/change indicators",
+        "./gradlew assembleDebug succeeds"
+      ],
+      "priority": 13,
+      "passes": false
+    },
+    {
+      "id": "US-014",
+      "title": "Create Typography.kt with text styles",
+      "description": "As a developer, I need centralized typography definitions using Material3 TextStyles.",
+      "acceptanceCriteria": [
+        "Update designsystem/theme/Type.kt with VETTR typography",
+        "Define VettrTypography using MaterialTheme typography() with: displayLarge (34sp, Bold), titleLarge (28sp, SemiBold), titleMedium (20sp, SemiBold)",
+        "Define bodyLarge (17sp, Normal), bodyMedium (15sp, Normal), labelSmall (12sp, Normal)",
+        "All text styles use SF Pro or system default font family",
+        "./gradlew assembleDebug succeeds"
+      ],
+      "priority": 14,
+      "passes": false
+    },
+    {
+      "id": "US-015",
+      "title": "Create Spacing.kt and Dimensions.kt constants",
+      "description": "As a developer, I need consistent spacing and dimension values across the app.",
+      "acceptanceCriteria": [
+        "Create designsystem/theme/Spacing.kt object with Dp constants: xs=4.dp, sm=8.dp, md=16.dp, lg=24.dp, xl=32.dp",
+        "Create designsystem/theme/Dimensions.kt with corner radii: cardRadius=12.dp, chipRadius=20.dp, buttonRadius=8.dp",
+        "Add icon sizes: iconSm=16.dp, iconMd=24.dp, iconLg=32.dp",
+        "./gradlew assembleDebug succeeds"
+      ],
+      "priority": 15,
+      "passes": false
+    },
+    {
+      "id": "US-016",
+      "title": "Update VettrTheme with complete Material3 theme",
+      "description": "As a developer, I need the app theme configured for dark mode with VETTR brand colors.",
+      "acceptanceCriteria": [
+        "Update designsystem/theme/Theme.kt VettrTheme composable",
+        "Configure darkColorScheme with VettrNavy as background, VettrAccent as primary, VettrCardBackground as surface",
+        "Force dark mode: override system theme to always use dark color scheme",
+        "Add @Preview composable showing theme applied to sample content",
+        "./gradlew assembleDebug succeeds"
+      ],
+      "priority": 16,
+      "passes": false
+    },
+    {
+      "id": "US-017",
+      "title": "Create Modifier extensions for design system",
+      "description": "As a developer, I need reusable Modifier extensions for consistent styling.",
+      "acceptanceCriteria": [
+        "Create designsystem/component/ModifierExtensions.kt",
+        "Add Modifier.cardStyle() extension: background(VettrCardBackground), clip(RoundedCornerShape(12.dp)), shadow",
+        "Add Modifier.vettrPadding() extension with default md spacing",
+        "Add @Preview composable demonstrating card style",
+        "./gradlew assembleDebug succeeds"
+      ],
+      "priority": 17,
+      "passes": false
+    },
+    {
+      "id": "US-018",
+      "title": "Create VettrScoreView composable component",
+      "description": "As a user, I want to see VETR Scores as prominent circular badges.",
+      "acceptanceCriteria": [
+        "Create designsystem/component/VettrScoreView.kt @Composable function",
+        "Circular badge displaying score 0-100 using Canvas or CircularProgressIndicator",
+        "Color coded: green (>80), yellow (60-80), orange (40-60), red (<40)",
+        "Shows label: Strong Buy, Buy, Hold, or Caution below score",
+        "Add @Preview with scores: 85, 70, 50, 30",
+        "./gradlew assembleDebug succeeds"
+      ],
+      "priority": 18,
+      "passes": false
+    },
+    {
+      "id": "US-019",
+      "title": "Create MetricCard composable component",
+      "description": "As a user, I want to see key metrics in consistent card format.",
+      "acceptanceCriteria": [
+        "Create designsystem/component/MetricCard.kt @Composable function",
+        "Parameters: title: String, value: String, change: Double? = null",
+        "Shows title, value, optional change indicator (+/- with color)",
+        "Uses Modifier.cardStyle() extension",
+        "Add @Preview with sample metrics including positive and negative changes",
+        "./gradlew assembleDebug succeeds"
+      ],
+      "priority": 19,
+      "passes": false
+    },
+    {
+      "id": "US-020",
+      "title": "Create SectorChip composable component",
+      "description": "As a user, I want sector tags to be visually distinct.",
+      "acceptanceCriteria": [
+        "Create designsystem/component/SectorChip.kt @Composable function",
+        "Pill-shaped Surface with sector name text",
+        "Background: VettrCardBackground, accent color border",
+        "Compact padding, labelSmall typography",
+        "Add @Preview with sectors: Mining, Technology, Energy",
+        "./gradlew assembleDebug succeeds"
+      ],
+      "priority": 20,
+      "passes": false
+    },
+    {
+      "id": "US-021",
+      "title": "Create StockRowView composable component",
+      "description": "As a user, I want stock list items to show all key information at a glance.",
+      "acceptanceCriteria": [
+        "Parameters: ticker, companyName, price, priceChange, logoUrl, onClick",
+        "Shows ticker, company name, price, price change (+/-) with placeholder icon via Coil AsyncImage",
+        "Change color: VettrGreen for positive, VettrRed for negative",
+        "Add @Preview with sample stocks",
+        "./gradlew assembleDebug succeeds"
+      ],
+      "priority": 21,
+      "passes": false
+    },
+    {
+      "id": "US-022",
+      "title": "Create SearchBarView composable component",
+      "description": "As a user, I want a search bar matching the app's design.",
+      "acceptanceCriteria": [
+        "Create designsystem/component/SearchBarView.kt @Composable function",
+        "OutlinedTextField with leading magnifying glass icon (Icons.Default.Search)",
+        "Placeholder text: Search, dark background, light text",
+        "Parameters: query: String, onQueryChange: (String) -> Unit",
+        "Add @Preview with empty and populated states",
+        "./gradlew assembleDebug succeeds"
+      ],
+      "priority": 22,
+      "passes": false
+    },
+    {
+      "id": "US-023",
+      "title": "Create SectionHeader composable component",
+      "description": "As a user, I want section headers to be consistent across screens.",
+      "acceptanceCriteria": [
+        "Create designsystem/component/SectionHeader.kt @Composable function",
+        "Shows title text (titleMedium typography)",
+        "Optional See All TextButton on right side",
+        "Parameters: title: String, onSeeAllClick: (() -> Unit)? = null",
+        "Add @Preview with and without See All button",
+        "./gradlew assembleDebug succeeds"
+      ],
+      "priority": 23,
+      "passes": false
+    },
+    {
+      "id": "US-024",
+      "title": "Create LoadingView composable component",
+      "description": "As a user, I want clear loading indicators when data is fetching.",
+      "acceptanceCriteria": [
+        "Create designsystem/component/LoadingView.kt @Composable function",
+        "Shows CircularProgressIndicator centered in Box",
+        "Optional message Text below spinner",
+        "Parameters: message: String? = null",
+        "Add @Preview with and without message",
+        "./gradlew assembleDebug succeeds"
+      ],
+      "priority": 24,
+      "passes": false
+    },
+    {
+      "id": "US-025",
+      "title": "Create ErrorView composable component",
+      "description": "As a user, I want clear error messages with retry option.",
+      "acceptanceCriteria": [
+        "Create designsystem/component/ErrorView.kt @Composable function",
+        "Shows error icon (Icons.Default.Error), message text, Retry button",
+        "Parameters: message: String, onRetry: () -> Unit",
+        "Button calls onRetry lambda",
+        "Add @Preview with sample error message",
+        "./gradlew assembleDebug succeeds"
+      ],
+      "priority": 25,
+      "passes": false
+    },
+    {
+      "id": "US-026",
+      "title": "Create EmptyStateView composable component",
+      "description": "As a user, I want helpful messages when lists are empty.",
+      "acceptanceCriteria": [
+        "Create designsystem/component/EmptyStateView.kt @Composable function",
+        "Shows icon (Material Icon), title, subtitle text",
+        "Optional action Button with label",
+        "Parameters: icon: ImageVector, title: String, subtitle: String, actionLabel: String?, onAction: (() -> Unit)?",
+        "Add @Preview with sample content",
+        "./gradlew assembleDebug succeeds"
+      ],
+      "priority": 26,
+      "passes": false
+    },
+    {
+      "id": "US-027",
+      "title": "Create PrimaryButton composable component",
+      "description": "As a user, I want consistent primary action buttons.",
+      "acceptanceCriteria": [
+        "Create designsystem/component/PrimaryButton.kt @Composable function",
+        "Green background (VettrAccent), white text",
+        "Parameters: text: String, onClick: () -> Unit, isLoading: Boolean = false, enabled: Boolean = true, fullWidth: Boolean = false",
+        "Shows CircularProgressIndicator when isLoading=true",
+        "Add @Preview with normal, loading, disabled states",
+        "./gradlew assembleDebug succeeds"
+      ],
+      "priority": 27,
+      "passes": false
+    },
+    {
+      "id": "US-028",
+      "title": "Create EventCard composable component",
+      "description": "As a user, I want event cards to clearly indicate event type and importance.",
+      "acceptanceCriteria": [
+        "Create designsystem/component/EventCard.kt @Composable function",
+        "Shows colored indicator dot (red/yellow/green), title, subtitle, date",
+        "Uses Modifier.cardStyle()",
+        "Parameters: title: String, subtitle: String, date: String, indicatorColor: Color, onClick: () -> Unit",
+        "Add @Preview with different event types",
+        "./gradlew assembleDebug succeeds"
+      ],
+      "priority": 28,
+      "passes": false
+    },
+    {
+      "id": "US-029",
+      "title": "Add unit tests for design system components",
+      "description": "As a developer, I need tests to ensure design component logic works correctly.",
+      "acceptanceCriteria": [
+        "Create app/src/test/java/com/vettr/android/designsystem/DesignSystemTest.kt",
+        "Test VettrScoreView color logic: score 85 -> green, 70 -> yellow, 50 -> orange, 30 -> red",
+        "Test VettrScoreView label logic: score 85 -> Strong Buy, 70 -> Buy, etc.",
+        "Test MetricCard change indicator: positive -> green, negative -> red",
+        "./gradlew testDebugUnitTest passes"
+      ],
+      "priority": 29,
+      "passes": false
+    },
+    {
+      "id": "US-030",
+      "title": "Create Stock Room entity",
+      "description": "As a developer, I need a Stock entity to represent company data in Room database.",
+      "acceptanceCriteria": [
+        "Create core/model/Stock.kt data class annotated with @Entity(tableName = \"stocks\")",
+        "Properties: id (String, @PrimaryKey), ticker (String), name (String), exchange (String), sector (String), marketCap (Double), price (Double), priceChange (Double), vetrScore (Int), isFavorite (Boolean)",
+        "Add @ColumnInfo annotations for non-default column names",
+        "./gradlew assembleDebug succeeds"
+      ],
+      "priority": 30,
+      "passes": false
+    },
+    {
+      "id": "US-031",
+      "title": "Create Filing Room entity",
+      "description": "As a developer, I need a Filing entity to represent regulatory filings.",
+      "acceptanceCriteria": [
+        "Create core/model/Filing.kt data class annotated with @Entity(tableName = \"filings\")",
+        "Properties: id (String, @PrimaryKey), stockId (String), type (String), title (String), date (Long), summary (String), isRead (Boolean), isMaterial (Boolean)",
+        "Add @ForeignKey reference to Stock entity on stockId",
+        "./gradlew assembleDebug succeeds"
+      ],
+      "priority": 31,
+      "passes": false
+    },
+    {
+      "id": "US-032",
+      "title": "Create Executive Room entity",
+      "description": "As a developer, I need an Executive entity for management information.",
+      "acceptanceCriteria": [
+        "Create core/model/Executive.kt data class annotated with @Entity(tableName = \"executives\")",
+        "Properties: id (String, @PrimaryKey), stockId (String), name (String), title (String), yearsAtCompany (Double), previousCompanies (String, JSON-serialized list), education (String), specialization (String), socialLinkedIn (String?), socialTwitter (String?)",
+        "Add TypeConverter for List<String> serialization",
+        "./gradlew assembleDebug succeeds"
+      ],
+      "priority": 32,
+      "passes": false
+    },
+    {
+      "id": "US-033",
+      "title": "Create User Room entity",
+      "description": "As a developer, I need a User entity for authentication and preferences.",
+      "acceptanceCriteria": [
+        "Create core/model/User.kt data class annotated with @Entity(tableName = \"users\")",
+        "Properties: id (String, @PrimaryKey), email (String), displayName (String), avatarUrl (String?), tier (String, mapped to VettrTier enum), createdAt (Long)",
+        "./gradlew assembleDebug succeeds"
+      ],
+      "priority": 33,
+      "passes": false
+    },
+    {
+      "id": "US-034",
+      "title": "Create VettrTier enum",
+      "description": "As a developer, I need to represent subscription tiers.",
+      "acceptanceCriteria": [
+        "Create core/model/VettrTier.kt enum class",
+        "Cases: FREE, PRO, PREMIUM",
+        "Property watchlistLimit: FREE=5, PRO=25, PREMIUM=Int.MAX_VALUE",
+        "Property pulseDelayHours: FREE=12, PRO=4, PREMIUM=0",
+        "Property syncIntervalHours: FREE=24, PRO=12, PREMIUM=4",
+        "./gradlew assembleDebug succeeds"
+      ],
+      "priority": 34,
+      "passes": false
+    },
+    {
+      "id": "US-035",
+      "title": "Create AlertType enum",
+      "description": "As a developer, I need to categorize alert types.",
+      "acceptanceCriteria": [
+        "Create core/model/AlertType.kt enum class",
+        "Cases: FINANCING, CONSOLIDATION, DRILL_RESULTS, MANAGEMENT_CHANGE, RED_FLAG",
+        "Property displayName for each case (e.g., Financing, Consolidation)",
+        "Property iconName for Material icon reference",
+        "./gradlew assembleDebug succeeds"
+      ],
+      "priority": 35,
+      "passes": false
+    },
+    {
+      "id": "US-036",
+      "title": "Create AlertRule Room entity",
+      "description": "As a developer, I need an AlertRule entity for user-defined alert rules.",
+      "acceptanceCriteria": [
+        "Create core/model/AlertRule.kt data class annotated with @Entity(tableName = \"alert_rules\")",
+        "Properties: id (String, @PrimaryKey), userId (String), stockTicker (String), ruleType (String), triggerCondition (String), isActive (Boolean), createdAt (Long), lastTriggeredAt (Long?), frequency (String)",
+        "Add index on userId and stockTicker columns",
+        "./gradlew assembleDebug succeeds"
+      ],
+      "priority": 36,
+      "passes": false
+    },
+    {
+      "id": "US-037",
+      "title": "Create RedFlagHistory Room entity",
+      "description": "As a developer, I need a RedFlagHistory entity for persisting detected red flags.",
+      "acceptanceCriteria": [
+        "Create core/model/RedFlagHistory.kt data class annotated with @Entity(tableName = \"red_flag_history\")",
+        "Properties: id (String, @PrimaryKey), stockTicker (String), flagType (String), severity (String), score (Double), description (String), detectedAt (Long), isAcknowledged (Boolean)",
+        "Add index on stockTicker column",
+        "./gradlew assembleDebug succeeds"
+      ],
+      "priority": 37,
+      "passes": false
+    },
+    {
+      "id": "US-038",
+      "title": "Create VetrScoreHistory Room entity",
+      "description": "As a developer, I need a VetrScoreHistory entity for persisting score data.",
+      "acceptanceCriteria": [
+        "Create core/model/VetrScoreHistory.kt data class annotated with @Entity(tableName = \"vetr_score_history\")",
+        "Properties: id (String, @PrimaryKey), stockTicker (String), overallScore (Int), pedigreeScore (Int), filingVelocityScore (Int), redFlagScore (Int), growthScore (Int), governanceScore (Int), calculatedAt (Long)",
+        "Add index on stockTicker column",
+        "./gradlew assembleDebug succeeds"
+      ],
+      "priority": 38,
+      "passes": false
+    },
+    {
+      "id": "US-039",
+      "title": "Create SyncHistory Room entity",
+      "description": "As a developer, I need a SyncHistory entity for logging sync operations.",
+      "acceptanceCriteria": [
+        "Create core/model/SyncHistory.kt data class annotated with @Entity(tableName = \"sync_history\")",
+        "Properties: id (String, @PrimaryKey), startedAt (Long), completedAt (Long?), duration (Long?), itemsSynced (Int), errors (String?), status (String)",
+        "./gradlew assembleDebug succeeds"
+      ],
+      "priority": 39,
+      "passes": false
+    },
+    {
+      "id": "US-040",
+      "title": "Create StockDao interface",
+      "description": "As a developer, I need a DAO for Stock database operations.",
+      "acceptanceCriteria": [
+        "Create core/data/local/StockDao.kt interface annotated with @Dao",
+        "Methods: getAll(): Flow<List<Stock>>, getById(id: String): Flow<Stock?>, getByTicker(ticker: String): Flow<Stock?>, searchByName(query: String): Flow<List<Stock>>",
+        "Methods: getFavorites(): Flow<List<Stock>>, insert(stock: Stock), insertAll(stocks: List<Stock>), update(stock: Stock), delete(stock: Stock)",
+        "Use @Query, @Insert(onConflict = OnConflictStrategy.REPLACE), @Update, @Delete annotations",
+        "./gradlew assembleDebug succeeds"
+      ],
+      "priority": 40,
+      "passes": false
+    },
+    {
+      "id": "US-041",
+      "title": "Create FilingDao interface",
+      "description": "As a developer, I need a DAO for Filing database operations.",
+      "acceptanceCriteria": [
+        "Create core/data/local/FilingDao.kt interface annotated with @Dao",
+        "Methods: getByStockId(stockId: String): Flow<List<Filing>>, getLatest(limit: Int): Flow<List<Filing>>, getById(id: String): Flow<Filing?>",
+        "Methods: insert(filing: Filing), insertAll(filings: List<Filing>), markAsRead(id: String)",
+        "Use @Query annotations with ORDER BY date DESC",
+        "./gradlew assembleDebug succeeds"
+      ],
+      "priority": 41,
+      "passes": false
+    },
+    {
+      "id": "US-042",
+      "title": "Create ExecutiveDao interface",
+      "description": "As a developer, I need a DAO for Executive database operations.",
+      "acceptanceCriteria": [
+        "Create core/data/local/ExecutiveDao.kt interface annotated with @Dao",
+        "Methods: getByStockId(stockId: String): Flow<List<Executive>>, searchByName(query: String): Flow<List<Executive>>, getById(id: String): Flow<Executive?>",
+        "Methods: insert(executive: Executive), insertAll(executives: List<Executive>), delete(executive: Executive)",
+        "./gradlew assembleDebug succeeds"
+      ],
+      "priority": 42,
+      "passes": false
+    },
+    {
+      "id": "US-043",
+      "title": "Create AlertRuleDao interface",
+      "description": "As a developer, I need a DAO for AlertRule database operations.",
+      "acceptanceCriteria": [
+        "Create core/data/local/AlertRuleDao.kt interface annotated with @Dao",
+        "Methods: getByUserId(userId: String): Flow<List<AlertRule>>, getByStockTicker(ticker: String): Flow<List<AlertRule>>, getById(id: String): Flow<AlertRule?>",
+        "Methods: getActive(): Flow<List<AlertRule>>, insert(rule: AlertRule), update(rule: AlertRule), delete(rule: AlertRule)",
+        "Method: getCountByUserId(userId: String): Flow<Int> for rule limit enforcement",
+        "./gradlew assembleDebug succeeds"
+      ],
+      "priority": 43,
+      "passes": false
+    },
+    {
+      "id": "US-044",
+      "title": "Create RedFlagHistoryDao interface",
+      "description": "As a developer, I need a DAO for RedFlagHistory operations.",
+      "acceptanceCriteria": [
+        "Create core/data/local/RedFlagHistoryDao.kt interface annotated with @Dao",
+        "Methods: getByStockTicker(ticker: String): Flow<List<RedFlagHistory>>, getRecent(limit: Int): Flow<List<RedFlagHistory>>",
+        "Methods: insert(flag: RedFlagHistory), insertAll(flags: List<RedFlagHistory>), acknowledge(id: String), acknowledgeAllForStock(ticker: String)",
+        "./gradlew assembleDebug succeeds"
+      ],
+      "priority": 44,
+      "passes": false
+    },
+    {
+      "id": "US-045",
+      "title": "Create VetrScoreHistoryDao interface",
+      "description": "As a developer, I need a DAO for VetrScoreHistory operations.",
+      "acceptanceCriteria": [
+        "Create core/data/local/VetrScoreHistoryDao.kt interface annotated with @Dao",
+        "Methods: getByStockTicker(ticker: String, limit: Int): Flow<List<VetrScoreHistory>>, getLatest(ticker: String): Flow<VetrScoreHistory?>",
+        "Methods: insert(score: VetrScoreHistory), insertAll(scores: List<VetrScoreHistory>)",
+        "./gradlew assembleDebug succeeds"
+      ],
+      "priority": 45,
+      "passes": false
+    },
+    {
+      "id": "US-046",
+      "title": "Configure VettrDatabase with all entities and DAOs",
+      "description": "As a developer, I need the Room database configured with all entities.",
+      "acceptanceCriteria": [
+        "Update core/data/local/VettrDatabase.kt annotated with @Database",
+        "Include entities: Stock, Filing, Executive, User, AlertRule, RedFlagHistory, VetrScoreHistory, SyncHistory",
+        "Declare abstract DAO accessors: stockDao(), filingDao(), executiveDao(), alertRuleDao(), redFlagHistoryDao(), vetrScoreHistoryDao()",
+        "Add TypeConverters class for List<String> JSON serialization",
+        "Set version = 1 and exportSchema = false",
+        "./gradlew assembleDebug succeeds"
+      ],
+      "priority": 46,
+      "passes": false
+    },
+    {
+      "id": "US-047",
+      "title": "Create DatabaseModule for Hilt DI",
+      "description": "As a developer, I need Hilt module to provide database and DAO instances.",
+      "acceptanceCriteria": [
+        "Create core/di/DatabaseModule.kt annotated with @Module @InstallIn(SingletonComponent::class)",
+        "Provide VettrDatabase singleton using Room.databaseBuilder()",
+        "Provide all DAO instances: StockDao, FilingDao, ExecutiveDao, AlertRuleDao, RedFlagHistoryDao, VetrScoreHistoryDao",
+        "Use @Provides and @Singleton annotations",
+        "./gradlew assembleDebug succeeds"
+      ],
+      "priority": 47,
+      "passes": false
+    },
+    {
+      "id": "US-048",
+      "title": "Add model unit tests",
+      "description": "As a developer, I need tests to verify model creation and enum logic.",
+      "acceptanceCriteria": [
+        "Create app/src/test/java/com/vettr/android/core/model/ModelTest.kt",
+        "Test Stock entity creation with all properties",
+        "Test VettrTier watchlistLimit and pulseDelayHours computed properties",
+        "Test AlertType displayName and iconName properties",
+        "./gradlew testDebugUnitTest passes"
+      ],
+      "priority": 48,
+      "passes": false
+    },
+    {
+      "id": "US-049",
+      "title": "Create VettrApi Retrofit interface",
+      "description": "As a developer, I need a Retrofit interface defining API endpoints.",
+      "acceptanceCriteria": [
+        "Create core/data/remote/VettrApi.kt interface",
+        "Define endpoints: @GET(\"stocks\") suspend fun getStocks(): List<StockDto>, @GET(\"stocks/{ticker}\") suspend fun getStock(@Path ticker: String): StockDto",
+        "Define: @GET(\"filings\") suspend fun getFilings(@Query stockId: String): List<FilingDto>",
+        "Define: @POST(\"auth/login\") suspend fun login(@Body request: LoginRequest): AuthResponse",
+        "Create DTO data classes: StockDto, FilingDto, LoginRequest, AuthResponse",
+        "./gradlew assembleDebug succeeds"
+      ],
+      "priority": 49,
+      "passes": false
+    },
+    {
+      "id": "US-050",
+      "title": "Create NetworkModule for Hilt DI",
+      "description": "As a developer, I need Hilt module to provide networking instances.",
+      "acceptanceCriteria": [
+        "Create core/di/NetworkModule.kt annotated with @Module @InstallIn(SingletonComponent::class)",
+        "Provide OkHttpClient singleton with HttpLoggingInterceptor (BODY level in debug)",
+        "Provide Retrofit singleton with base URL and GsonConverterFactory",
+        "Provide VettrApi instance from Retrofit",
+        "Use @Provides and @Singleton annotations",
+        "./gradlew assembleDebug succeeds"
+      ],
+      "priority": 50,
+      "passes": false
+    },
+    {
+      "id": "US-051",
+      "title": "Create StockRepository interface and implementation",
+      "description": "As a developer, I need a repository abstracting stock data sources.",
+      "acceptanceCriteria": [
+        "Create core/data/repository/StockRepository.kt interface with methods: getStocks(): Flow<List<Stock>>, getStock(id: String): Flow<Stock?>, searchStocks(query: String): Flow<List<Stock>>, getFavorites(): Flow<List<Stock>>, toggleFavorite(stockId: String)",
+        "Create core/data/repository/StockRepositoryImpl.kt implementing StockRepository with @Inject constructor taking StockDao",
+        "Implementation delegates to StockDao for local-first data access",
+        "./gradlew assembleDebug succeeds"
+      ],
+      "priority": 51,
+      "passes": false
+    },
+    {
+      "id": "US-052",
+      "title": "Create FilingRepository interface and implementation",
+      "description": "As a developer, I need a repository abstracting filing data sources.",
+      "acceptanceCriteria": [
+        "Create core/data/repository/FilingRepository.kt interface with methods: getFilingsForStock(stockId: String): Flow<List<Filing>>, getLatestFilings(limit: Int): Flow<List<Filing>>, markAsRead(filingId: String)",
+        "Create core/data/repository/FilingRepositoryImpl.kt implementing FilingRepository with @Inject constructor taking FilingDao",
+        "./gradlew assembleDebug succeeds"
+      ],
+      "priority": 52,
+      "passes": false
+    },
+    {
+      "id": "US-053",
+      "title": "Create RepositoryModule for Hilt DI",
+      "description": "As a developer, I need Hilt module to bind repository implementations.",
+      "acceptanceCriteria": [
+        "Create core/di/RepositoryModule.kt annotated with @Module @InstallIn(SingletonComponent::class)",
+        "Use @Binds to bind StockRepositoryImpl to StockRepository",
+        "Use @Binds to bind FilingRepositoryImpl to FilingRepository",
+        "All bindings use @Singleton scope",
+        "./gradlew assembleDebug succeeds"
+      ],
+      "priority": 53,
+      "passes": false
+    },
+    {
+      "id": "US-054",
+      "title": "Create TokenManager with EncryptedSharedPreferences",
+      "description": "As a developer, I need secure token storage for auth tokens.",
+      "acceptanceCriteria": [
+        "Create core/data/local/TokenManager.kt class with @Inject constructor",
+        "Use EncryptedSharedPreferences with MasterKeys.AES256_GCM_SPEC",
+        "Methods: saveToken(token: String), getToken(): String?, deleteToken(), saveRefreshToken(token: String), getRefreshToken(): String?",
+        "SharedPreferences file name: vettr_secure_prefs",
+        "./gradlew assembleDebug succeeds"
+      ],
+      "priority": 54,
+      "passes": false
+    },
+    {
+      "id": "US-055",
+      "title": "Create AuthRepository interface and implementation",
+      "description": "As a developer, I need authentication repository for login/signup/logout.",
+      "acceptanceCriteria": [
+        "Create core/data/repository/AuthRepository.kt interface: signInWithEmail(email: String, password: String): Result<User>, signInWithGoogle(idToken: String): Result<User>, signUp(email: String, password: String): Result<User>, signOut(), getCurrentUser(): Flow<User?>, isAuthenticated(): Flow<Boolean>",
+        "Create core/data/repository/AuthRepositoryImpl.kt with @Inject constructor taking TokenManager",
+        "Mock implementation: store auth state in memory, create mock User on login",
+        "./gradlew assembleDebug succeeds"
+      ],
+      "priority": 55,
+      "passes": false
+    },
+    {
+      "id": "US-056",
+      "title": "Create email validation utility",
+      "description": "As a developer, I need to validate email addresses.",
+      "acceptanceCriteria": [
+        "Create core/util/Validators.kt object",
+        "Add fun isValidEmail(email: String): Boolean using Patterns.EMAIL_ADDRESS or regex",
+        "Add fun isValidPassword(password: String): Boolean (min 8 chars, 1 uppercase, 1 digit)",
+        "Add unit test in app/src/test/ with valid and invalid emails and passwords",
+        "./gradlew testDebugUnitTest passes"
+      ],
+      "priority": 56,
+      "passes": false
+    },
+    {
+      "id": "US-057",
+      "title": "Create SeedDataService",
+      "description": "As a developer, I need a service to seed initial data into Room database.",
+      "acceptanceCriteria": [
+        "Create core/data/local/SeedDataService.kt class with @Inject constructor taking StockDao, FilingDao, ExecutiveDao",
+        "Method: suspend fun seedAllData() populates database with pilot data",
+        "Method: suspend fun isSeedComplete(): Boolean checks DataStore preference",
+        "Method: suspend fun markSeedComplete() sets DataStore flag",
+        "./gradlew assembleDebug succeeds"
+      ],
+      "priority": 57,
+      "passes": false
+    },
+    {
+      "id": "US-058",
+      "title": "Add 25 pilot stocks seed data",
+      "description": "As a developer, I need realistic stock data for testing.",
+      "acceptanceCriteria": [
+        "Add static data in SeedDataService for 25 pilot stocks",
+        "Include: BTO.TO, FOM.V, AMC.V, IE.TO, LAAC.TO, DML.TO, GMIN.TO, SOIL.V, TVE.TO, CJ.TO, GRN.TO, NPI.TO, DCBO.TO, LSPD.TO, DND.TO, QUIS.V, PNG.V, ENGH.TO, ACT.CSE, PLUR.V, PAID.CSE, NDA.V, NTAR.CSE",
+        "Each stock has: ticker, name, exchange, sector, realistic price and marketCap",
+        "Assign VETR Scores (30-95 range) with mix of Strong Buy, Buy, Hold, Caution",
+        "./gradlew assembleDebug succeeds"
+      ],
+      "priority": 58,
+      "passes": false
+    },
+    {
+      "id": "US-059",
+      "title": "Add sample filings and executives seed data",
+      "description": "As a developer, I need filing and executive data for testing.",
+      "acceptanceCriteria": [
+        "Add 3-5 sample filings per pilot stock in SeedDataService",
+        "Filing types: MD&A, Press Release, Financial Statements, with realistic titles and summaries",
+        "Add 2-4 executives per stock with realistic names, titles, tenure, specializations",
+        "Dates range from last 6 months for filings",
+        "./gradlew assembleDebug succeeds"
+      ],
+      "priority": 59,
+      "passes": false
+    },
+    {
+      "id": "US-060",
+      "title": "Seed data on first launch",
+      "description": "As a user, I want the app to have data on first launch.",
+      "acceptanceCriteria": [
+        "Check DataStore preference isSeedComplete in VettrApp or MainActivity",
+        "If false, call SeedDataService.seedAllData() on app launch using coroutine",
+        "Set flag to true after seeding completes",
+        "App displays seed data in subsequent screens",
+        "./gradlew assembleDebug succeeds"
+      ],
+      "priority": 60,
+      "passes": false
+    },
+    {
+      "id": "US-061",
+      "title": "Add seed data unit tests",
+      "description": "As a developer, I need tests to verify seed data integrity.",
+      "acceptanceCriteria": [
+        "Create app/src/test/java/com/vettr/android/core/data/SeedDataServiceTest.kt",
+        "Test: 25 stocks are generated with valid fields",
+        "Test: VETR Scores are in valid range (0-100)",
+        "Test: Filings have required fields (title, date, summary)",
+        "./gradlew testDebugUnitTest passes"
+      ],
+      "priority": 61,
+      "passes": false
+    },
+    {
+      "id": "US-062",
+      "title": "Create AuthViewModel with Hilt",
+      "description": "As a developer, I need a ViewModel to handle auth logic.",
+      "acceptanceCriteria": [
+        "Create feature/auth/AuthViewModel.kt annotated with @HiltViewModel",
+        "Use @Inject constructor with AuthRepository",
+        "StateFlow properties: email, password, isLoading, errorMessage, isAuthenticated",
+        "Methods: signInWithEmail(), signInWithGoogle(), signUp(), clearError()",
+        "Expose UI state via collectAsStateWithLifecycle() pattern",
+        "./gradlew assembleDebug succeeds"
+      ],
+      "priority": 62,
+      "passes": false
+    },
+    {
+      "id": "US-063",
+      "title": "Create WelcomeScreen composable",
+      "description": "As a new user, I want to see a welcoming first screen with sign-in options.",
+      "acceptanceCriteria": [
+        "Create feature/auth/WelcomeScreen.kt @Composable function",
+        "Shows VETTR logo placeholder, dog mascot, tagline: Smart Investing for Canadians",
+        "Get Started PrimaryButton and Log In TextButton for navigation",
+        "Add @Preview with VettrTheme",
+        "./gradlew assembleDebug succeeds"
+      ],
+      "priority": 63,
+      "passes": false
+    },
+    {
+      "id": "US-064",
+      "title": "Create LoginScreen composable",
+      "description": "As a returning user, I want to log in with my credentials.",
+      "acceptanceCriteria": [
+        "Create feature/auth/LoginScreen.kt @Composable with email/password OutlinedTextFields",
+        "Google Sign-In button and Login PrimaryButton calling viewModel.signInWithEmail()",
+        "Show error text from viewModel.errorMessage, Dont have an account? Sign Up link",
+        "Add @Preview",
+        "./gradlew assembleDebug succeeds"
+      ],
+      "priority": 64,
+      "passes": false
+    },
+    {
+      "id": "US-065",
+      "title": "Create SignUpScreen composable",
+      "description": "As a new user, I want to create an account.",
+      "acceptanceCriteria": [
+        "Create feature/auth/SignUpScreen.kt @Composable with email, password, confirm password fields",
+        "Google Sign-In button and Sign Up PrimaryButton with field validation (email format, password match)",
+        "Already have an account? Log In clickable text",
+        "Add @Preview",
+        "./gradlew assembleDebug succeeds"
+      ],
+      "priority": 65,
+      "passes": false
+    },
+    {
+      "id": "US-066",
+      "title": "Set up Navigation Compose with auth routing",
+      "description": "As a user, I want to see login screen when not authenticated, main app when authenticated.",
+      "acceptanceCriteria": [
+        "Create feature/main/VettrNavHost.kt @Composable with NavHostController",
+        "Define nav graph: auth (welcome, login, signup) and main (tabs) destinations",
+        "Observe AuthRepository.isAuthenticated() to determine start destination",
+        "Navigate to main graph on successful auth, to auth graph on logout",
+        "Wire NavHost into MainActivity setContent block",
+        "./gradlew assembleDebug succeeds"
+      ],
+      "priority": 66,
+      "passes": false
+    },
+    {
+      "id": "US-067",
+      "title": "Create MainScreen with bottom navigation",
+      "description": "As a user, I want to navigate between main app sections via bottom tabs.",
+      "acceptanceCriteria": [
+        "Create feature/main/MainScreen.kt @Composable with NavigationBar (5 items: Pulse, Discovery, Stocks, Alerts, Profile)",
+        "Material icons: TrendingUp, Explore, List, Notifications, Person with VettrAccent selected tint",
+        "Each tab navigates via nested NavHost, add @Preview",
+        "./gradlew assembleDebug succeeds"
+      ],
+      "priority": 67,
+      "passes": false
+    },
+    {
+      "id": "US-068",
+      "title": "Create placeholder screens for each tab",
+      "description": "As a developer, I need stub composables to test navigation.",
+      "acceptanceCriteria": [
+        "Create placeholder screens: PulseScreen, DiscoveryScreen, StocksScreen, AlertsScreen, ProfileScreen",
+        "Each shows centered title text wrapped in Scaffold with TopAppBar",
+        "./gradlew assembleDebug succeeds"
+      ],
+      "priority": 68,
+      "passes": false
+    },
+    {
+      "id": "US-069",
+      "title": "Style bottom navigation bar",
+      "description": "As a user, I want the bottom navigation bar to match the app's dark aesthetic.",
+      "acceptanceCriteria": [
+        "NavigationBar background: VettrNavy color",
+        "Selected item tint: VettrAccent (green)",
+        "Unselected item tint: VettrTextSecondary (gray)",
+        "Add elevation/shadow to navigation bar",
+        "Navigation bar displays correctly in preview",
+        "./gradlew assembleDebug succeeds"
+      ],
+      "priority": 69,
+      "passes": false
+    },
+    {
+      "id": "US-070",
+      "title": "Create PulseViewModel with Hilt",
+      "description": "As a developer, I need a ViewModel for the Pulse screen.",
+      "acceptanceCriteria": [
+        "Create feature/pulse/PulseViewModel.kt annotated with @HiltViewModel",
+        "Use @Inject constructor with StockRepository and FilingRepository",
+        "StateFlow properties: stocks (List<Stock>), filings (List<Filing>), isLoading (Boolean), errorMessage (String?)",
+        "Methods: loadData(), refresh()",
+        "Collect repository Flows in init block using viewModelScope",
+        "./gradlew assembleDebug succeeds"
+      ],
+      "priority": 70,
+      "passes": false
+    },
+    {
+      "id": "US-071",
+      "title": "Build PulseScreen with Market Overview section",
+      "description": "As a user, I want to see major index performance at a glance on the Pulse screen.",
+      "acceptanceCriteria": [
+        "Update feature/pulse/PulseScreen.kt to use PulseViewModel via hiltViewModel()",
+        "Add SearchBarView at top with notification bell IconButton",
+        "Add Market Overview section with horizontal LazyRow of 3 MetricCards: TSX, S&P 500, NASDAQ",
+        "Each MetricCard shows index value and change (+/-) with mock data",
+        "SectionHeader: Market Overview",
+        "./gradlew assembleDebug succeeds"
+      ],
+      "priority": 71,
+      "passes": false
+    },
+    {
+      "id": "US-072",
+      "title": "Add Strategic Events section to PulseScreen",
+      "description": "As a user, I want to see important market events.",
+      "acceptanceCriteria": [
+        "Add Strategic Events section to PulseScreen below Market Overview",
+        "Use EventCard composables in LazyColumn",
+        "3 sample events: Discovery Drill Hit (green), Red Flag Alert (red), New Financing (yellow)",
+        "SectionHeader: Strategic Events",
+        "./gradlew assembleDebug succeeds"
+      ],
+      "priority": 72,
+      "passes": false
+    },
+    {
+      "id": "US-073",
+      "title": "Add Trending Stocks section to PulseScreen",
+      "description": "As a user, I want to discover trending stocks from the Pulse screen.",
+      "acceptanceCriteria": [
+        "Add Trending Stocks section with horizontal LazyRow of StockRowView composables",
+        "Shows 5-6 stocks from PulseViewModel.stocks",
+        "SectionHeader: Trending Stocks with See All button",
+        "Tapping a stock navigates to StockDetailScreen (placeholder for now)",
+        "./gradlew assembleDebug succeeds"
+      ],
+      "priority": 73,
+      "passes": false
+    },
+    {
+      "id": "US-074",
+      "title": "Add loading, error, and empty states to PulseScreen",
+      "description": "As a user, I want visual feedback for all data states on PulseScreen.",
+      "acceptanceCriteria": [
+        "Show LoadingView when PulseViewModel.isLoading is true",
+        "Show ErrorView with retry button when errorMessage is not null",
+        "Add pullToRefresh using pullRefresh Modifier calling viewModel.refresh()",
+        "Collect viewModel state using collectAsStateWithLifecycle()",
+        "./gradlew assembleDebug succeeds"
+      ],
+      "priority": 74,
+      "passes": false
+    },
+    {
+      "id": "US-075",
+      "title": "Create DiscoveryViewModel with Hilt",
+      "description": "As a developer, I need a ViewModel for the Discovery screen.",
+      "acceptanceCriteria": [
+        "Create feature/discovery/DiscoveryViewModel.kt annotated with @HiltViewModel",
+        "Use @Inject constructor with StockRepository, FilingRepository",
+        "StateFlow: stocks, sectors (List<String>), selectedFilter (Watchlist/Alerts), searchQuery",
+        "Methods: loadData(), toggleFilter(), searchStocks(query: String)",
+        "./gradlew assembleDebug succeeds"
+      ],
+      "priority": 75,
+      "passes": false
+    },
+    {
+      "id": "US-076",
+      "title": "Build DiscoveryScreen with filter tabs and sectors grid",
+      "description": "As a user, I want to browse and filter stocks on the Discovery screen.",
+      "acceptanceCriteria": [
+        "Update feature/discovery/DiscoveryScreen.kt with DiscoveryViewModel via hiltViewModel()",
+        "Add My Watchlist / Alerts Only segmented FilterChip toggle",
+        "Add Top Sectors section with 2x2 LazyVerticalGrid: Critical Minerals, AI Technology, Energy Juniors, Clean Tech",
+        "Each sector card shows name and placeholder percentage",
+        "Add Recent Updates section with LazyColumn of EventCard composables",
+        "./gradlew assembleDebug succeeds"
+      ],
+      "priority": 76,
+      "passes": false
+    },
+    {
+      "id": "US-077",
+      "title": "Create StockDetailViewModel with Hilt",
+      "description": "As a developer, I need a ViewModel for stock detail screen.",
+      "acceptanceCriteria": [
+        "Create feature/stockdetail/StockDetailViewModel.kt annotated with @HiltViewModel",
+        "Use @Inject constructor with StockRepository, FilingRepository, SavedStateHandle for stockId argument",
+        "StateFlow: stock (Stock?), filings (List<Filing>), selectedTab (Overview/Analysis/News), isLoading, errorMessage",
+        "Methods: loadStock(), toggleFavorite(), selectTab(tab: StockDetailTab)",
+        "./gradlew assembleDebug succeeds"
+      ],
+      "priority": 77,
+      "passes": false
+    },
+    {
+      "id": "US-078",
+      "title": "Build StockDetailScreen shell with header",
+      "description": "As a user, I want to see a stock's detail screen with VETR Score badge.",
+      "acceptanceCriteria": [
+        "Create feature/stockdetail/StockDetailScreen.kt @Composable with Scaffold and TopAppBar (back, share, favorite)",
+        "Header: ticker, exchange badge, company name with VettrScoreView (large) and rating label",
+        "Add @Preview with sample stock data",
+        "./gradlew assembleDebug succeeds"
+      ],
+      "priority": 78,
+      "passes": false
+    },
+    {
+      "id": "US-079",
+      "title": "Add price display and time range selector",
+      "description": "As a user, I want to see current price, change, and a mini chart placeholder.",
+      "acceptanceCriteria": [
+        "Add price section below header: price in CAD, change amount and percentage",
+        "Change color: VettrGreen for positive, VettrRed for negative",
+        "Mini line chart placeholder Box with gray background",
+        "Add time range buttons Row: 1D, 1W, 1M, 1Y using FilterChip composables",
+        "Selection state stored in StockDetailViewModel.selectedTimeRange",
+        "./gradlew assembleDebug succeeds"
+      ],
+      "priority": 79,
+      "passes": false
+    },
+    {
+      "id": "US-080",
+      "title": "Add Overview/Analysis/News tabs to StockDetailScreen",
+      "description": "As a user, I want to switch between different information sections on stock detail.",
+      "acceptanceCriteria": [
+        "Add custom TabRow with 3 tabs: Overview, Analysis, News",
+        "Overview tab: company description, sector, exchange, share structure summary with MetricCards",
+        "Analysis tab: VETR Analysis header with bullet point analysis text",
+        "News tab: LazyColumn of filings with date, title, summary from StockDetailViewModel",
+        "Tab selection indicator uses VettrAccent color",
+        "./gradlew assembleDebug succeeds"
+      ],
+      "priority": 80,
+      "passes": false
+    },
+    {
+      "id": "US-081",
+      "title": "Add favorite/watchlist toggle to StockDetailScreen",
+      "description": "As a user, I want to add stocks to my watchlist.",
+      "acceptanceCriteria": [
+        "Star IconButton in TopAppBar toolbar",
+        "Icon: Icons.Default.Star (filled) when favorited, Icons.Default.StarBorder when not",
+        "Click calls StockDetailViewModel.toggleFavorite()",
+        "Updates Stock.isFavorite in Room via repository",
+        "State updates reactively via Flow collection",
+        "./gradlew assembleDebug succeeds"
+      ],
+      "priority": 81,
+      "passes": false
+    },
+    {
+      "id": "US-082",
+      "title": "Add share functionality to StockDetailScreen",
+      "description": "As a user, I want to share stock information.",
+      "acceptanceCriteria": [
+        "Share IconButton in TopAppBar using Icons.Default.Share",
+        "Click launches Android share sheet via Intent.ACTION_SEND",
+        "Share text includes: ticker, company name, VETR Score, and placeholder link",
+        "Share intent type: text/plain",
+        "./gradlew assembleDebug succeeds"
+      ],
+      "priority": 82,
+      "passes": false
+    },
+    {
+      "id": "US-083",
+      "title": "Wire stock navigation from lists to detail",
+      "description": "As a user, I want to tap a stock to navigate to its detail screen.",
+      "acceptanceCriteria": [
+        "Tapping StockRowView in PulseScreen navigates to StockDetailScreen with stockId argument",
+        "Tapping stock in DiscoveryScreen navigates to StockDetailScreen",
+        "Tapping stock in StocksScreen navigates to StockDetailScreen",
+        "Navigation uses NavController.navigate() with stockId argument",
+        "Back navigation works correctly",
+        "./gradlew assembleDebug succeeds"
+      ],
+      "priority": 83,
+      "passes": false
+    },
+    {
+      "id": "US-084",
+      "title": "Create StocksViewModel for Stocks tab",
+      "description": "As a developer, I need a ViewModel for the Stocks list screen.",
+      "acceptanceCriteria": [
+        "Create feature/stockdetail/StocksViewModel.kt annotated with @HiltViewModel",
+        "Use @Inject constructor with StockRepository",
+        "StateFlow: allStocks (List<Stock>), searchQuery (String), isLoading (Boolean)",
+        "Methods: loadStocks(), searchStocks(query: String), computed filtered list based on query",
+        "./gradlew assembleDebug succeeds"
+      ],
+      "priority": 84,
+      "passes": false
+    },
+    {
+      "id": "US-085",
+      "title": "Build StocksScreen with search and list",
+      "description": "As a user, I want to browse and search all stocks in the Stocks tab.",
+      "acceptanceCriteria": [
+        "Update StocksScreen with StocksViewModel via hiltViewModel(), SearchBarView at top",
+        "LazyColumn of StockRowView composables with search filtering and navigation to StockDetailScreen",
+        "Show EmptyStateView for no results, LoadingView during initial load",
+        "./gradlew assembleDebug succeeds"
+      ],
+      "priority": 85,
+      "passes": false
+    },
+    {
+      "id": "US-086",
+      "title": "Create ProfileViewModel with Hilt",
+      "description": "As a developer, I need a ViewModel for the Profile screen.",
+      "acceptanceCriteria": [
+        "Create feature/profile/ProfileViewModel.kt annotated with @HiltViewModel",
+        "Use @Inject constructor with AuthRepository",
+        "StateFlow: user (User?), tier (VettrTier), isLoading (Boolean)",
+        "Methods: loadUserData(), logout()",
+        "Logout clears token and navigates to auth screen",
+        "./gradlew assembleDebug succeeds"
+      ],
+      "priority": 86,
+      "passes": false
+    },
+    {
+      "id": "US-087",
+      "title": "Build ProfileScreen with user info and menu",
+      "description": "As a user, I want to see my profile information and account options.",
+      "acceptanceCriteria": [
+        "Update ProfileScreen with ProfileViewModel: header (avatar, name, email, tier badge)",
+        "Menu rows: My Account & Settings, Notification Settings, Educational Hub with icons and chevrons",
+        "Upgrade to Pro card ($10.99/month), Help & Support row, Log Out with confirmation AlertDialog",
+        "Add @Preview",
+        "./gradlew assembleDebug succeeds"
+      ],
+      "priority": 87,
+      "passes": false
+    },
+    {
+      "id": "US-088",
+      "title": "Add auth unit tests",
+      "description": "As a developer, I need tests for auth ViewModel and repository.",
+      "acceptanceCriteria": [
+        "Create app/src/test/java/com/vettr/android/feature/auth/AuthViewModelTest.kt",
+        "Test: signInWithEmail updates isAuthenticated to true on success",
+        "Test: signInWithEmail sets errorMessage on invalid credentials",
+        "Test: signUp validates email format and password match",
+        "Test: signOut clears auth state",
+        "./gradlew testDebugUnitTest passes"
+      ],
+      "priority": 88,
+      "passes": false
+    },
+    {
+      "id": "US-089",
+      "title": "Add navigation and screen unit tests",
+      "description": "As a developer, I need tests for screen ViewModels.",
+      "acceptanceCriteria": [
+        "Create PulseViewModelTest.kt: test loadData populates stocks and filings flows",
+        "Create DiscoveryViewModelTest.kt: test filter toggle updates displayed stocks",
+        "Create StockDetailViewModelTest.kt: test toggleFavorite updates stock.isFavorite",
+        "Create ProfileViewModelTest.kt: test logout clears user state",
+        "./gradlew testDebugUnitTest passes"
+      ],
+      "priority": 89,
+      "passes": false
+    },
+    {
+      "id": "US-090",
+      "title": "Create ExecutiveRepository interface and implementation",
+      "description": "As a developer, I need a repository for executive data operations.",
+      "acceptanceCriteria": [
+        "Create core/data/repository/ExecutiveRepository.kt interface: getExecutivesForStock(stockId: String): Flow<List<Executive>>, searchByName(query: String): Flow<List<Executive>>, getExecutiveScore(stockId: String): Int",
+        "Create ExecutiveRepositoryImpl.kt with @Inject constructor taking ExecutiveDao",
+        "Bind in RepositoryModule with @Binds",
+        "./gradlew assembleDebug succeeds"
+      ],
+      "priority": 90,
+      "passes": false
+    },
+    {
+      "id": "US-091",
+      "title": "Create PedigreeViewModel with Hilt",
+      "description": "As a developer, I need a ViewModel for the Pedigree screen showing executives.",
+      "acceptanceCriteria": [
+        "Create feature/stockdetail/PedigreeViewModel.kt annotated with @HiltViewModel",
+        "Use @Inject constructor with ExecutiveRepository, SavedStateHandle",
+        "StateFlow: executives (List<Executive>), searchQuery, sortOption (Name/Tenure/Score), filterTitle (CEO/CFO/all)",
+        "Methods: loadExecutives(), search(), sort(), filter()",
+        "Executive rows show: name, title, years at company, specialization, tenure risk badge",
+        "./gradlew assembleDebug succeeds"
+      ],
+      "priority": 91,
+      "passes": false
+    },
+    {
+      "id": "US-092",
+      "title": "Build PedigreeScreen with executive list",
+      "description": "As a user, I want to see key executives for a stock with their titles and tenure.",
+      "acceptanceCriteria": [
+        "Create feature/stockdetail/PedigreeScreen.kt with SearchBarView, sort menu (Name/Tenure/Score), filter chips (All/CEO/CFO/COO)",
+        "LazyColumn of ExecutiveRowView composables: name, title, years, specialization, tenure risk badge",
+        "Red background tint if tenure < 1 year, EmptyStateView if no data",
+        "./gradlew assembleDebug succeeds"
+      ],
+      "priority": 92,
+      "passes": false
+    },
+    {
+      "id": "US-093",
+      "title": "Build ExecutiveDetailScreen with career history",
+      "description": "As a user, I want to see detailed career history and education for each executive.",
+      "acceptanceCriteria": [
+        "Create ExecutiveDetailScreen.kt @Composable as BottomSheet with header (photo, name, title, tenure)",
+        "Career Timeline (5 previous companies), Education, Specialization badge sections",
+        "Social links (LinkedIn, Twitter via Intent) and Report button (mailto: support@vettr.ca)",
+        "./gradlew assembleDebug succeeds"
+      ],
+      "priority": 93,
+      "passes": false
+    },
+    {
+      "id": "US-094",
+      "title": "Add Pedigree tab to StockDetailScreen",
+      "description": "As a user, I want to access Pedigree information from the stock detail tabs.",
+      "acceptanceCriteria": [
+        "Add Pedigree tab to StockDetailScreen TabRow (Overview, Pedigree, Red Flags)",
+        "Selecting Pedigree tab shows PedigreeScreen composable inline",
+        "Pass stockId to PedigreeViewModel for loading executives",
+        "Tab indicator uses VettrAccent color",
+        "./gradlew assembleDebug succeeds"
+      ],
+      "priority": 94,
+      "passes": false
+    },
+    {
+      "id": "US-095",
+      "title": "Create AlertRuleRepository interface and implementation",
+      "description": "As a developer, I need a repository for alert rule CRUD operations.",
+      "acceptanceCriteria": [
+        "Create core/data/repository/AlertRuleRepository.kt interface: createRule(rule: AlertRule): Result<AlertRule>, updateRule(rule: AlertRule), deleteRule(ruleId: String), getRulesForUser(userId: String): Flow<List<AlertRule>>, getRulesForStock(ticker: String): Flow<List<AlertRule>>, toggleActive(ruleId: String), getRuleCount(userId: String): Flow<Int>",
+        "Create AlertRuleRepositoryImpl.kt with @Inject constructor taking AlertRuleDao",
+        "Add validation: max 50 rules per user, no duplicates for same stock/type",
+        "Bind in RepositoryModule",
+        "./gradlew assembleDebug succeeds"
+      ],
+      "priority": 95,
+      "passes": false
+    },
+    {
+      "id": "US-096",
+      "title": "Create AlertsViewModel with Hilt",
+      "description": "As a developer, I need a ViewModel for the Alerts screen.",
+      "acceptanceCriteria": [
+        "Create feature/alerts/AlertsViewModel.kt annotated with @HiltViewModel",
+        "Use @Inject constructor with AlertRuleRepository, AuthRepository",
+        "StateFlow: alertRules (List<AlertRule>), selectedFilter (All/Active/Triggered), isLoading",
+        "Methods: loadRules(), toggleRule(ruleId: String), deleteRule(ruleId: String), duplicateRule(rule: AlertRule)",
+        "Group rules by stock ticker",
+        "./gradlew assembleDebug succeeds"
+      ],
+      "priority": 96,
+      "passes": false
+    },
+    {
+      "id": "US-097",
+      "title": "Build AlertsScreen with rule management",
+      "description": "As a user, I want to view, manage, and filter my alert rules.",
+      "acceptanceCriteria": [
+        "Update AlertsScreen with AlertsViewModel: filter tabs (All/Active/Triggered), LazyColumn grouped by stock ticker",
+        "AlertRuleRow: ticker, type icon, condition text, active Switch; swipe-to-delete via SwipeToDismissBox",
+        "Recent Triggers section (last 5), FAB for + Create Alert, EmptyStateView",
+        "./gradlew assembleDebug succeeds"
+      ],
+      "priority": 97,
+      "passes": false
+    },
+    {
+      "id": "US-098",
+      "title": "Build AlertRuleCreatorScreen (guided wizard)",
+      "description": "As a user, I want a step-by-step wizard to create alert rules.",
+      "acceptanceCriteria": [
+        "Create AlertRuleCreatorScreen.kt multi-step wizard: Stock Selection -> Rule Type (5 cards) -> Condition (contextual) -> Frequency -> Review",
+        "LinearProgressIndicator for step progress, Edit buttons on Review step",
+        "Save creates rule via AlertRuleRepository and shows success Snackbar",
+        "./gradlew assembleDebug succeeds"
+      ],
+      "priority": 98,
+      "passes": false
+    },
+    {
+      "id": "US-099",
+      "title": "Create RedFlagDetector for thread-safe flag detection",
+      "description": "As a platform, I need to automatically detect and score red flags across filing patterns.",
+      "acceptanceCriteria": [
+        "Create RedFlagDetector.kt with thread-safe detection using Mutex or single-threaded dispatcher",
+        "Implement 5 detectors: consolidationVelocity (30%), financingVelocity (25%), executiveChurn (20%), disclosureGaps (15%), debtTrend (10%)",
+        "Composite RedFlagScore (0-100) with thresholds: <30 (low), 30-60 (moderate), 60-85 (high), >85 (critical)",
+        "Add unit tests covering all severity levels",
+        "./gradlew testDebugUnitTest passes"
+      ],
+      "priority": 99,
+      "passes": false
+    },
+    {
+      "id": "US-100",
+      "title": "Create RedFlagRepository interface and implementation",
+      "description": "As a developer, I need a repository for red flag detection and history.",
+      "acceptanceCriteria": [
+        "Create core/data/repository/RedFlagRepository.kt interface: detectFlagsForStock(ticker: String): List<DetectedFlag>, getFlagHistory(ticker: String): Flow<List<RedFlagHistory>>, acknowledgeFlag(id: String), acknowledgeAllForStock(ticker: String), getFlagTrend(ticker: String): RedFlagTrend",
+        "Create RedFlagRepositoryImpl.kt with @Inject constructor taking RedFlagHistoryDao, RedFlagDetector",
+        "Bind in RepositoryModule",
+        "./gradlew assembleDebug succeeds"
+      ],
+      "priority": 100,
+      "passes": false
+    },
+    {
+      "id": "US-101",
+      "title": "Build RedFlagScreen in StockDetail tabs",
+      "description": "As a user, I want to see all detected red flags for a stock with explanations.",
+      "acceptanceCriteria": [
+        "Create RedFlagScreen.kt accessible from StockDetail tabs with overall score circular badge (Canvas)",
+        "Individual flag breakdown bars, flag rows (icon, name, severity Chip, explanation) with tap-to-expand detail",
+        "Flag History timeline (10 items), Acknowledge All button, methodology info BottomSheet",
+        "Empty state for score < 30",
+        "./gradlew assembleDebug succeeds"
+      ],
+      "priority": 101,
+      "passes": false
+    },
+    {
+      "id": "US-102",
+      "title": "Create VetrScoreCalculator",
+      "description": "As a platform, I need to calculate holistic VETR Score (0-100) from multiple components.",
+      "acceptanceCriteria": [
+        "Create VetrScoreCalculator.kt: Pedigree (25%), Filing Velocity (20%), Red Flag (25%), Growth (15%), Governance (15%)",
+        "Bonus +5 for audited financials/expertise, penalty -10 for overdue filings/regulatory issues, clamped 0-100",
+        "Cache scores with 24-hour TTL, comprehensive unit tests",
+        "./gradlew testDebugUnitTest passes"
+      ],
+      "priority": 102,
+      "passes": false
+    },
+    {
+      "id": "US-103",
+      "title": "Create VetrScoreRepository interface and implementation",
+      "description": "As a developer, I need a repository for VETR Score calculation and history.",
+      "acceptanceCriteria": [
+        "Create core/data/repository/VetrScoreRepository.kt interface: calculateScore(ticker: String): VetrScoreResult, getScoreHistory(ticker: String, months: Int): Flow<List<VetrScoreHistory>>, getScoreTrend(ticker: String): ScoreTrend, compareScores(ticker: String): PeerComparison",
+        "Create VetrScoreRepositoryImpl.kt with @Inject constructor taking VetrScoreHistoryDao, VetrScoreCalculator",
+        "VetrScoreResult data class: overallScore, components map, lastUpdated",
+        "ScoreTrend data class: direction (Improving/Stable/Declining), momentum, scoreChange",
+        "Bind in RepositoryModule",
+        "./gradlew assembleDebug succeeds"
+      ],
+      "priority": 103,
+      "passes": false
+    },
+    {
+      "id": "US-104",
+      "title": "Build VetrScoreDetailScreen with breakdown",
+      "description": "As a user, I want to understand how the VETR Score is calculated with detailed breakdown.",
+      "acceptanceCriteria": [
+        "Create VetrScoreDetailScreen.kt BottomSheet: large score badge (Canvas), 30-day trend sparkline",
+        "5 component CircularProgressIndicators with tap-to-detail, Scoring Methodology expandable section",
+        "Peer Comparison (percentile bar), What Could Improve Score (3-5 insights), disclaimers",
+        "./gradlew assembleDebug succeeds"
+      ],
+      "priority": 104,
+      "passes": false
+    },
+    {
+      "id": "US-105",
+      "title": "Create SyncManager with WorkManager",
+      "description": "As a platform, I need automatic background data synchronization using WorkManager.",
+      "acceptanceCriteria": [
+        "Create SyncManager.kt with SyncWorker (CoroutineWorker + @HiltWorker) using PeriodicWorkRequestBuilder",
+        "Intervals: Premium (4h), Pro (12h), Free (24h); sync filings, prices, alerts (mock)",
+        "Retry with exponential backoff, prioritize watchlist stocks, log to SyncHistory entity",
+        "./gradlew assembleDebug succeeds"
+      ],
+      "priority": 105,
+      "passes": false
+    },
+    {
+      "id": "US-106",
+      "title": "Implement conflict resolution for offline-to-online sync",
+      "description": "As a user, I want seamless data sync even with offline local changes.",
+      "acceptanceCriteria": [
+        "Create ConflictResolver.kt with strategies: lastWriteWins, localWins, serverWins, manual",
+        "Local takes precedence for watchlist/alert changes if newer timestamp; queue offline changes in Room",
+        "Add unit tests covering all resolution strategies",
+        "./gradlew testDebugUnitTest passes"
+      ],
+      "priority": 106,
+      "passes": false
+    },
+    {
+      "id": "US-107",
+      "title": "Add sync UI to ProfileScreen",
+      "description": "As a user, I want to see sync status and trigger manual sync.",
+      "acceptanceCriteria": [
+        "Add Sync section to ProfileScreen: last sync time, next sync ETA",
+        "Manual Sync Now button calling SyncManager",
+        "Show sync frequency based on tier (Free: daily, Pro: 12h, Premium: 4h)",
+        "CircularProgressIndicator during active sync",
+        "./gradlew assembleDebug succeeds"
+      ],
+      "priority": 107,
+      "passes": false
+    },
+    {
+      "id": "US-108",
+      "title": "Create NotificationService for local alert notifications",
+      "description": "As a user, I want to receive local push notifications when alert rules trigger.",
+      "acceptanceCriteria": [
+        "Create NotificationService.kt with notification channel vettr_alerts (high importance)",
+        "Request POST_NOTIFICATIONS permission (Android 13+), schedule via WorkManager (instant/daily/weekly)",
+        "PendingIntent deep links to StockDetailScreen, 1-hour duplicate prevention",
+        "./gradlew assembleDebug succeeds"
+      ],
+      "priority": 108,
+      "passes": false
+    },
+    {
+      "id": "US-109",
+      "title": "Create AnalyticsService wrapper",
+      "description": "As a product team, I need analytics event tracking for user engagement metrics.",
+      "acceptanceCriteria": [
+        "Create core/util/AnalyticsService.kt interface with methods: trackScreen(name), trackEvent(name, params), setUserId(id), setUserProperty(key, value)",
+        "Create MockAnalyticsService.kt implementation logging events to Logcat in debug",
+        "Privacy-first: sanitize PII, no email/password logging",
+        "Define AnalyticsEvent sealed class with 30+ standard events (ScreenViewed, StockAdded, AlertCreated, etc.)",
+        "Provide via Hilt @Module @InstallIn(SingletonComponent::class)",
+        "./gradlew assembleDebug succeeds"
+      ],
+      "priority": 109,
+      "passes": false
+    },
+    {
+      "id": "US-110",
+      "title": "Create ErrorReportingService wrapper",
+      "description": "As a platform, I need crash and error reporting infrastructure.",
+      "acceptanceCriteria": [
+        "Create core/util/ErrorReportingService.kt interface: logError(throwable, context), logMessage(message, level), addBreadcrumb(message), setUser(id)",
+        "Create MockErrorReportingService.kt logging to Logcat in debug",
+        "Breadcrumb tracking: store last 10 user actions before error",
+        "Capture device info: model, OS version, screen size, memory usage",
+        "Provide via Hilt module",
+        "./gradlew assembleDebug succeeds"
+      ],
+      "priority": 110,
+      "passes": false
+    },
+    {
+      "id": "US-111",
+      "title": "Implement image caching with Coil configuration",
+      "description": "As a user, I want fast image loading with minimal data usage.",
+      "acceptanceCriteria": [
+        "Create core/di/ImageModule.kt providing custom Coil ImageLoader via Hilt",
+        "Configure memory cache (50MB) and disk cache (200MB) with OkHttp disk cache",
+        "Set cache policy: 30-day disk cache expiration",
+        "Placeholder and error drawables for failed loads",
+        "Preload strategy for visible stock logos using Coil preload",
+        "./gradlew assembleDebug succeeds"
+      ],
+      "priority": 111,
+      "passes": false
+    },
+    {
+      "id": "US-112",
+      "title": "Implement lazy loading and pagination for stock lists",
+      "description": "As a user, I want smooth scrolling in lists with thousands of stocks.",
+      "acceptanceCriteria": [
+        "Create core/util/PaginationHelper.kt with page size of 50 items",
+        "Update StocksViewModel to load stocks in batches using Room LIMIT/OFFSET queries",
+        "Detect scroll-near-bottom in LazyColumn using LaunchedEffect on last visible item",
+        "Show Loading more... CircularProgressIndicator at bottom during fetch",
+        "Implement cancel-previous pattern using Job.cancel() for in-flight requests on new search",
+        "./gradlew assembleDebug succeeds"
+      ],
+      "priority": 112,
+      "passes": false
+    },
+    {
+      "id": "US-113",
+      "title": "Implement TalkBack accessibility support",
+      "description": "As a visually impaired user, I want full TalkBack support for all screens.",
+      "acceptanceCriteria": [
+        "Add contentDescription to all Icon composables and semantics blocks to custom components",
+        "Use Modifier.semantics(mergeDescendants = true) for grouping, logical focus order",
+        "Add stateDescription for toggles (active/inactive), test all screens with TalkBack",
+        "./gradlew assembleDebug succeeds"
+      ],
+      "priority": 113,
+      "passes": false
+    },
+    {
+      "id": "US-114",
+      "title": "Implement dynamic text scaling support",
+      "description": "As a user with vision challenges, I want readable text at all system font sizes.",
+      "acceptanceCriteria": [
+        "Verify all Text composables use MaterialTheme.typography styles (not hardcoded sp values)",
+        "Test layouts at system font scale 0.85x, 1.0x, 1.3x, 2.0x (accessibility large)",
+        "Ensure layouts use flexible Arrangement.spacedBy and weight modifiers to avoid overflow",
+        "Two-column layouts should wrap to single column at large text sizes using adaptive layouts",
+        "No text clipping or overlapping at any system font size",
+        "./gradlew assembleDebug succeeds"
+      ],
+      "priority": 114,
+      "passes": false
+    },
+    {
+      "id": "US-115",
+      "title": "Ensure color-blind support with secondary indicators",
+      "description": "As a color-blind user, I want information conveyed without relying only on color.",
+      "acceptanceCriteria": [
+        "All color-coded information has secondary indicators: icons, text labels, numeric values",
+        "VETR scores: color + value + label; Red flags: color + icon + text; Price changes: color + sign + percentage",
+        "All text meets WCAG AA contrast ratio (4.5:1 body, 3:1 large text)",
+        "./gradlew assembleDebug succeeds"
+      ],
+      "priority": 115,
+      "passes": false
+    },
+    {
+      "id": "US-116",
+      "title": "Create SettingsScreen with app preferences",
+      "description": "As a user, I want granular control over app behavior and notifications.",
+      "acceptanceCriteria": [
+        "Create SettingsScreen.kt navigable from ProfileScreen with General (currency, dark mode, language) and Notifications (per-type toggles, frequency) sections",
+        "Privacy section (analytics/crash opt-out), Developer section (build info, memory, reset) in debug only",
+        "Persist all settings using DataStore Preferences, add @Preview",
+        "./gradlew assembleDebug succeeds"
+      ],
+      "priority": 116,
+      "passes": false
+    },
+    {
+      "id": "US-117",
+      "title": "Create OnboardingScreen carousel",
+      "description": "As a new user, I want guided introduction to key features.",
+      "acceptanceCriteria": [
+        "Create OnboardingScreen.kt with HorizontalPager (5 slides: Welcome, Watchlist, VETR Score, Alerts, Red Flags)",
+        "Skip/Next buttons with dot indicator, Done on last slide; store completion in DataStore",
+        "Accessible from Profile > About to replay, add @Preview",
+        "./gradlew assembleDebug succeeds"
+      ],
+      "priority": 117,
+      "passes": false
+    },
+    {
+      "id": "US-118",
+      "title": "Implement deep linking for URLs and notifications",
+      "description": "As a user, I want to open app features directly from notifications or external URLs.",
+      "acceptanceCriteria": [
+        "Configure intent-filter in AndroidManifest.xml for vettr:// scheme and https://vettr.app host",
+        "Handle deep links in VettrNavHost: vettr://stock/{ticker}, vettr://alert/{alertId}, vettr://pedigree/{ticker}",
+        "Support query parameters: vettr://stock/BTO.TO?tab=pedigree",
+        "Notification tap PendingIntent creates deep link to StockDetailScreen",
+        "Fallback: show error Snackbar if destination not found",
+        "./gradlew assembleDebug succeeds"
+      ],
+      "priority": 118,
+      "passes": false
+    },
+    {
+      "id": "US-119",
+      "title": "Implement pull-to-refresh for all list screens",
+      "description": "As a user, I want to manually refresh data with pull-to-refresh gesture.",
+      "acceptanceCriteria": [
+        "Add pullToRefresh Modifier (or PullToRefreshBox) to PulseScreen, DiscoveryScreen, StocksScreen, AlertsScreen",
+        "Refresh triggers data reload from repository",
+        "Show refresh indicator during fetch",
+        "Display last updated relative timestamp: Last updated 2 minutes ago",
+        "Debounce consecutive refreshes: prevent more than 1 refresh per 10 seconds",
+        "./gradlew assembleDebug succeeds"
+      ],
+      "priority": 119,
+      "passes": false
+    },
+    {
+      "id": "US-120",
+      "title": "Create AppError sealed class and error handling",
+      "description": "As a user, I want clear, actionable error messages when something goes wrong.",
+      "acceptanceCriteria": [
+        "Create core/util/AppError.kt sealed class: NetworkError, InvalidData, NotFound, Unauthorized, ServerError, Unknown",
+        "Each type provides: userMessage (String), icon (ImageVector), suggestedAction (Retry/GoHome/ContactSupport)",
+        "Create ErrorMapper.kt utility: map Retrofit HttpException, IOException, etc. to AppError",
+        "Update ErrorView composable to accept AppError and display appropriate icon, message, action button",
+        "Add unit tests for all error type mappings",
+        "./gradlew testDebugUnitTest passes"
+      ],
+      "priority": 120,
+      "passes": false
+    },
+    {
+      "id": "US-121",
+      "title": "Implement skeleton loading screens",
+      "description": "As a user, I want visual feedback with skeleton placeholders while content loads.",
+      "acceptanceCriteria": [
+        "Create designsystem/component/SkeletonView.kt @Composable with shimmer animation using InfiniteTransition",
+        "Create skeleton variants: SkeletonStockRow, SkeletonMetricCard, SkeletonEventCard",
+        "Integrate into PulseScreen, DiscoveryScreen, StocksScreen: show 5-8 skeleton rows during initial load",
+        "Smooth crossfade transition from skeleton to content using AnimatedVisibility or Crossfade",
+        "Skeleton colors match VettrCardBackground with gray gradient overlay",
+        "./gradlew assembleDebug succeeds"
+      ],
+      "priority": 121,
+      "passes": false
+    },
+    {
+      "id": "US-122",
+      "title": "Add haptic feedback for key interactions",
+      "description": "As a user, I want tactile feedback for important actions.",
+      "acceptanceCriteria": [
+        "Create HapticService.kt using HapticFeedbackConstants: light (tap), medium (success), heavy (delete), error (reject)",
+        "Add haptic toggle in SettingsScreen, disable if user preference",
+        "Integrate haptics into favorite, alert, delete, and reset interactions",
+        "./gradlew assembleDebug succeeds"
+      ],
+      "priority": 122,
+      "passes": false
+    },
+    {
+      "id": "US-123",
+      "title": "Implement BiometricPrompt authentication",
+      "description": "As a user, I want to unlock the app with fingerprint or face recognition.",
+      "acceptanceCriteria": [
+        "Create BiometricService.kt using BiometricPrompt with BIOMETRIC_STRONG",
+        "Show prompt on app resume if enabled; fallback to password on 3 failures",
+        "Add Enable Biometric Login toggle in SettingsScreen with type display, handle no-hardware edge case",
+        "./gradlew assembleDebug succeeds"
+      ],
+      "priority": 123,
+      "passes": false
+    },
+    {
+      "id": "US-124",
+      "title": "Create in-app help, glossary, and FAQ screens",
+      "description": "As a user, I want explanations for complex features and terminology.",
+      "acceptanceCriteria": [
+        "Create feature/profile/GlossaryScreen.kt with 25+ terms across categories (searchable, filterable LazyColumn)",
+        "Create feature/profile/FaqScreen.kt with 15+ questions in expandable sections (AnimatedVisibility)",
+        "Add info IconButton to VETR Score, Red Flag, and Pedigree sections opening BottomSheet explanations",
+        "Add Help & Learning section in ProfileScreen navigating to Glossary and FAQ",
+        "Add @Preview for both screens",
+        "./gradlew assembleDebug succeeds"
+      ],
+      "priority": 124,
+      "passes": false
+    },
+    {
+      "id": "US-125",
+      "title": "Create share functionality for stocks, executives, and alerts",
+      "description": "As a user, I want to share interesting stocks and insights with colleagues.",
+      "acceptanceCriteria": [
+        "Create ShareService.kt generating formatted share text for stocks, executives, and alerts with deep links",
+        "Add share IconButton to StockDetailScreen, ExecutiveDetailScreen, and AlertsScreen recent triggers",
+        "Use Intent.ACTION_SEND with text/plain, track analytics events",
+        "./gradlew assembleDebug succeeds"
+      ],
+      "priority": 125,
+      "passes": false
+    },
+    {
+      "id": "US-126",
+      "title": "Implement feedback and app rating prompts",
+      "description": "As a product team, I want user feedback and Play Store ratings.",
+      "acceptanceCriteria": [
+        "Create core/util/FeedbackService.kt tracking user engagement milestones",
+        "Trigger Play Store review prompt (ReviewManager API) after 10 watchlist additions with 90-day cooldown",
+        "Create feature/profile/FeedbackScreen.kt with: text input, optional email, category picker (Bug/Feature/General), submit button",
+        "Submit sends to support@vettr.ca (mock), shows thank you Snackbar",
+        "Track feedback metrics in AnalyticsService",
+        "./gradlew assembleDebug succeeds"
+      ],
+      "priority": 126,
+      "passes": false
+    },
+    {
+      "id": "US-127",
+      "title": "Create localization infrastructure for multi-language",
+      "description": "As a product team, I want infrastructure ready for French localization (Phase 2).",
+      "acceptanceCriteria": [
+        "Extract all hardcoded strings from Kotlin and Compose files into res/values/strings.xml",
+        "Use stringResource(R.string.key) for all user-facing text in composables",
+        "Structure strings: section_field_label naming convention (e.g., pulse_section_trending, auth_button_login)",
+        "Create res/values-fr/strings.xml placeholder with 5 translated strings as example",
+        "Total strings to translate: ~200 estimated",
+        "./gradlew assembleDebug succeeds"
+      ],
+      "priority": 127,
+      "passes": false
+    },
+    {
+      "id": "US-128",
+      "title": "Create integration tests for core workflows",
+      "description": "As a QA engineer, I need automated integration tests for critical user workflows.",
+      "acceptanceCriteria": [
+        "Create CoreWorkflowTest.kt with integration tests: auth (signup/login/logout), watchlist (add/remove), alert CRUD",
+        "Test VETR score calculation (0-100 valid range) and red flag detection (returns results)",
+        "Mock all repositories using fake implementations",
+        "./gradlew testDebugUnitTest passes"
+      ],
+      "priority": 128,
+      "passes": false
+    },
+    {
+      "id": "US-129",
+      "title": "Create Compose UI tests for critical journeys",
+      "description": "As a QA engineer, I need automated UI tests to verify screens and interactions.",
+      "acceptanceCriteria": [
+        "Create LoginScreenTest.kt: email/password fields visible, validation error on invalid email",
+        "Create StockDetailScreenTest.kt: tabs switch, favorite toggles; AlertsScreenTest.kt: filter chips work",
+        "Use composeTestRule.setContent with Hilt test setup",
+        "./gradlew connectedDebugAndroidTest passes (or document manual steps)"
+      ],
+      "priority": 129,
+      "passes": false
+    },
+    {
+      "id": "US-130",
+      "title": "Create smoke tests for release verification",
+      "description": "As a QA engineer, I need quick smoke tests to verify core functionality before release.",
+      "acceptanceCriteria": [
+        "Create SmokeTest.kt with 10 tests: app config, auth flow, stock data loads, watchlist persistence",
+        "Alert CRUD, VETR score (0-100), red flag detection, settings persistence, validators, end-to-end journey",
+        "./gradlew testDebugUnitTest passes"
+      ],
+      "priority": 130,
+      "passes": false
+    },
+    {
+      "id": "US-131",
+      "title": "Add Detekt/ktlint static analysis configuration",
+      "description": "As a developer, I want clean code with automated style enforcement.",
+      "acceptanceCriteria": [
+        "Add io.gitlab.arturbosch.detekt plugin to build.gradle.kts",
+        "Create detekt.yml configuration with: maxLineLength=120, naming conventions, complexity rules",
+        "Configure ktlint via detekt-formatting plugin",
+        "Add ./gradlew detekt task to CI workflow",
+        "Fix any initial violations to achieve clean analysis",
+        "./gradlew detekt passes with zero errors"
+      ],
+      "priority": 131,
+      "passes": false
+    },
+    {
+      "id": "US-132",
+      "title": "Profile and optimize memory usage",
+      "description": "As a developer, I need to identify and fix memory leaks and optimize heap usage.",
+      "acceptanceCriteria": [
+        "Audit ViewModels for no Activity/Context leaks, verify viewModelScope cancellation",
+        "Use collectAsStateWithLifecycle() everywhere, target <150MB typical / <300MB peak",
+        "Add debug memory monitor, clear Coil cache on onTrimMemory",
+        "./gradlew assembleDebug succeeds"
+      ],
+      "priority": 132,
+      "passes": false
+    },
+    {
+      "id": "US-133",
+      "title": "Implement app versioning and build management",
+      "description": "As a developer, I need automated versioning and build number management.",
+      "acceptanceCriteria": [
+        "Set versionName = 1.0.0 and versionCode = 1 in app/build.gradle.kts",
+        "Create version.properties file for CI auto-increment of versionCode",
+        "Create VersionManager utility: current version, check for updates (mock)",
+        "Display version info in ProfileScreen and SettingsScreen developer section",
+        "Document version release procedure for Google Play",
+        "./gradlew assembleDebug succeeds"
+      ],
+      "priority": 133,
+      "passes": false
+    },
+    {
+      "id": "US-134",
+      "title": "Configure ProGuard/R8 for release builds",
+      "description": "As a developer, I need minification and obfuscation configured for release APK.",
+      "acceptanceCriteria": [
+        "Verify isMinifyEnabled = true and isShrinkResources = true in release buildType",
+        "Create proguard-rules.pro with keep rules for: Room entities (@Entity), Retrofit models, Hilt modules",
+        "Add keep rules for Gson serialization (@SerializedName), Kotlin data classes",
+        "Add keep for Google Sign-In classes",
+        "./gradlew assembleRelease succeeds without ProGuard errors"
+      ],
+      "priority": 134,
+      "passes": false
+    },
+    {
+      "id": "US-135",
+      "title": "Create security audit and input validation",
+      "description": "As a security team, I need to identify and fix security issues before release.",
+      "acceptanceCriteria": [
+        "Audit: tokens in EncryptedSharedPreferences, all API calls HTTPS, no hardcoded secrets",
+        "Create InputValidator: sanitize inputs for SQL injection/XSS, add network_security_config.xml",
+        "Add unit tests for input validation",
+        "./gradlew testDebugUnitTest passes"
+      ],
+      "priority": 135,
+      "passes": false
+    },
+    {
+      "id": "US-136",
+      "title": "Create Google Play Store submission assets",
+      "description": "As a product manager, I need all assets and information for Play Store submission.",
+      "acceptanceCriteria": [
+        "Document Play Store listing: app name (VETTR), short description, full description (4000 char), category (Finance)",
+        "Prepare screenshot specifications: phone (16:9), 7-inch tablet, 10-inch tablet",
+        "Prepare privacy policy URL and content: data collection, tracking, third-party services",
+        "Prepare feature graphic (1024x500) specifications",
+        "App rating questionnaire: content rating, COPPA compliance",
+        "Document required release notes for version 1.0.0"
+      ],
+      "priority": 136,
+      "passes": false
+    },
+    {
+      "id": "US-137",
+      "title": "Configure Firebase App Distribution for beta testing",
+      "description": "As a product manager, I need beta distribution before Play Store release.",
+      "acceptanceCriteria": [
+        "Document Firebase App Distribution setup steps",
+        "Create beta tester group configuration (10-20 testers)",
+        "Document beta release notes template",
+        "Configure ./gradlew assembleDebug for beta distribution builds",
+        "Document feedback collection process via Firebase or in-app form",
+        "Minimum 2-week beta period before Play Store submission"
+      ],
+      "priority": 137,
+      "passes": false
+    },
+    {
+      "id": "US-138",
+      "title": "Set up CI/CD pipeline with GitHub Actions",
+      "description": "As a developer, I need automated builds, tests, and deployments.",
+      "acceptanceCriteria": [
+        "Update .github/workflows/build.yml: checkout -> JDK 17 -> assembleDebug -> testDebugUnitTest -> detekt",
+        "Cache Gradle dependencies, GitHub status checks on PRs, assembleRelease on tag push",
+        "Document CI/CD process",
+        "./gradlew assembleDebug succeeds"
+      ],
+      "priority": 138,
+      "passes": false
+    },
+    {
+      "id": "US-139",
+      "title": "Create monitoring and observability configuration",
+      "description": "As a platform team, I need real-time visibility into app health.",
+      "acceptanceCriteria": [
+        "Document monitoring setup: Firebase Crashlytics for crashes, Firebase Analytics for engagement",
+        "Define SLAs: crash-free rate >99%, app startup <2s, API response <500ms",
+        "Create ObservabilityService interface for metrics tracking",
+        "Track app startup time using ContentProvider or Application.onCreate timing",
+        "Track screen load times in each ViewModel",
+        "Document alert thresholds and escalation procedures"
+      ],
+      "priority": 139,
+      "passes": false
+    },
+    {
+      "id": "US-140",
+      "title": "Create post-launch monitoring and update strategy",
+      "description": "As a platform team, I need to plan monitoring and updates post-launch.",
+      "acceptanceCriteria": [
+        "Document monitoring tools: Firebase Crashlytics, Analytics, Performance",
+        "Define update cadence: hotfix (<2h), minor (2-4 weeks), major (3-6 months)",
+        "Document hotfix process: critical bug -> fix -> ./gradlew assembleRelease -> Play Store upload",
+        "Define feedback loop: collect feedback -> prioritize -> fix -> release",
+        "Document Year 1 roadmap placeholder with Phase 2 features"
+      ],
+      "priority": 140,
+      "passes": false
+    },
+    {
+      "id": "US-141",
+      "title": "Create release notes, terms of service, and privacy policy",
+      "description": "As a product manager, I need legal and marketing content for release.",
+      "acceptanceCriteria": [
+        "Write version 1.0.0 release notes: features, improvements",
+        "Create Play Store description highlighting: Pedigree, Pulse, Alerts, VETR Score",
+        "Prepare keywords: venture capital, stock research, TSX-V, CSE, investment intelligence",
+        "Create terms of service content: disclaimers, liability limitations, investment warnings",
+        "Create privacy policy: data collection, user tracking, third-party services, GDPR/CCPA compliance"
+      ],
+      "priority": 141,
+      "passes": false
+    },
+    {
+      "id": "US-142",
+      "title": "Document API contracts for backend integration",
+      "description": "As a backend developer, I need clear specifications for API endpoints the app expects.",
+      "acceptanceCriteria": [
+        "Document auth endpoints: POST /auth/signup, POST /auth/login, POST /auth/refresh, POST /auth/logout, POST /auth/google",
+        "Document stock endpoints: GET /stocks, GET /stocks/{ticker}, POST /stocks/search, POST /stocks/{id}/favorite",
+        "Document filing endpoints: GET /filings/{ticker}, GET /filings/search",
+        "Document executive, alert rule, red flag, VETR score endpoints",
+        "Include request/response JSON formats, error codes, rate limits, pagination"
+      ],
+      "priority": 142,
+      "passes": false
+    },
+    {
+      "id": "US-143",
+      "title": "Create comprehensive code documentation",
+      "description": "As a developer, I want well-documented code for future maintenance.",
+      "acceptanceCriteria": [
+        "Add KDoc comments to all public interfaces: repositories, services, DAOs",
+        "Add KDoc to all @HiltViewModel classes documenting state and methods",
+        "Add KDoc to all Room @Entity classes documenting fields and relationships",
+        "Add inline comments for complex logic: scoring algorithms, sync conflict resolution",
+        "Document architecture patterns: MVVM, repository pattern, Hilt DI, Navigation Compose"
+      ],
+      "priority": 143,
+      "passes": false
+    },
+    {
+      "id": "US-144",
+      "title": "Add Compose @Preview for all screens",
+      "description": "As a developer, I need previews for rapid UI development.",
+      "acceptanceCriteria": [
+        "Verify every @Composable screen has at least one @Preview function",
+        "Add multi-preview: @Preview(name = Phone) and @Preview(name = Tablet, widthDp = 840)",
+        "Add dark mode preview (default since app is dark-only)",
+        "Previews use sample data, not real ViewModel instances",
+        "All previews render without errors in Android Studio",
+        "./gradlew assembleDebug succeeds"
+      ],
+      "priority": 144,
+      "passes": false
+    },
+    {
+      "id": "US-145",
+      "title": "Configure app for edge-to-edge display",
+      "description": "As a user, I want the app to use the full screen with proper system bar handling.",
+      "acceptanceCriteria": [
+        "Verify enableEdgeToEdge() is called in MainActivity.onCreate()",
+        "All Scaffold composables use innerPadding parameter correctly",
+        "System bars (status bar, navigation bar) have transparent background",
+        "Content does not overlap with system bars (proper WindowInsets handling)",
+        "Test on devices with gesture navigation and 3-button navigation",
+        "./gradlew assembleDebug succeeds"
+      ],
+      "priority": 145,
+      "passes": false
+    },
+    {
+      "id": "US-146",
+      "title": "Add landscape and tablet layout support",
+      "description": "As a tablet user, I want optimized layouts for larger screens.",
+      "acceptanceCriteria": [
+        "Use WindowSizeClass to detect compact, medium, expanded screen widths",
+        "PulseScreen: show 2-column grid on expanded, single column on compact",
+        "StockDetailScreen: show side-by-side header and tabs on expanded",
+        "DiscoveryScreen: show 3-column sector grid on expanded",
+        "Test on Pixel phone (compact), Pixel Fold (medium), Pixel Tablet (expanded)",
+        "./gradlew assembleDebug succeeds"
+      ],
+      "priority": 146,
+      "passes": false
+    },
+    {
+      "id": "US-147",
+      "title": "Add Material3 animated transitions between screens",
+      "description": "As a user, I want smooth animations when navigating between screens.",
+      "acceptanceCriteria": [
+        "Configure AnimatedNavHost or enterTransition/exitTransition in NavHost",
+        "Forward navigation: slide in from right (fadeIn + slideInHorizontally)",
+        "Back navigation: slide out to right (fadeOut + slideOutHorizontally)",
+        "Bottom sheet: slide up from bottom (for ExecutiveDetail, VetrScoreDetail)",
+        "Tab switching: crossfade animation for tab content",
+        "./gradlew assembleDebug succeeds"
+      ],
+      "priority": 147,
+      "passes": false
+    },
+    {
+      "id": "US-148",
+      "title": "Optimize Compose recomposition performance",
+      "description": "As a developer, I need to minimize unnecessary recompositions for smooth UI.",
+      "acceptanceCriteria": [
+        "Audit all @Composable functions: use Immutable or Stable annotations on data classes passed to composables",
+        "Use remember {} and derivedStateOf {} for expensive computations",
+        "Use key {} in LazyColumn items for stable recomposition",
+        "Avoid passing unstable lambdas: use remember { { viewModel.doSomething() } } pattern",
+        "Profile with Layout Inspector: verify no excessive recomposition counts",
+        "./gradlew assembleDebug succeeds"
+      ],
+      "priority": 148,
+      "passes": false
+    },
+    {
+      "id": "US-149",
+      "title": "Add Room database migration strategy",
+      "description": "As a developer, I need database migration support for future schema changes.",
+      "acceptanceCriteria": [
+        "Set exportSchema = true in @Database annotation",
+        "Configure room.schemaLocation in build.gradle.kts for schema export directory",
+        "Create Migration strategy documentation: how to add new entities, modify existing ones",
+        "Add fallbackToDestructiveMigration() for development builds only",
+        "Create placeholder Migration(1, 2) class template for future use",
+        "./gradlew assembleDebug succeeds"
+      ],
+      "priority": 149,
+      "passes": false
+    },
+    {
+      "id": "US-150",
+      "title": "Add network connectivity monitoring",
+      "description": "As a user, I want the app to gracefully handle offline and online transitions.",
+      "acceptanceCriteria": [
+        "Create core/util/NetworkMonitor.kt using ConnectivityManager and registerDefaultNetworkCallback()",
+        "Expose isOnline: StateFlow<Boolean> observable from any screen",
+        "Show offline banner Snackbar when network is lost",
+        "Auto-trigger sync when network returns (if pending changes exist)",
+        "Provide via Hilt as @Singleton",
+        "./gradlew assembleDebug succeeds"
+      ],
+      "priority": 150,
+      "passes": false
+    },
+    {
+      "id": "US-151",
+      "title": "Add OkHttp auth interceptor for token refresh",
+      "description": "As a developer, I need automatic token refresh on 401 responses.",
+      "acceptanceCriteria": [
+        "Create core/data/remote/AuthInterceptor.kt implementing Interceptor",
+        "Add Authorization: Bearer {token} header to all API requests from TokenManager",
+        "On 401 response: attempt token refresh, retry original request with new token",
+        "On refresh failure: clear tokens, emit unauthorized state to AuthRepository",
+        "Add AuthInterceptor to OkHttpClient in NetworkModule",
+        "./gradlew assembleDebug succeeds"
+      ],
+      "priority": 151,
+      "passes": false
+    },
+    {
+      "id": "US-152",
+      "title": "Add Timber logging framework",
+      "description": "As a developer, I need structured logging for debugging.",
+      "acceptanceCriteria": [
+        "Add com.jakewharton.timber:timber dependency to build.gradle.kts",
+        "Plant Timber.DebugTree() in VettrApp.onCreate() for debug builds only",
+        "Replace all Log.d/Log.e calls with Timber.d/Timber.e throughout codebase",
+        "Add Timber.tag() for service-specific logs (e.g., SyncManager, AuthRepository)",
+        "./gradlew assembleDebug succeeds"
+      ],
+      "priority": 152,
+      "passes": false
+    },
+    {
+      "id": "US-153",
+      "title": "Add Android app icon and splash screen",
+      "description": "As a user, I want to see the VETTR icon on my home screen and a branded splash.",
+      "acceptanceCriteria": [
+        "Add adaptive icon: res/mipmap-anydpi-v26/ic_launcher.xml with foreground and background layers",
+        "Add placeholder dog/shield icon as foreground drawable",
+        "Background: VettrNavy color",
+        "Configure SplashScreen API (Android 12+) in styles.xml with VettrNavy background and icon",
+        "Splash screen dismisses after data init completes",
+        "./gradlew assembleDebug succeeds"
+      ],
+      "priority": 153,
+      "passes": false
+    },
+    {
+      "id": "US-154",
+      "title": "Add Gradle build optimization",
+      "description": "As a developer, I need fast build times for productive development.",
+      "acceptanceCriteria": [
+        "Configure gradle.properties: org.gradle.parallel=true, org.gradle.caching=true, org.gradle.daemon=true",
+        "Set org.gradle.jvmargs=-Xmx4096m for sufficient heap",
+        "Enable build cache in settings.gradle.kts",
+        "Verify clean build time and incremental build time",
+        "Document build performance baselines",
+        "./gradlew assembleDebug succeeds"
+      ],
+      "priority": 154,
+      "passes": false
+    },
+    {
+      "id": "US-155",
+      "title": "Final build verification and release checklist",
+      "description": "As a developer, I need to verify the complete app builds and all tests pass.",
+      "acceptanceCriteria": [
+        "./gradlew clean assembleDebug succeeds with zero errors",
+        "./gradlew testDebugUnitTest passes all unit tests",
+        "./gradlew assembleRelease succeeds (with ProGuard)",
+        "./gradlew detekt passes with zero errors (if configured)",
+        "All user stories US-001 through US-154 have passes: true",
+        "Document any known issues or limitations for Phase 2"
+      ],
+      "priority": 155,
+      "passes": false
+    }
+  ],
+  "completionCriteria": {
+    "allStoriesImplemented": "All 155 stories must have passes=true",
+    "codeQuality": "Detekt/ktlint zero errors, zero compiler warnings, >70% test coverage",
+    "performance": "App startup <2s, list scroll 60 FPS, memory <150MB typical, <300MB peak",
+    "accessibility": "TalkBack fully supported, all text dynamic type compatible, WCAG AA contrast",
+    "security": "No hardcoded secrets, tokens in EncryptedSharedPreferences, HTTPS required, inputs validated",
+    "testing": "All critical workflows tested (unit + integration), smoke tests pass, UI tests cover critical paths",
+    "documentation": "KDoc on public APIs, architecture documented, API spec complete, CLAUDE.md patterns updated",
+    "playStoreReady": "APK signed, privacy policy + terms ready, all screenshots specified, release notes written"
+  },
+  "successMetrics": {
+    "downloads": "Target 1,000 downloads in first month",
+    "activeUsers": "Target 300 weekly active users by end of month 2",
+    "retention": "Target 40% 7-day retention, 20% 30-day retention",
+    "crashFreeness": "Target >99% crash-free sessions",
+    "userRating": "Target >4.0 stars on Google Play Store",
+    "engagement": "Average session duration >5 minutes, 2+ sessions per day for active users"
+  }
+}

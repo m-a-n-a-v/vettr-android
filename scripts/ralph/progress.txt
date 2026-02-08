@@ -1,0 +1,15 @@
+# Ralph Progress Log
+Started: 2026-02-07
+Project: VETTR Android
+---
+
+## Codebase Patterns
+- All ViewModels use @HiltViewModel with @Inject constructor and StateFlow for UI state
+- Compose screens use collectAsStateWithLifecycle() for state collection
+- Room entities use @Entity annotation with @PrimaryKey
+- Hilt modules use @Module + @InstallIn(SingletonComponent::class)
+- Design tokens in designsystem/theme/ - NEVER hardcode colors or fonts
+- Navigation uses Navigation Compose with sealed class routes
+- JAVA_HOME must point to Android Studio JBR: /Applications/Android Studio.app/Contents/jbr/Contents/Home
+- Build command: JAVA_HOME="/Applications/Android Studio.app/Contents/jbr/Contents/Home" ./gradlew assembleDebug
+---
