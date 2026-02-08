@@ -1782,3 +1782,32 @@ Details:
   - Preview composables should include backgroundColor parameter matching VettrNavy (#0D1B2A) for dark theme
   - StockDetailViewModel already existed with proper Hilt setup and state management
 ---
+
+## US-079: Add price display and time range selector
+Status: ✅ COMPLETE
+Date: 2026-02-07
+Details:
+- Added TimeRange enum to StockDetailViewModel (ONE_DAY, ONE_WEEK, ONE_MONTH, ONE_YEAR)
+- Added selectedTimeRange state management with selectTimeRange() function
+- Created PriceSection composable displaying:
+  - Current price in CAD using NumberFormat.getCurrencyInstance(Locale.CANADA)
+  - Change amount with + or - prefix
+  - Percentage change calculated from price and priceChange
+  - VettrGreen for positive changes, VettrRed for negative changes
+- Created ChartPlaceholder composable: 200dp height Box with gray background
+- Created TimeRangeSelector with FilterChip components (1D, 1W, 1M, 1Y)
+- TimeRangeChip uses VettrGreen for selected state, surfaceVariant for unselected
+- Updated StockDetailScreen to include selectedTimeRange and onTimeRangeSelected parameters
+- All sections added below header with proper spacing
+
+Files changed:
+- app/src/main/java/com/vettr/android/feature/stockdetail/StockDetailViewModel.kt
+- app/src/main/java/com/vettr/android/feature/stockdetail/StockDetailScreen.kt
+
+**Learnings for future iterations:**
+- FilterChip is the correct Material 3 component for time range selectors
+- CAD currency formatting: NumberFormat.getCurrencyInstance(Locale.CANADA)
+- Percentage calculation from absolute price change: (priceChange / (price - priceChange)) * 100
+- Color coding uses VettrGreen and VettrRed from theme
+- Chart placeholder can be simple Box with gray background and centered text
+---
