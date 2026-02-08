@@ -949,3 +949,31 @@ Files changed:
   - ORDER BY calculated_at DESC ensures scores are returned in reverse chronological order for trend charts
   - DAO abstract methods must be added to RoomDatabase class to expose database operations
 ---
+
+## US-046: Configure VettrDatabase with all entities and DAOs
+Status: ✅ COMPLETE
+Date: 2026-02-07
+Details:
+- Created core/data/local/UserDao.kt interface with CRUD operations for User entity
+- Created core/data/local/SyncHistoryDao.kt interface with sync tracking operations
+- Updated VettrDatabase.kt to include all 8 entities: Stock, Filing, Executive, User, AlertRule, RedFlagHistory, VetrScoreHistory, SyncHistory
+- Removed PlaceholderEntity (no longer needed with real entities)
+- Added abstract DAO accessors: userDao() and syncHistoryDao() to complete the set
+- Verified TypeConverters(Converters::class) annotation for List<String> and VettrTier serialization
+- Verified version = 1 and exportSchema = false
+- Build successful: ./gradlew assembleDebug passes
+Files changed:
+- app/src/main/java/com/vettr/android/core/data/local/UserDao.kt (created)
+- app/src/main/java/com/vettr/android/core/data/local/SyncHistoryDao.kt (created)
+- app/src/main/java/com/vettr/android/core/data/local/VettrDatabase.kt (updated)
+- scripts/ralph/prd.json (updated passes to true)
+**Learnings for future iterations:**
+  - VettrDatabase now complete with all 8 entities and 8 corresponding DAOs
+  - UserDao includes getByEmail() for authentication flows and deleteAll() for logout
+  - SyncHistoryDao includes updateCompletion() and updateErrors() for sync lifecycle tracking
+  - SyncHistoryDao includes getInProgress() to check for ongoing syncs and prevent duplicate syncs
+  - SyncHistoryDao includes deleteOlderThan() for cleanup of old sync logs
+  - PlaceholderEntity was temporary scaffold - removed once real entities were added
+  - Database follows single-responsibility principle: one DAO per entity for clean separation
+  - All DAOs follow established pattern: Flow for queries, suspend for mutations, OnConflictStrategy.REPLACE for upserts
+---
