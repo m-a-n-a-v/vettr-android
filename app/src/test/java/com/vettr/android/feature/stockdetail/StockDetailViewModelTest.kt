@@ -168,18 +168,18 @@ class StockDetailViewModelTest {
         assertEquals(StockDetailTab.OVERVIEW, viewModel.selectedTab.value)
 
         // When
-        viewModel.selectTab(StockDetailTab.ANALYSIS)
+        viewModel.selectTab(StockDetailTab.PEDIGREE)
         advanceUntilIdle()
 
         // Then
-        assertEquals(StockDetailTab.ANALYSIS, viewModel.selectedTab.value)
+        assertEquals(StockDetailTab.PEDIGREE, viewModel.selectedTab.value)
 
         // When
-        viewModel.selectTab(StockDetailTab.NEWS)
+        viewModel.selectTab(StockDetailTab.RED_FLAGS)
         advanceUntilIdle()
 
         // Then
-        assertEquals(StockDetailTab.NEWS, viewModel.selectedTab.value)
+        assertEquals(StockDetailTab.RED_FLAGS, viewModel.selectedTab.value)
     }
 
     @Test
