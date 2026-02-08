@@ -1934,7 +1934,7 @@
         "Document alert thresholds and escalation procedures"
       ],
       "priority": 139,
-      "passes": false
+      "passes": true
     },
     {
       "id": "US-140",

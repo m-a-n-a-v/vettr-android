@@ -3749,3 +3749,30 @@ Files changed:
 - Tag triggers use 'refs/tags/v*' pattern to match version tags like v1.0.0
 - Documentation should cover both automated CI/CD and local development workflows
 ---
+
+## US-139: Create monitoring and observability configuration
+Status: ✅ COMPLETE
+Date: 2026-02-08
+Details:
+- Created ObservabilityService interface with methods for tracking app startup, screen load times, API calls, memory usage, custom metrics, and SLA violations
+- Implemented MockObservabilityService with Logcat logging for development/testing
+- Created ObservabilityModule to provide ObservabilityService via Hilt dependency injection
+- Implemented AppStartupTracker ContentProvider to measure app startup time from process start
+- Registered AppStartupTracker in AndroidManifest.xml
+- Integrated startup tracking in VettrApp.onCreate() to report timing to ObservabilityService
+- Added screen load time tracking to PulseViewModel, DiscoveryViewModel, and AlertsViewModel
+- Screen load time is measured from ViewModel init to first data emission (only tracked once per instance)
+- Created comprehensive MONITORING.md documentation covering:
+  - SLA definitions (P0/P1/P2/P3 with specific thresholds)
+  - App startup <2s, screen load <1s, API response <500ms, crash-free rate >99%
+  - Alert thresholds and escalation procedures (immediate page for P0, Slack for P1, email for P2)
+  - Monitoring stack (Firebase Crashlytics, Performance Monitoring, Analytics)
+  - Implementation guide for production Firebase integration
+- Build successful: ./gradlew assembleDebug passes
+**Learnings for future iterations:**
+  - ContentProvider.onCreate() is called before Application.onCreate(), making it ideal for measuring cold start time
+  - ObservabilityService pattern provides a clean interface that can be swapped from mock to Firebase in production
+  - Screen load tracking should only fire once per ViewModel instance (use flag to track)
+  - Comprehensive documentation of SLAs and alert thresholds helps teams align on performance expectations
+  - Mock implementation with Logcat is useful for development without requiring Firebase setup
+---
