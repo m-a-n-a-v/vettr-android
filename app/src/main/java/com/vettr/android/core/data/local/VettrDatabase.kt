@@ -25,7 +25,7 @@ import com.vettr.android.core.util.Converters
         SyncHistory::class
     ],
     version = 1,
-    exportSchema = false
+    exportSchema = true
 )
 @TypeConverters(Converters::class)
 abstract class VettrDatabase : RoomDatabase() {

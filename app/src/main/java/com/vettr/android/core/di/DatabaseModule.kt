@@ -2,6 +2,7 @@ package com.vettr.android.core.di
 
 import android.content.Context
 import androidx.room.Room
+import com.vettr.android.BuildConfig
 import com.vettr.android.core.data.local.AlertRuleDao
 import com.vettr.android.core.data.local.ExecutiveDao
 import com.vettr.android.core.data.local.FilingDao
@@ -25,11 +26,20 @@ object DatabaseModule {
     @Provides
     @Singleton
     fun provideVettrDatabase(@ApplicationContext context: Context): VettrDatabase {
-        return Room.databaseBuilder(
+        val builder = Room.databaseBuilder(
             context,
             VettrDatabase::class.java,
             "vettr-db"
-        ).build()
+        )
+
+        // For debug builds, allow destructive migrations
+        // This will drop and recreate tables if migration is missing
+        // Production builds MUST have explicit migrations
+        if (BuildConfig.DEBUG) {
+            builder.fallbackToDestructiveMigration()
+        }
+
+        return builder.build()
     }
 
     @Provides
