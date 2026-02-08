@@ -7,6 +7,7 @@ import com.vettr.android.core.model.AlertRule
 import com.vettr.android.core.model.Executive
 import com.vettr.android.core.model.Filing
 import com.vettr.android.core.model.PlaceholderEntity
+import com.vettr.android.core.model.RedFlagHistory
 import com.vettr.android.core.model.Stock
 import com.vettr.android.core.model.User
 import com.vettr.android.core.util.Converters
@@ -18,7 +19,8 @@ import com.vettr.android.core.util.Converters
         Filing::class,
         Executive::class,
         User::class,
-        AlertRule::class
+        AlertRule::class,
+        RedFlagHistory::class
     ],
     version = 1,
     exportSchema = false

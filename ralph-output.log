@@ -408,3 +408,622 @@ Iteration 15 complete. Continuing...
 ===============================================================
   Ralph Iteration 16 of 158 (claude)
 ===============================================================
+Perfect! US-016 has been successfully completed. Here's a summary of what was accomplished:
+
+## US-016: Update VettrTheme with complete Material3 theme ✅
+
+**What was implemented:**
+- Verified the VettrTheme composable was already configured with Material3 darkColorScheme
+- Confirmed dark mode enforcement (hardcoded VettrDarkColorScheme without system theme detection)
+- Confirmed proper color mapping:
+  - Background: VettrNavy (#0D1B2A)
+  - Primary: VettrAccent (#00C853)
+  - Surface hierarchy: VettrCardBackground (#1B2838) as surfaceContainerHighest
+- **Added @Preview composable** (VettrThemePreview) demonstrating the theme applied to sample content including Text components and a Card
+
+**Files changed:**
+- app/src/main/java/com/vettr/android/designsystem/theme/Theme.kt:82-125
+
+**Build status:** ✅ Passes (./gradlew assembleDebug successful)
+
+The theme implementation was already well-structured from the initial scaffold. I added the missing Preview composable to satisfy the acceptance criteria and enable design validation in Android Studio.
+Iteration 16 complete. Continuing...
+
+===============================================================
+  Ralph Iteration 17 of 158 (claude)
+===============================================================
+There are still 138 stories with passes=false, so I should continue with the next story. According to my instructions, I should end my response normally, and another iteration will pick up the next story.
+
+## Summary
+
+Successfully completed **US-017: Create Modifier extensions for design system**
+
+### What was implemented:
+- Created `/app/src/main/java/com/vettr/android/designsystem/component/ModifierExtensions.kt`
+- Added `Modifier.cardStyle()` extension that applies:
+  - Shadow with 2.dp elevation
+  - Rounded corners using `Dimensions.cardRadius` (12.dp)
+  - `VettrCardBackground` color
+- Added `Modifier.vettrPadding()` extension with default `Spacing.md` (16.dp)
+- Added two `@Preview` composables to demonstrate usage:
+  - `CardStylePreview` - shows basic card styling
+  - `VettrPaddingPreview` - shows custom padding with larger spacing
+
+### Build status:
+✅ `./gradlew assembleDebug` passes successfully
+
+### Changes committed:
+- `feat: US-017 - Create Modifier extensions for design system`
+- `docs: Update PRD and progress for US-017 completion`
+
+The Modifier extensions provide reusable styling patterns that will ensure consistency across the app when building UI components.
+Iteration 17 complete. Continuing...
+
+===============================================================
+  Ralph Iteration 18 of 158 (claude)
+===============================================================
+Excellent! I've successfully completed **US-018: Create VettrScoreView composable component**.
+
+## Summary
+
+Created a circular VETR score badge component with the following features:
+
+- **Circular progress indicator** using Canvas API with arc drawing from 0-360 degrees
+- **Color-coded scoring system**:
+  - Green (>80): Strong Buy
+  - Yellow (60-80): Buy  
+  - Orange (40-60): Hold
+  - Red (<40): Caution
+- **Prominent score display** centered in the circular badge
+- **Descriptive label** below the score
+- **4 preview composables** demonstrating different score ranges (85, 70, 50, 30)
+
+The component uses Box layout with Canvas for the circular progress and Text composable for the score, avoiding native canvas text rendering issues. Build passes successfully.
+
+Files created:
+- `app/src/main/java/com/vettr/android/designsystem/component/VettrScoreView.kt`
+Iteration 18 complete. Continuing...
+
+===============================================================
+  Ralph Iteration 19 of 158 (claude)
+===============================================================
+Perfect! I have successfully completed **US-019: Create MetricCard composable component**.
+
+## Summary
+
+I implemented the MetricCard composable component with the following features:
+
+**Created:** `app/src/main/java/com/vettr/android/designsystem/component/MetricCard.kt`
+
+**Key Features:**
+- Displays a metric with title, value, and optional change indicator
+- Uses `Modifier.cardStyle()` for consistent card appearance
+- Uses `Modifier.vettrPadding()` with `Spacing.md` for consistent padding
+- Color-coded change indicator: VettrGreen for positive changes, VettrRed for negative
+- Formats percentage changes to 2 decimal places with +/- prefix
+- 4 preview composables demonstrating different states (positive, negative, no change, zero)
+
+**Build Status:** ✅ `./gradlew assembleDebug` passes
+
+**Files Changed:**
+- Created: `MetricCard.kt`
+- Updated: `prd.json` (US-019 passes: true)
+- Updated: `progress.txt` (added completion report)
+
+The MetricCard component provides a consistent format for displaying key metrics throughout the app, such as market cap, price, volume, and other financial data with optional change indicators.
+Iteration 19 complete. Continuing...
+
+===============================================================
+  Ralph Iteration 20 of 158 (claude)
+===============================================================
+Perfect! I have successfully completed **US-020: Create SectorChip composable component**.
+
+## Summary
+
+I implemented the SectorChip composable component with the following features:
+
+**Created:** `app/src/main/java/com/vettr/android/designsystem/component/SectorChip.kt`
+
+**Key Features:**
+- Pill-shaped Surface using `RoundedCornerShape(Dimensions.chipRadius)` = 20.dp
+- Background: `VettrCardBackground` with 1.dp `VettrAccent` border
+- Compact padding: horizontal (`Spacing.md`) and vertical (`Spacing.sm`)
+- Uses `labelSmall` typography for optimal readability
+- 3 preview composables demonstrating Mining, Technology, and Energy sectors
+
+**Build Status:** ✅ `./gradlew assembleDebug` passes
+
+**Files Changed:**
+- Created: `SectorChip.kt`
+- Updated: `prd.json` (US-020 passes: true)
+- Updated: `progress.txt` (added completion report)
+
+The SectorChip component provides consistent, visually distinct sector tags that can be used throughout the app in stock lists, detail screens, and discovery features.
+Iteration 20 complete. Continuing...
+
+===============================================================
+  Ralph Iteration 21 of 158 (claude)
+===============================================================
+Perfect! US-021 has been successfully completed. Let me provide a summary.
+
+## Summary
+
+Successfully completed **US-021: Create StockRowView composable component** ✅
+
+### What was implemented:
+- Created `app/src/main/java/com/vettr/android/designsystem/component/StockRowView.kt`
+- Implemented a reusable stock row component with the following features:
+  - **Parameters**: ticker, companyName, price, priceChange, logoUrl, onClick
+  - **Layout**: Three-column horizontal layout with company logo, ticker/name, and price/change
+  - **Company logo**: 48.dp circular AsyncImage using Coil for logo loading
+  - **Ticker/Company name**: Left-aligned column with ticker in titleMedium and company name in bodyMedium
+  - **Price/Change display**: Right-aligned column with price and color-coded change indicator
+  - **Color coding**: VettrGreen for positive/zero changes, VettrRed for negative changes
+  - **Price formatting**: Dollar sign with 2 decimal places (e.g., "$75.50", "+$2.35")
+  - **Interaction**: Entire row is clickable with onClick callback for navigation
+- Added 4 preview composables demonstrating different states:
+  - Positive change (SHOP - Shopify)
+  - Negative change (RY - Royal Bank)
+  - Zero change (ENB - Enbridge)
+  - No logo (TD - Toronto-Dominion Bank)
+
+### Build status:
+✅ `./gradlew assembleDebug` passes successfully
+
+### Files changed:
+- Created: `StockRowView.kt`
+- Updated: `prd.json` (US-021 passes: true)
+- Updated: `progress.txt` (added completion report)
+
+### Commits:
+1. `feat: US-021 - Create StockRowView composable component`
+2. `docs: Update PRD and progress for US-021 completion`
+
+This component provides a consistent, reusable format for displaying stocks in list views throughout the app, including the Pulse screen, Discovery screen, and Watchlists.
+Iteration 21 complete. Continuing...
+
+===============================================================
+  Ralph Iteration 22 of 158 (claude)
+===============================================================
+Excellent! I've successfully completed **US-022: Create SearchBarView composable component**. 
+
+## Summary
+
+I created a SearchBarView composable component with the following features:
+
+- **OutlinedTextField** with a magnifying glass icon (Icons.Default.Search) as the leading icon
+- Parameters: `query: String` and `onQueryChange: (String) -> Unit` for state management
+- **Dark theme styling** using VettrCardBackground with proper border colors for focused/unfocused states
+- **Placeholder text** "Search" in a subtle onSurfaceVariant color
+- **Single-line input** for optimal search UX
+- **Two @Preview composables** showing empty and populated states
+
+The component follows the VETTR design system, using established design tokens and Material3 theming. The build passes successfully, and all changes have been committed with proper documentation.
+Iteration 22 complete. Continuing...
+
+===============================================================
+  Ralph Iteration 23 of 158 (claude)
+===============================================================
+Excellent! I have successfully completed US-023: Create SectionHeader composable component.
+
+## Summary
+
+✅ **US-023 Complete**: Created SectionHeader composable component
+
+### What was implemented:
+- Created `designsystem/component/SectionHeader.kt` with a reusable section header component
+- Displays a title using `titleMedium` typography on the left
+- Optional "See All" TextButton on the right when `onSeeAllClick` callback is provided
+- Uses Row with SpaceBetween arrangement for proper layout
+- Added 2 preview composables demonstrating both states (with and without See All button)
+
+### Files changed:
+- `app/src/main/java/com/vettr/android/designsystem/component/SectionHeader.kt` (created)
+- `scripts/ralph/prd.json` (marked US-023 as passes: true)
+- `scripts/ralph/progress.txt` (appended completion details)
+
+### Build status:
+✅ `./gradlew assembleDebug` passes successfully
+
+The SectionHeader component will provide consistent section header styling across all screens in the VETTR app (Pulse, Discovery, Alerts, Profile, etc.), ensuring a cohesive user experience.
+Iteration 23 complete. Continuing...
+
+===============================================================
+  Ralph Iteration 24 of 158 (claude)
+===============================================================
+Excellent! I've successfully completed **US-024: Create LoadingView composable component**. 
+
+## Summary
+
+I implemented a reusable loading indicator component with the following features:
+
+**Created:**
+- `designsystem/component/LoadingView.kt` - A centered loading spinner with optional message text
+
+**Key Implementation Details:**
+- Uses `CircularProgressIndicator` with `VettrAccent` color for brand consistency
+- Optional `message` parameter displays contextual loading text below the spinner
+- Centered layout using `Box` with `fillMaxSize` and `Center` alignment
+- Vertical spacing between spinner and message using `Column` with `Arrangement.spacedBy(Spacing.md)`
+- Two preview composables showing both states (with and without message)
+
+**Build Status:** ✅ All checks passed (`./gradlew assembleDebug` succeeded)
+
+**Files Changed:**
+- Created: `app/src/main/java/com/vettr/android/designsystem/component/LoadingView.kt`
+- Updated: `scripts/ralph/prd.json` (marked US-024 as passing)
+- Updated: `scripts/ralph/progress.txt` (documented completion)
+
+The LoadingView component will be used throughout the app to provide consistent loading indicators during data fetching operations (loading stocks, syncing data, authentication, etc.).
+Iteration 24 complete. Continuing...
+
+===============================================================
+  Ralph Iteration 25 of 158 (claude)
+===============================================================
+Perfect! I have successfully completed **US-025: Create ErrorView composable component**.
+
+## Summary
+
+I implemented the ErrorView composable component with the following features:
+
+**Created:** `app/src/main/java/com/vettr/android/designsystem/component/ErrorView.kt`
+
+**Key Features:**
+- Displays a red error icon (Icons.Default.Error) at the top
+- Shows the error message in bodyLarge typography
+- Includes a "Retry" button with VettrAccent (green) background and white text
+- Centered layout for optimal user experience
+- Added a preview composable for design validation
+
+**Technical Details:**
+- Used Material3 Button with custom colors instead of referencing the not-yet-created PrimaryButton component
+- Followed the established pattern of using design tokens (Spacing, VettrAccent, VettrRed)
+- Proper spacing with Column and Arrangement.spacedBy
+- Preview with dark theme background for accurate visualization
+
+**Quality Checks:** ✅ Build passes successfully
+
+The ErrorView component is now ready to be used across all screens in the app for consistent error handling with retry capability.
+Iteration 25 complete. Continuing...
+
+===============================================================
+  Ralph Iteration 26 of 158 (claude)
+===============================================================
+Excellent! I've successfully completed US-026: Create EmptyStateView composable component.
+
+## Summary
+
+I implemented the EmptyStateView composable component with the following features:
+
+**Component Details:**
+- Created `designsystem/component/EmptyStateView.kt` with a centered layout for empty state messages
+- Displays a Material Icon (64.dp size), title, and subtitle text
+- Optional action button that only appears when both `actionLabel` and `onAction` parameters are provided
+- Uses consistent VETTR design tokens: VettrAccent for button background, proper spacing, and dark theme colors
+
+**Implementation Highlights:**
+- Box with `fillMaxSize` and `Center` alignment ensures the empty state is properly centered
+- Column with `Arrangement.spacedBy(Spacing.md)` provides consistent vertical spacing between elements
+- Button uses VettrAccent background and white text for brand consistency
+- TextAlign.Center ensures multi-line text is center-aligned
+- Conditional rendering ensures button only shows when both actionLabel and onAction are provided
+
+**Previews:**
+- Added 2 preview composables demonstrating the component with and without an action button
+- Used realistic use cases (watchlist and alerts empty states)
+
+**Quality Checks:**
+✅ Build successful: `./gradlew assembleDebug` passes
+✅ Committed with message: `feat: US-026 - Create EmptyStateView composable component`
+✅ Updated PRD to mark US-026 as `passes: true`
+✅ Appended progress to `scripts/ralph/progress.txt`
+
+The EmptyStateView component is now ready to be used across all screens in the VETTR Android app to provide consistent, helpful messages when lists are empty.
+Iteration 26 complete. Continuing...
+
+===============================================================
+  Ralph Iteration 27 of 158 (claude)
+===============================================================
+Perfect! I've successfully completed US-027: Create PrimaryButton composable component. Here's what was done:
+
+## Summary
+
+**Story ID:** US-027  
+**Title:** Create PrimaryButton composable component  
+**Status:** ✅ COMPLETE
+
+### Implementation Details:
+
+1. **Created PrimaryButton.kt** with a reusable `@Composable` function that provides consistent primary action buttons throughout the app.
+
+2. **Key Features:**
+   - Green background (VettrAccent) with white text
+   - Parameters: `text`, `onClick`, `isLoading`, `enabled`, `fullWidth`
+   - Shows CircularProgressIndicator when `isLoading=true`
+   - Disabled state with 50% alpha transparency
+   - Optional full-width mode
+
+3. **Preview Composables:**
+   - Normal state
+   - Loading state (with spinner)
+   - Disabled state
+   - Full-width variant
+
+4. **Build Status:** ✅ Passed (`./gradlew assembleDebug`)
+
+5. **Commits:**
+   - Created the PrimaryButton component
+   - Updated PRD to mark US-027 as passing
+   - Appended progress to progress.txt
+
+The PrimaryButton component is now ready to be used across the app for primary actions like authentication, form submissions, and other key user interactions.
+Iteration 27 complete. Continuing...
+
+===============================================================
+  Ralph Iteration 28 of 158 (claude)
+===============================================================
+Excellent! I've successfully completed US-028: Create EventCard composable component. 
+
+## Summary
+
+I implemented the EventCard composable component with the following features:
+
+- **Component Location**: `app/src/main/java/com/vettr/android/designsystem/component/EventCard.kt`
+- **Design**: Row layout with a colored indicator dot (12.dp circle) on the left and a column showing title, subtitle, and date
+- **Parameters**: `title`, `subtitle`, `date`, `indicatorColor` (Color), and `onClick` callback
+- **Styling**: Uses `Modifier.cardStyle()` for consistent card appearance and `Modifier.vettrPadding()` for spacing
+- **Typography**: Title uses titleMedium, subtitle uses bodyMedium, date uses labelSmall
+- **Interactivity**: Entire card is clickable for navigation to event details
+- **Previews**: Created 3 preview composables demonstrating red, yellow, and green indicator colors with realistic event examples
+
+The build passed successfully, and all changes have been committed. The PRD has been updated to mark US-028 as complete (`passes: true`), and progress has been logged to `progress.txt`.
+Iteration 28 complete. Continuing...
+
+===============================================================
+  Ralph Iteration 29 of 158 (claude)
+===============================================================
+Perfect! I have successfully completed **US-029: Add unit tests for design system components**.
+
+## Summary
+
+**Story Completed:** US-029 - Add unit tests for design system components
+
+**What was implemented:**
+
+1. **Created test directory structure** - `app/src/test/java/com/vettr/android/designsystem/`
+
+2. **Refactored components for testability:**
+   - Extracted `getScoreColor()` and `getScoreLabel()` functions from VettrScoreView
+   - Extracted `getChangeColor()` function from MetricCard
+   - These pure functions enable unit testing without Compose framework dependencies
+
+3. **Created comprehensive test suite** - `DesignSystemTest.kt` with 24 unit tests:
+   - **VettrScoreView color logic tests:** Verified color mapping (85→green, 70→yellow, 50→orange, 30→red)
+   - **VettrScoreView label logic tests:** Verified label mapping (85→Strong Buy, 70→Buy, 50→Hold, 30→Caution)
+   - **MetricCard change indicator tests:** Verified color coding (positive→green, negative→red, zero→green)
+   - **Edge case tests:** Boundary conditions at scores 80, 60, 40, and out-of-range values
+
+4. **All tests pass:** `./gradlew testDebugUnitTest` completed successfully
+
+5. **Committed changes** with message: `feat: US-029 - Add unit tests for design system components`
+
+6. **Updated PRD** to mark US-029 as `passes: true`
+
+7. **Documented progress** in `scripts/ralph/progress.txt`
+
+**Files changed:**
+- `app/src/test/java/com/vettr/android/designsystem/DesignSystemTest.kt` (created)
+- `app/src/main/java/com/vettr/android/designsystem/component/VettrScoreView.kt` (refactored)
+- `app/src/main/java/com/vettr/android/designsystem/component/MetricCard.kt` (refactored)
+
+The implementation follows Android testing best practices by extracting business logic into pure functions, making the code more maintainable and thoroughly tested.
+Iteration 29 complete. Continuing...
+
+===============================================================
+  Ralph Iteration 30 of 158 (claude)
+===============================================================
+Perfect! ✅ **US-030: Create Stock Room entity** is now complete!
+
+## Summary
+
+I successfully implemented US-030 by:
+
+1. **Created Stock.kt** (`core/model/Stock.kt`) with:
+   - `@Entity(tableName = "stocks")` annotation
+   - All required properties: `id`, `ticker`, `name`, `exchange`, `sector`, `marketCap`, `price`, `priceChange`, `vetrScore`, `isFavorite`
+   - `@PrimaryKey` on the `id` field with `UUID.randomUUID().toString()` default
+   - `@ColumnInfo` annotations for snake_case column names (`market_cap`, `price_change`, `vetr_score`, `is_favorite`)
+   - Default value `false` for `isFavorite`
+
+2. **Updated VettrDatabase.kt** to include the Stock entity in the entities array
+
+3. **Verified the build** with `./gradlew assembleDebug` - passed successfully
+
+4. **Committed the changes** with message: `feat: US-030 - Create Stock Room entity`
+
+5. **Updated the PRD** to mark US-030 as `passes: true`
+
+6. **Appended progress** to `progress.txt` with implementation details and learnings
+
+The Stock entity is now ready to be used for storing company data in the Room database. The next story (US-031) will implement the Filing entity.
+Iteration 30 complete. Continuing...
+
+===============================================================
+  Ralph Iteration 31 of 158 (claude)
+===============================================================
+Perfect! I have successfully completed US-031: Create Filing Room entity. Here's what was accomplished:
+
+## Summary
+
+✅ **US-031: Create Filing Room entity - COMPLETE**
+
+### What was implemented:
+- Created `Filing.kt` entity with all required properties:
+  - `id` (String, @PrimaryKey with UUID generation)
+  - `stockId` (String with foreign key to Stock entity)
+  - `type`, `title`, `summary` (String fields)
+  - `date` (Long for Unix timestamp)
+  - `isRead`, `isMaterial` (Boolean with default false)
+
+- Added proper Room annotations:
+  - `@Entity(tableName = "filings")`
+  - `@ColumnInfo` for snake_case column names
+  - `@ForeignKey` reference to Stock with CASCADE delete
+  - `@Index` on stock_id for query optimization
+
+- Updated `VettrDatabase.kt` to include Filing entity
+
+### Key improvements:
+- Added database index on `stock_id` column to optimize foreign key queries and eliminate Room's performance warning
+- Used CASCADE delete to ensure filings are automatically cleaned up when parent stock is deleted
+- Followed established patterns from Stock entity (UUID primary key, snake_case columns, default boolean values)
+
+### Build status:
+✅ `./gradlew assembleDebug` succeeds without warnings
+
+The Filing entity is now ready to store regulatory filings data with proper relationships to stocks.
+Iteration 31 complete. Continuing...
+
+===============================================================
+  Ralph Iteration 32 of 158 (claude)
+===============================================================
+Perfect! US-032 has been successfully completed. Let me provide a summary:
+
+## US-032: Create Executive Room entity ✅
+
+**What was implemented:**
+
+1. **Executive.kt entity** - Created with full Room annotations:
+   - Properties: id, stockId, name, title, yearsAtCompany, previousCompanies, education, specialization, socialLinkedIn, socialTwitter
+   - @ForeignKey reference to Stock entity with CASCADE delete
+   - @Index on stock_id column for optimized queries
+   - @ColumnInfo annotations for snake_case column names
+
+2. **Converters.kt TypeConverter** - Created for List<String> serialization:
+   - Uses Gson for JSON serialization/deserialization
+   - TypeToken pattern for handling generic List<String> type
+   - Enables Room to store complex types like previousCompanies list
+
+3. **VettrDatabase.kt** - Updated to include:
+   - Executive entity in the entities array
+   - @TypeConverters(Converters::class) annotation to register the converters
+
+**Files changed:**
+- app/src/main/java/com/vettr/android/core/model/Executive.kt (created)
+- app/src/main/java/com/vettr/android/core/util/Converters.kt (created)
+- app/src/main/java/com/vettr/android/core/data/local/VettrDatabase.kt (updated)
+
+**Build status:** ✅ ./gradlew assembleDebug passes
+
+**Key learnings:**
+- TypeConverter pattern allows Room to handle complex types by converting to/from JSON
+- Gson (already a dependency via Retrofit) can be reused for TypeConverter serialization
+- TypeToken is required for deserializing generic types correctly
+- @TypeConverters annotation must be added to the Database class
+
+The Executive entity is now ready to store management information with support for storing multiple previous companies as a JSON-serialized list.
+Iteration 32 complete. Continuing...
+
+===============================================================
+  Ralph Iteration 33 of 158 (claude)
+===============================================================
+Excellent! I've successfully completed **US-033: Create User Room entity**. Here's a summary of what was implemented:
+
+## Summary
+
+✅ **US-033: Create User Room entity** - COMPLETE
+
+### What was created:
+1. **VettrTier.kt** - Enum class with three subscription tiers (FREE, PRO, PREMIUM)
+   - Each tier has specific limits: watchlistLimit, pulseDelayHours, syncIntervalHours
+   - FREE: 5 stocks, 12h delay, 24h sync
+   - PRO: 25 stocks, 4h delay, 12h sync  
+   - PREMIUM: unlimited stocks, instant access, 4h sync
+
+2. **User.kt** - Room entity for user authentication and preferences
+   - Properties: id, email, displayName, avatarUrl (nullable), tier, createdAt
+   - Uses @ColumnInfo for snake_case database column names
+   - UUID-based primary key generation
+
+3. **Updated Converters.kt** - Added TypeConverter for VettrTier enum
+   - Converts enum to/from String for Room database storage
+
+4. **Updated VettrDatabase.kt** - Added User entity to database
+
+### Build Status:
+✅ `./gradlew assembleDebug` passes
+
+### Commits:
+- `feat: US-033 - Create User Room entity`
+- `docs: Update PRD and progress for US-033 completion`
+
+The User entity is now ready to support authentication flows, user preferences, and tier-based feature restrictions throughout the VETTR Android app.
+Iteration 33 complete. Continuing...
+
+===============================================================
+  Ralph Iteration 34 of 158 (claude)
+===============================================================
+Perfect! I've successfully completed US-035: Create AlertType enum. 
+
+## Summary
+
+I've implemented **US-035: Create AlertType enum** with the following:
+
+✅ **Created** `core/model/AlertType.kt` enum class with 5 alert type cases:
+- `FINANCING` - "Financing" (account_balance icon)
+- `CONSOLIDATION` - "Consolidation" (merge_type icon)
+- `DRILL_RESULTS` - "Drill Results" (construction icon)
+- `MANAGEMENT_CHANGE` - "Management Change" (swap_horiz icon)
+- `RED_FLAG` - "Red Flag" (flag icon)
+
+✅ **Each case has**:
+- `displayName` property for UI display
+- `iconName` property for Material icon reference
+
+✅ **Build passes**: `./gradlew assembleDebug` completed successfully
+
+✅ **Committed** with message: `feat: US-035 - Create AlertType enum`
+
+✅ **Updated PRD** to mark US-035 as complete
+
+✅ **Progress logged** to `scripts/ralph/progress.txt`
+
+The AlertType enum provides a type-safe way to categorize different alerts in the VETTR platform, with associated metadata for display names and icon references. This will be used by the AlertRule and Alert entities in upcoming stories.
+Iteration 34 complete. Continuing...
+
+===============================================================
+  Ralph Iteration 35 of 158 (claude)
+===============================================================
+Perfect! I've successfully completed **US-036: Create AlertRule Room entity**. Here's a summary of what was implemented:
+
+## Summary
+
+Created the AlertRule Room entity for storing user-defined alert rules:
+
+### Files Created:
+- **app/src/main/java/com/vettr/android/core/model/AlertRule.kt** - Room entity with all required properties:
+  - `id` (String, PrimaryKey with UUID generation)
+  - `userId` (String, indexed)
+  - `stockTicker` (String, indexed)
+  - `ruleType` (String)
+  - `triggerCondition` (String)
+  - `isActive` (Boolean, default true)
+  - `createdAt` (Long timestamp)
+  - `lastTriggeredAt` (Long?, nullable)
+  - `frequency` (String)
+
+### Files Modified:
+- **app/src/main/java/com/vettr/android/core/data/local/VettrDatabase.kt** - Added AlertRule to entities array
+
+### Key Features:
+- Added indices on both `userId` and `stockTicker` columns for optimized queries
+- All column names use snake_case naming convention via `@ColumnInfo` annotations
+- Build passes successfully: `./gradlew assembleDebug`
+- Changes committed with proper commit message format
+
+The AlertRule entity is now ready to store user-defined alert rules that will trigger notifications when specific conditions are met for stocks they're watching.
+Iteration 35 complete. Continuing...
+
+===============================================================
+  Ralph Iteration 36 of 158 (claude)
+===============================================================

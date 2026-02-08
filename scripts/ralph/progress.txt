@@ -697,3 +697,44 @@ Files changed:
   - VettrTier enum properties encapsulate tier-specific feature limits for easy access throughout the app
   - TypeConverter methods must be simple and symmetric: fromType converts to String, toType converts from String
 ---
+## US-035: Create AlertType enum
+Status: ✅ COMPLETE
+Date: 2026-02-07
+Details:
+- Created core/model/AlertType.kt enum class with 5 alert type cases
+- Added FINANCING, CONSOLIDATION, DRILL_RESULTS, MANAGEMENT_CHANGE, RED_FLAG cases
+- Each case has displayName property for UI display (e.g., "Financing", "Drill Results")
+- Each case has iconName property for Material icon reference (e.g., "account_balance", "construction")
+- Build successful: ./gradlew assembleDebug passes
+Files changed:
+- app/src/main/java/com/vettr/android/core/model/AlertType.kt (created)
+**Learnings for future iterations:**
+  - AlertType enum provides categorization for different types of alerts in the VETTR platform
+  - iconName property stores Material icon identifier strings for consistent icon usage across the app
+  - Icon names use Material icon naming convention (snake_case): account_balance, merge_type, construction, swap_horiz, flag
+  - displayName provides human-readable labels for UI display while maintaining code-friendly enum names
+  - Enum pattern with properties is ideal for fixed sets of categories that need associated metadata
+---
+## US-036: Create AlertRule Room entity
+Status: ✅ COMPLETE
+Date: 2026-02-07
+Details:
+- Created core/model/AlertRule.kt data class annotated with @Entity(tableName = "alert_rules")
+- Added all required properties: id (String, @PrimaryKey), userId, stockTicker, ruleType, triggerCondition, isActive, createdAt, lastTriggeredAt, frequency
+- Added @ColumnInfo annotations for snake_case column names
+- Added @Index annotations on userId and stockTicker columns for query optimization
+- Updated VettrDatabase.kt to include AlertRule entity in entities array
+- Build successful: ./gradlew assembleDebug passes
+Files changed:
+- app/src/main/java/com/vettr/android/core/model/AlertRule.kt (created)
+- app/src/main/java/com/vettr/android/core/data/local/VettrDatabase.kt (updated)
+**Learnings for future iterations:**
+  - AlertRule entity stores user-defined alert rules with conditions that trigger notifications
+  - Multiple indices pattern: @Index annotations can be specified in array for multiple columns
+  - Index on userId optimizes queries for fetching user's alert rules
+  - Index on stockTicker optimizes queries for stock-specific alert rules
+  - lastTriggeredAt is nullable (Long?) since rules may never have triggered
+  - isActive default value (true) makes new rules active by default
+  - Rule lifecycle: created (createdAt), activated/deactivated (isActive), triggered (lastTriggeredAt)
+  - ruleType, triggerCondition, and frequency stored as String for flexibility (can be converted to enums later if needed)
+---
