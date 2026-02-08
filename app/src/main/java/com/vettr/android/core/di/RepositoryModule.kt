@@ -12,6 +12,8 @@ import com.vettr.android.core.data.repository.RedFlagRepository
 import com.vettr.android.core.data.repository.RedFlagRepositoryImpl
 import com.vettr.android.core.data.repository.StockRepository
 import com.vettr.android.core.data.repository.StockRepositoryImpl
+import com.vettr.android.core.data.repository.VetrScoreRepository
+import com.vettr.android.core.data.repository.VetrScoreRepositoryImpl
 import dagger.Binds
 import dagger.Module
 import dagger.hilt.InstallIn
@@ -57,4 +59,10 @@ abstract class RepositoryModule {
     abstract fun bindRedFlagRepository(
         redFlagRepositoryImpl: RedFlagRepositoryImpl
     ): RedFlagRepository
+
+    @Binds
+    @Singleton
+    abstract fun bindVetrScoreRepository(
+        vetrScoreRepositoryImpl: VetrScoreRepositoryImpl
+    ): VetrScoreRepository
 }
