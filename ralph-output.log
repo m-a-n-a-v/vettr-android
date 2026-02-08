@@ -274,3 +274,137 @@ Iteration 10 complete. Continuing...
 ===============================================================
   Ralph Iteration 11 of 158 (claude)
 ===============================================================
+Perfect! ✅ US-011 is now complete. The `.gitignore` file was already properly configured in the initial project scaffold with all the required entries for Android development. The build passes successfully and no ignored files are being tracked in Git.
+
+**Summary:**
+- ✅ Verified .gitignore contains all required entries (.gradle/, build/, .idea/, *.iml, local.properties, .DS_Store, captures/, .externalNativeBuild/, .cxx/)
+- ✅ Confirmed no ignored files are tracked in Git
+- ✅ Build succeeds: ./gradlew assembleDebug
+- ✅ Updated PRD: US-011 passes = true
+- ✅ Appended progress report to progress.txt
+- ✅ Committed all changes
+
+The next story to implement would be US-012: Create GitHub Actions workflow for build and test.
+Iteration 11 complete. Continuing...
+
+===============================================================
+  Ralph Iteration 12 of 158 (claude)
+===============================================================
+## Summary
+
+I have successfully completed **US-012: Create GitHub Actions workflow for build and test**.
+
+### What was implemented:
+
+1. **Created `.github/workflows/build.yml`** - A GitHub Actions CI workflow with:
+   - Triggers on push and pull_request to main branch
+   - Uses ubuntu-latest runner with JDK 17 (temurin distribution)
+   - Gradle caching for faster builds
+   - Runs `./gradlew assembleDebug` to build the app
+   - Runs `./gradlew testDebugUnitTest` to execute unit tests
+   - Proper permissions set with `chmod +x gradlew`
+
+2. **Verified all acceptance criteria:**
+   - ✅ Created .github/workflows/build.yml
+   - ✅ Workflow triggers on push and pull_request to main
+   - ✅ Workflow runs ./gradlew assembleDebug
+   - ✅ Workflow runs ./gradlew testDebugUnitTest
+   - ✅ Uses ubuntu-latest runner with JDK 17
+   - ✅ Workflow file is valid YAML (validated with Python yaml parser)
+
+3. **Quality checks passed:**
+   - Build successful: `./gradlew assembleDebug` completes with BUILD SUCCESSFUL
+
+4. **Commits created:**
+   - feat: US-012 - Create GitHub Actions workflow for build and test
+   - docs: Update PRD and progress for US-012 completion
+
+The workflow is now ready to run on GitHub whenever code is pushed or PRs are created targeting the main branch, providing continuous integration for the VETTR Android project.
+Iteration 12 complete. Continuing...
+
+===============================================================
+  Ralph Iteration 13 of 158 (claude)
+===============================================================
+Perfect! I've successfully completed **US-013: Create Color.kt with brand design tokens**.
+
+## Summary
+
+I've updated the Color.kt file with all required VETTR brand design tokens:
+
+**Brand Colors:**
+- ✅ VettrNavy (0xFF0D1B2A)
+- ✅ VettrAccent (0xFF00C853)
+- ✅ VettrCardBackground (0xFF1B2838)
+- ✅ VettrTextPrimary (Color.White)
+- ✅ VettrTextSecondary (0xFFA0A0A0)
+
+**Risk Indicator Colors:**
+- ✅ VettrGreen (0xFF00C853) - for positive changes and high scores
+- ✅ VettrYellow (0xFFFFAB00) - for moderate risk and warnings
+- ✅ VettrRed (0xFFFF5252) - for negative changes and high risk
+
+All changes have been committed and the build passes successfully. The PRD has been updated to mark US-013 as complete, and progress has been logged to progress.txt.
+Iteration 13 complete. Continuing...
+
+===============================================================
+  Ralph Iteration 14 of 158 (claude)
+===============================================================
+## Summary
+
+I have successfully completed **US-014: Create Typography.kt with text styles**. Here's what was done:
+
+### Changes Made
+Updated `app/src/main/java/com/vettr/android/designsystem/theme/Type.kt` with VETTR brand typography specifications:
+- **displayLarge**: 34sp, Bold (updated from 57sp)
+- **titleLarge**: 28sp, SemiBold (updated from 22sp)
+- **titleMedium**: 20sp, SemiBold (updated from 16sp, Medium)
+- **bodyLarge**: 17sp, Normal (updated from 16sp)
+- **bodyMedium**: 15sp, Normal (updated from 14sp)
+- **labelSmall**: 12sp, Normal (updated from 11sp, Medium)
+
+All text styles use `FontFamily.Default` for system font consistency.
+
+### Verification
+- Build successful: `./gradlew assembleDebug` passes
+- All acceptance criteria met
+- Committed with message: `feat: US-014 - Create Typography.kt with text styles`
+- PRD updated: `passes: true` for US-014
+- Progress report appended to `progress.txt`
+
+The typography design tokens are now centralized and ready to be used throughout the VETTR Android app, ensuring consistent text styling across all screens.
+Iteration 14 complete. Continuing...
+
+===============================================================
+  Ralph Iteration 15 of 158 (claude)
+===============================================================
+Perfect! I have successfully completed **US-015: Create Spacing.kt and Dimensions.kt constants**.
+
+## Summary
+
+I've implemented centralized spacing and dimension design tokens for the VETTR Android app:
+
+### Files Created:
+1. **`Spacing.kt`** - Spacing constants for consistent padding/margins:
+   - xs = 4.dp
+   - sm = 8.dp
+   - md = 16.dp
+   - lg = 24.dp
+   - xl = 32.dp
+
+2. **`Dimensions.kt`** - Dimension constants for UI elements:
+   - **Corner radii**: cardRadius=12.dp, chipRadius=20.dp, buttonRadius=8.dp
+   - **Icon sizes**: iconSm=16.dp, iconMd=24.dp, iconLg=32.dp
+
+### Verification:
+- ✅ Build successful: `./gradlew assembleDebug` passes
+- ✅ All acceptance criteria met
+- ✅ Committed with message: `feat: US-015 - Create Spacing.kt and Dimensions.kt constants`
+- ✅ PRD updated: `passes: true` for US-015
+- ✅ Progress report appended to `progress.txt`
+
+These design tokens will ensure consistent spacing and sizing throughout the app, making it easier to maintain visual hierarchy and adhere to the VETTR design system.
+Iteration 15 complete. Continuing...
+
+===============================================================
+  Ralph Iteration 16 of 158 (claude)
+===============================================================
