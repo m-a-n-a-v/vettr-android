@@ -1286,3 +1286,90 @@ Files changed:
   - All 25 stocks have unique tickers to prevent Room database conflicts
   - seedStocks() is called from seedAllData() which will also seed filings and executives in US-059
 ---
+## US-059: Add sample filings and executives seed data
+Status: ✅ COMPLETE
+Date: 2026-02-07
+Details:
+- Implemented seedFilings() method with 3-5 filings per stock
+- Filing types include MD&A, Press Release, and Financial Statements with realistic titles and summaries
+- Filing dates randomly distributed over last 6 months (1-180 days ago)
+- Implemented seedExecutives() method with 2-4 executives per stock
+- Executive roles include CEO, CFO, VP Exploration/CTO/VP Operations, and VP Corporate Development
+- Executive data includes realistic names, titles, tenure (yearsAtCompany), previous companies (JSON-serialized), education, and specializations
+- Added helper functions: getPressReleaseTitle(), getPressReleaseSummary(), getExecutiveName(), getPreviousCompanies(), getEducation(), getSpecialization()
+- Sector-specific content generation for Mining, Energy, Technology, and Agriculture sectors
+- Previous companies list serialized to JSON using Gson for storage in Room database
+- Updated seedAllData() to call seedFilings() and seedExecutives() with stock data
+- Build successful: ./gradlew assembleDebug passes
+Files changed:
+- app/src/main/java/com/vettr/android/core/data/local/SeedDataService.kt (added 249 lines)
+**Learnings for future iterations:**
+  - Double ranges don't have random() extension in Kotlin - use Random.nextDouble(from, until) instead
+  - Filing stockId must match Stock.id (UUID), not ticker, due to foreign key relationship
+  - Executive previousCompanies stored as JSON string using Gson serialization for Room database compatibility
+  - Sector-specific content generation improves realism of seed data for different industries
+  - Random filing dates distributed over 6 months provide realistic temporal variety for testing
+  - Executive tenure ranges should be realistic: CEO (3-15 years), CFO (2-12 years), VPs (1.5-10 years)
+  - Helper functions for name/company/education generation improve code maintainability and variety
+  - Gson is already available as project dependency through Retrofit, can be reused for JSON serialization
+---
+## US-060: Seed data on first launch
+Status: ✅ COMPLETE
+Date: 2026-02-07
+Details:
+- Updated VettrApp.kt to implement seed check and data loading on first launch
+- Added @Inject lateinit var seedDataService: SeedDataService for Hilt dependency injection
+- Created applicationScope coroutine scope with SupervisorJob and Dispatchers.IO for background seeding
+- Implemented onCreate() override to check isSeedComplete() and call seedAllData() if needed
+- Marks seed as complete after seeding finishes to prevent re-seeding on subsequent launches
+- SeedDataService automatically provided by Hilt via @Singleton and @Inject constructor annotations
+- Build successful: ./gradlew assembleDebug passes
+Files changed:
+- app/src/main/java/com/vettr/android/VettrApp.kt (updated with seed logic)
+- scripts/ralph/prd.json (updated passes to true)
+**Learnings for future iterations:**
+  - Application class can use @Inject lateinit var for Hilt dependency injection without @AndroidEntryPoint
+  - SupervisorJob + Dispatchers.IO creates coroutine scope for background work that survives child coroutine failures
+  - DataStore preferences (used by SeedDataService) provide type-safe async persistence for seed completion flag
+  - SeedDataService doesn't need explicit Hilt module binding - @Singleton + @Inject constructor enables automatic provision
+  - Application.onCreate() runs before any Activity, making it ideal for one-time initialization like database seeding
+  - Coroutine scope tied to Application lifecycle ensures seed operation completes even if user navigates away
+  - Seed check prevents duplicate seeding on subsequent app launches by checking DataStore flag
+---
+
+## US-061: Add seed data unit tests
+Status: ✅ COMPLETE
+Date: 2026-02-07
+Details:
+- Created app/src/test/java/com/vettr/android/core/data/SeedDataServiceTest.kt with comprehensive unit tests
+- Added MockK version 1.13.13 to gradle/libs.versions.toml for mocking in unit tests
+- Added kotlinx-coroutines-test dependency to gradle/libs.versions.toml for testing coroutines
+- Updated app/build.gradle.kts with testImplementation dependencies: mockk and kotlinx-coroutines-test
+- Implemented 6 test cases covering seed data integrity:
+  1. `25 stocks are generated with valid fields` - verifies stock count, non-null/non-empty fields, valid exchanges (TSX/TSXV/CSE), positive prices and market caps
+  2. `VETR Scores are in valid range 0-100` - verifies all scores are between 0-100 and there's score distribution
+  3. `Filings have required fields - title, date, summary` - verifies 75-125 filings generated (3-5 per stock), all have required fields, dates are in the past
+  4. `All stocks have unique tickers` - verifies no duplicate tickers in seed data
+  5. `All stocks have unique IDs` - verifies all stock IDs are unique (UUID collision check)
+  6. `Executives are generated for each stock` - verifies 50-100 executives (2-4 per stock), all have valid fields
+- Used MockK to mock DAOs (StockDao, FilingDao, ExecutiveDao) and capture inserted data for validation
+- Used slot() pattern to capture List arguments passed to DAO insert methods
+- All 6 tests pass successfully: ./gradlew testDebugUnitTest
+- Build successful: ./gradlew assembleDebug passes
+Files changed:
+- app/src/test/java/com/vettr/android/core/data/SeedDataServiceTest.kt (created with 242 lines)
+- gradle/libs.versions.toml (added mockk and kotlinx-coroutines-test)
+- app/build.gradle.kts (added test dependencies)
+- scripts/ralph/prd.json (updated passes to true)
+**Learnings for future iterations:**
+  - MockK is essential for unit testing Android components - enables mocking of DAOs without database dependency
+  - slot() pattern in MockK captures method arguments for verification: `val slot = slot<List<Stock>>()` + `coEvery { dao.insert(capture(slot)) }`
+  - MockK uses `coEvery` for suspend functions and `coVerify` for verification of suspend function calls
+  - MockK `relaxed = true` parameter creates relaxed mock that returns default values for all methods
+  - Unit tests should verify business logic without database/network dependencies
+  - Comprehensive test coverage includes: required fields, ranges, counts, uniqueness, distribution
+  - Test names with backticks allow descriptive names: `Filings have required fields - title, date, summary`
+  - kotlinx-coroutines-test provides runBlocking for testing suspend functions synchronously
+  - Test results are in XML format at app/build/test-results/testDebugUnitTest/*.xml
+  - Adding new test dependencies requires updating both libs.versions.toml and build.gradle.kts
+---

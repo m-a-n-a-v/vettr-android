@@ -1647,3 +1647,155 @@ Iteration 56 complete. Continuing...
 ===============================================================
   Ralph Iteration 57 of 158 (claude)
 ===============================================================
+Perfect! I've successfully completed US-058. Here's a summary of what was implemented:
+
+## US-058: Add 25 pilot stocks seed data ✅
+
+I've successfully implemented the seed data for 25 pilot Canadian stocks in the `SeedDataService`. Here's what was done:
+
+### Implementation Details:
+- **Added `seedStocks()` method** with 25 Canadian stocks featuring realistic data
+- **Included all 23 required stocks** from the acceptance criteria (BTO.TO, FOM.V, AMC.V, IE.TO, LAAC.TO, DML.TO, GMIN.TO, SOIL.V, TVE.TO, CJ.TO, GRN.TO, NPI.TO, DCBO.TO, LSPD.TO, DND.TO, QUIS.V, PNG.V, ENGH.TO, ACT.CSE, PLUR.V, PAID.CSE, NDA.V, NTAR.CSE)
+- **Added 2 additional stocks** to reach the 25 total: BIR.TO (Birchcliff Energy) and VET.TO (Vermilion Energy)
+
+### Stock Data Characteristics:
+- **VETR Score Distribution:**
+  - 5 Strong Buy stocks (scores 80-90)
+  - 9 Buy stocks (scores 62-75)
+  - 7 Hold stocks (scores 45-53)
+  - 4 Caution stocks (scores 32-38)
+
+- **Sector Coverage:** Mining (9), Technology (8), Energy (7), Agriculture (1)
+- **Exchange Coverage:** TSX (11), TSXV (10), CSE (4)
+- **Realistic pricing:** Market caps ranging from $8M to $5.4B, prices from $0.08 to $52.30
+
+### Files Changed:
+- `app/src/main/java/com/vettr/android/core/data/local/SeedDataService.kt` - Added seedStocks() method
+- `scripts/ralph/prd.json` - Marked US-058 as complete
+- `scripts/ralph/progress.txt` - Added progress log
+
+Build passes successfully: ✅ `./gradlew assembleDebug`
+
+The seed data is now ready to be used when implementing the data seeding logic in US-060 (seed on first launch).
+Iteration 57 complete. Continuing...
+
+===============================================================
+  Ralph Iteration 58 of 158 (claude)
+===============================================================
+Excellent! The story is complete. Let me provide a summary:
+
+## Summary
+
+I've successfully completed **US-059: Add sample filings and executives seed data**.
+
+### What was implemented:
+
+1. **seedFilings() method** - Adds 3-5 filings per stock with:
+   - Three filing types: MD&A, Press Release, and Financial Statements
+   - Realistic titles and summaries based on stock sector (Mining, Energy, Technology, Agriculture)
+   - Dates randomly distributed over the last 6 months
+   - Material and read status flags
+
+2. **seedExecutives() method** - Adds 2-4 executives per stock with:
+   - Realistic executive names, titles (CEO, CFO, VPs), and specializations
+   - Years at company with appropriate ranges per role
+   - Previous companies list (JSON-serialized) with sector-relevant companies
+   - Education credentials with university names
+   - Sector-specific specializations
+
+3. **Helper functions** for realistic data generation:
+   - `getPressReleaseTitle()` and `getPressReleaseSummary()` - sector-specific content
+   - `getExecutiveName()` - generates random names
+   - `getPreviousCompanies()` - sector-relevant company lists
+   - `getEducation()` - specialization-specific degrees
+   - `getSpecialization()` - sector and role-specific expertise
+
+4. **Updated seedAllData()** to call both methods with stock data
+
+### Key learnings:
+- Used `Random.nextDouble()` instead of `.random()` on Double ranges
+- Filing `stockId` must match Stock UUID (foreign key constraint)
+- Previous companies serialized to JSON using Gson (already available in project)
+- Sector-specific content improves testing realism
+
+**Build successful** and changes committed. The PRD has been updated with `passes: true` for US-059.
+Iteration 58 complete. Continuing...
+
+===============================================================
+  Ralph Iteration 59 of 158 (claude)
+===============================================================
+Perfect! I have successfully completed **US-060: Seed data on first launch**. Here's a summary of what was implemented:
+
+## Summary
+
+**User Story:** US-060 - Seed data on first launch
+
+**Implementation:**
+- Updated `VettrApp.kt` to inject `SeedDataService` via Hilt
+- Created an application-scoped coroutine with `SupervisorJob` and `Dispatchers.IO` for background seeding
+- Implemented `onCreate()` to check if seeding is complete using `isSeedComplete()`
+- If not seeded, calls `seedAllData()` to populate the database with 25 Canadian stocks, filings, and executives
+- Marks seeding as complete with `markSeedComplete()` to prevent duplicate seeding on subsequent launches
+- Build passes successfully
+
+**Files Changed:**
+- `app/src/main/java/com/vettr/android/VettrApp.kt` - Added seed check and data loading logic
+- `scripts/ralph/prd.json` - Marked US-060 as complete
+- `scripts/ralph/progress.txt` - Added completion details and learnings
+
+**Key Learnings:**
+- Application class supports field injection with `@Inject lateinit var` without needing `@AndroidEntryPoint`
+- `SeedDataService` with `@Singleton` and `@Inject constructor` is automatically provided by Hilt
+- Application's `onCreate()` is the ideal place for one-time initialization like database seeding
+- DataStore preferences provide type-safe persistence for tracking seed completion status
+
+The app will now automatically populate the database with seed data on first launch, ensuring users see realistic stock, filing, and executive data immediately.
+Iteration 59 complete. Continuing...
+
+===============================================================
+  Ralph Iteration 60 of 158 (claude)
+===============================================================
+Perfect! US-061 is now complete. Let me provide a summary:
+
+## Summary: US-061 - Add seed data unit tests ✅
+
+I successfully completed user story US-061 by implementing comprehensive unit tests for the SeedDataService. Here's what was accomplished:
+
+### What was implemented:
+1. **Created SeedDataServiceTest.kt** with 6 comprehensive test cases:
+   - ✅ 25 stocks are generated with valid fields
+   - ✅ VETR Scores are in valid range (0-100)
+   - ✅ Filings have required fields (title, date, summary)
+   - ✅ All stocks have unique tickers
+   - ✅ All stocks have unique IDs
+   - ✅ Executives are generated for each stock
+
+2. **Added testing dependencies**:
+   - MockK 1.13.13 for mocking DAOs
+   - kotlinx-coroutines-test for testing suspend functions
+
+3. **Test highlights**:
+   - Used MockK's `slot()` pattern to capture inserted data from DAOs
+   - Verified stock count (exactly 25), valid exchanges (TSX/TSXV/CSE), positive prices
+   - Verified VETR scores are 0-100 with proper distribution
+   - Verified 75-125 filings (3-5 per stock) with required fields
+   - Verified 50-100 executives (2-4 per stock) with valid data
+   - All tests pass successfully
+
+### Files changed:
+- `app/src/test/java/com/vettr/android/core/data/SeedDataServiceTest.kt` (created, 242 lines)
+- `gradle/libs.versions.toml` (added MockK and coroutines-test dependencies)
+- `app/build.gradle.kts` (added test dependencies)
+- `scripts/ralph/prd.json` (marked US-061 as complete)
+- `scripts/ralph/progress.txt` (documented completion)
+
+### Quality checks passed:
+- ✅ `./gradlew testDebugUnitTest` - All 6 tests passed
+- ✅ `./gradlew assembleDebug` - Build successful
+
+The commit has been made with message: `feat: US-061 - Add seed data unit tests`
+Iteration 60 complete. Continuing...
+
+===============================================================
+  Ralph Iteration 61 of 158 (claude)
+===============================================================
