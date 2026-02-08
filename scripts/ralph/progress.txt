@@ -1916,3 +1916,21 @@ Files changed:
 - MainScreen's NavHost handles both bottom tab navigation and detail screen navigation
 
 ---
+
+## US-084: Create StocksViewModel for Stocks tab
+Status: ✅ COMPLETE
+Date: 2026-02-07
+Details:
+- Created StocksViewModel.kt in feature/stockdetail package with @HiltViewModel annotation
+- Injected StockRepository via @Inject constructor
+- Implemented StateFlow properties: allStocks, searchQuery, isLoading
+- Created filteredStocks as computed StateFlow using combine() and stateIn()
+- Implemented loadStocks() method to fetch stocks from repository
+- Implemented searchStocks(query: String) to update search query
+- Build successful: ./gradlew assembleDebug passes
+**Learnings for future iterations:**
+  - Use stateIn() with SharingStarted.WhileSubscribed(5000) for computed StateFlows from combine()
+  - asStateFlow() only works on MutableStateFlow, not on Flow transformations
+  - Filtered lists should use combine() to merge multiple StateFlows and stateIn() to convert to StateFlow
+  - WhileSubscribed(5000) keeps the flow active for 5 seconds after last subscriber, optimizing for config changes
+---
