@@ -48,6 +48,9 @@ class SettingsRepository @Inject constructor(
         // Accessibility settings keys
         val HAPTIC_FEEDBACK_ENABLED = booleanPreferencesKey("haptic_feedback_enabled")
 
+        // Security settings keys
+        val BIOMETRIC_LOGIN_ENABLED = booleanPreferencesKey("biometric_login_enabled")
+
         // Default values
         const val DEFAULT_CURRENCY = "CAD"
         const val DEFAULT_DARK_MODE = true
@@ -60,6 +63,7 @@ class SettingsRepository @Inject constructor(
         const val DEFAULT_ANALYTICS_OPT_OUT = false
         const val DEFAULT_CRASH_REPORTING_OPT_OUT = false
         const val DEFAULT_HAPTIC_FEEDBACK_ENABLED = true
+        const val DEFAULT_BIOMETRIC_LOGIN_ENABLED = false
     }
 
     // General settings flows
@@ -108,6 +112,11 @@ class SettingsRepository @Inject constructor(
     // Accessibility settings flows
     val hapticFeedbackEnabled: Flow<Boolean> = dataStore.data.map { preferences ->
         preferences[HAPTIC_FEEDBACK_ENABLED] ?: DEFAULT_HAPTIC_FEEDBACK_ENABLED
+    }
+
+    // Security settings flows
+    val biometricLoginEnabled: Flow<Boolean> = dataStore.data.map { preferences ->
+        preferences[BIOMETRIC_LOGIN_ENABLED] ?: DEFAULT_BIOMETRIC_LOGIN_ENABLED
     }
 
     // Setters for general settings
@@ -177,6 +186,13 @@ class SettingsRepository @Inject constructor(
     suspend fun setHapticFeedbackEnabled(value: Boolean) {
         dataStore.edit { preferences ->
             preferences[HAPTIC_FEEDBACK_ENABLED] = value
+        }
+    }
+
+    // Setters for security settings
+    suspend fun setBiometricLoginEnabled(value: Boolean) {
+        dataStore.edit { preferences ->
+            preferences[BIOMETRIC_LOGIN_ENABLED] = value
         }
     }
 

@@ -85,6 +85,7 @@ fun SettingsScreen(
         onAnalyticsOptOutChange = { viewModel.setAnalyticsOptOut(it) },
         onCrashReportingOptOutChange = { viewModel.setCrashReportingOptOut(it) },
         onHapticFeedbackChange = { viewModel.setHapticFeedbackEnabled(it) },
+        onBiometricLoginChange = { viewModel.setBiometricLoginEnabled(it) },
         onResetApp = { viewModel.resetApp(view) },
         onBackClick = onBackClick,
         modifier = modifier
@@ -106,11 +107,13 @@ private fun SettingsScreenContent(
     onAnalyticsOptOutChange: (Boolean) -> Unit,
     onCrashReportingOptOutChange: (Boolean) -> Unit,
     onHapticFeedbackChange: (Boolean) -> Unit,
+    onBiometricLoginChange: (Boolean) -> Unit,
     onResetApp: () -> Unit,
     onBackClick: () -> Unit,
     modifier: Modifier = Modifier
 ) {
     var showResetDialog by remember { mutableStateOf(false) }
+    var showBiometricUnavailableDialog by remember { mutableStateOf(false) }
 
     Scaffold(
         topBar = {
@@ -260,6 +263,35 @@ private fun SettingsScreenContent(
 
             Spacer(modifier = Modifier.height(Spacing.lg))
 
+            // Security Section
+            SectionHeader(title = "Security")
+            Spacer(modifier = Modifier.height(Spacing.sm))
+
+            SettingCard {
+                Column {
+                    SettingToggleRow(
+                        title = "Enable Biometric Login",
+                        subtitle = if (uiState.biometricAvailable) {
+                            if (uiState.biometricLoginEnabled) "Unlock with fingerprint or face" else "Use fingerprint or face to unlock app"
+                        } else {
+                            uiState.biometricUnavailableReason ?: "Biometric authentication not available"
+                        },
+                        checked = uiState.biometricLoginEnabled,
+                        onCheckedChange = { enabled ->
+                            if (enabled && !uiState.biometricAvailable) {
+                                // Show dialog if trying to enable but biometric is unavailable
+                                showBiometricUnavailableDialog = true
+                            } else {
+                                onBiometricLoginChange(enabled)
+                            }
+                        },
+                        enabled = uiState.biometricAvailable
+                    )
+                }
+            }
+
+            Spacer(modifier = Modifier.height(Spacing.lg))
+
             // Accessibility Section
             SectionHeader(title = "Accessibility")
             Spacer(modifier = Modifier.height(Spacing.sm))
@@ -326,6 +358,14 @@ private fun SettingsScreenContent(
                 onResetApp()
             },
             onDismiss = { showResetDialog = false }
+        )
+    }
+
+    // Biometric unavailable dialog
+    if (showBiometricUnavailableDialog) {
+        BiometricUnavailableDialog(
+            reason = uiState.biometricUnavailableReason ?: "Biometric authentication is not available on this device",
+            onDismiss = { showBiometricUnavailableDialog = false }
         )
     }
 }
@@ -412,7 +452,8 @@ private fun SettingToggleRow(
     subtitle: String,
     checked: Boolean,
     onCheckedChange: (Boolean) -> Unit,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    enabled: Boolean = true
 ) {
     Row(
         modifier = modifier
@@ -427,7 +468,7 @@ private fun SettingToggleRow(
             Text(
                 text = title,
                 style = MaterialTheme.typography.bodyLarge,
-                color = VettrTextPrimary
+                color = if (enabled) VettrTextPrimary else VettrTextSecondary.copy(alpha = 0.6f)
             )
 
             Spacer(modifier = Modifier.height(Spacing.xs))
@@ -444,11 +485,16 @@ private fun SettingToggleRow(
         Switch(
             checked = checked,
             onCheckedChange = onCheckedChange,
+            enabled = enabled,
             colors = SwitchDefaults.colors(
                 checkedThumbColor = VettrAccent,
                 checkedTrackColor = VettrAccent.copy(alpha = 0.5f),
                 uncheckedThumbColor = VettrTextSecondary,
-                uncheckedTrackColor = VettrTextSecondary.copy(alpha = 0.3f)
+                uncheckedTrackColor = VettrTextSecondary.copy(alpha = 0.3f),
+                disabledCheckedThumbColor = VettrTextSecondary.copy(alpha = 0.5f),
+                disabledCheckedTrackColor = VettrTextSecondary.copy(alpha = 0.3f),
+                disabledUncheckedThumbColor = VettrTextSecondary.copy(alpha = 0.5f),
+                disabledUncheckedTrackColor = VettrTextSecondary.copy(alpha = 0.2f)
             )
         )
     }
@@ -572,6 +618,42 @@ private fun ResetConfirmationDialog(
     )
 }
 
+/**
+ * Biometric unavailable dialog.
+ */
+@Composable
+private fun BiometricUnavailableDialog(
+    reason: String,
+    onDismiss: () -> Unit
+) {
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        containerColor = VettrCardBackground,
+        title = {
+            Text(
+                text = "Biometric Login Unavailable",
+                style = MaterialTheme.typography.titleMedium,
+                color = VettrTextPrimary
+            )
+        },
+        text = {
+            Text(
+                text = reason,
+                style = MaterialTheme.typography.bodyMedium,
+                color = VettrTextSecondary
+            )
+        },
+        confirmButton = {
+            TextButton(onClick = onDismiss) {
+                Text(
+                    text = "OK",
+                    color = VettrAccent
+                )
+            }
+        }
+    )
+}
+
 @Preview(showBackground = true)
 @Composable
 fun SettingsScreenPreview() {
@@ -588,7 +670,10 @@ fun SettingsScreenPreview() {
                 notificationFrequency = "Real-time",
                 analyticsOptOut = false,
                 crashReportingOptOut = false,
-                hapticFeedbackEnabled = true
+                hapticFeedbackEnabled = true,
+                biometricLoginEnabled = true,
+                biometricAvailable = true,
+                biometricUnavailableReason = null
             ),
             onCurrencyChange = {},
             onDarkModeChange = {},
@@ -601,6 +686,7 @@ fun SettingsScreenPreview() {
             onAnalyticsOptOutChange = {},
             onCrashReportingOptOutChange = {},
             onHapticFeedbackChange = {},
+            onBiometricLoginChange = {},
             onResetApp = {},
             onBackClick = {}
         )

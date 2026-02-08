@@ -3,6 +3,8 @@ package com.vettr.android.feature.profile
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.vettr.android.core.data.repository.SettingsRepository
+import com.vettr.android.core.util.BiometricCheckResult
+import com.vettr.android.core.util.BiometricService
 import com.vettr.android.core.util.HapticService
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -27,7 +29,10 @@ data class SettingsUiState(
     val notificationFrequency: String = "Real-time",
     val analyticsOptOut: Boolean = false,
     val crashReportingOptOut: Boolean = false,
-    val hapticFeedbackEnabled: Boolean = true
+    val hapticFeedbackEnabled: Boolean = true,
+    val biometricLoginEnabled: Boolean = false,
+    val biometricAvailable: Boolean = false,
+    val biometricUnavailableReason: String? = null
 )
 
 /**
@@ -37,6 +42,7 @@ data class SettingsUiState(
 @HiltViewModel
 class SettingsViewModel @Inject constructor(
     private val settingsRepository: SettingsRepository,
+    private val biometricService: BiometricService,
     val hapticService: HapticService
 ) : ViewModel() {
 
@@ -44,6 +50,13 @@ class SettingsViewModel @Inject constructor(
     val uiState: StateFlow<SettingsUiState> = _uiState.asStateFlow()
 
     init {
+        // Check biometric availability
+        val biometricResult = biometricService.isBiometricAvailable()
+        val biometricAvailable = biometricResult is BiometricCheckResult.Available
+        val biometricUnavailableReason = if (biometricResult is BiometricCheckResult.Unavailable) {
+            biometricResult.reason
+        } else null
+
         // Collect all settings flows and update UI state
         viewModelScope.launch {
             combine(
@@ -57,7 +70,8 @@ class SettingsViewModel @Inject constructor(
                 settingsRepository.notificationFrequency,
                 settingsRepository.analyticsOptOut,
                 settingsRepository.crashReportingOptOut,
-                settingsRepository.hapticFeedbackEnabled
+                settingsRepository.hapticFeedbackEnabled,
+                settingsRepository.biometricLoginEnabled
             ) { values ->
                 SettingsUiState(
                     currency = values[0] as String,
@@ -70,7 +84,10 @@ class SettingsViewModel @Inject constructor(
                     notificationFrequency = values[7] as String,
                     analyticsOptOut = values[8] as Boolean,
                     crashReportingOptOut = values[9] as Boolean,
-                    hapticFeedbackEnabled = values[10] as Boolean
+                    hapticFeedbackEnabled = values[10] as Boolean,
+                    biometricLoginEnabled = values[11] as Boolean,
+                    biometricAvailable = biometricAvailable,
+                    biometricUnavailableReason = biometricUnavailableReason
                 )
             }.collect { newState ->
                 _uiState.value = newState
@@ -145,6 +162,13 @@ class SettingsViewModel @Inject constructor(
     fun setHapticFeedbackEnabled(value: Boolean) {
         viewModelScope.launch {
             settingsRepository.setHapticFeedbackEnabled(value)
+        }
+    }
+
+    // Security settings
+    fun setBiometricLoginEnabled(value: Boolean) {
+        viewModelScope.launch {
+            settingsRepository.setBiometricLoginEnabled(value)
         }
     }
 
