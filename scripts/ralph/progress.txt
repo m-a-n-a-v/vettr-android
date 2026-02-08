@@ -3936,3 +3936,34 @@ Details:
 - backgroundColor parameter ensures consistent dark theme preview rendering
 - Preview naming convention: "{ScreenName}Preview" for phone, "{ScreenName}TabletPreview" for tablet
 ---
+
+## US-145: Configure app for edge-to-edge display
+Status: ✅ COMPLETE
+Date: 2026-02-08
+Details:
+- Verified enableEdgeToEdge() is called in MainActivity.onCreate() (MainActivity.kt:38)
+- Verified all 12 Scaffold composables properly use paddingValues parameter:
+  - MainScreen.kt (line 126): NavHost uses padding(paddingValues)
+  - PulseScreen.kt (lines 82, 89, 105): All content uses padding(paddingValues)
+  - DiscoveryScreen.kt: PullToRefreshBox uses padding(paddingValues)
+  - StocksScreen.kt: PullToRefreshBox uses padding(paddingValues)
+  - StockDetailScreen.kt: Column uses padding(paddingValues)
+  - AlertsScreen.kt (line 113): PullToRefreshBox uses padding(paddingValues)
+  - AlertRuleCreatorScreen.kt: Column uses padding(paddingValues)
+  - SettingsScreen.kt: Column uses padding(paddingValues)
+  - FaqScreen.kt: LazyColumn uses padding(paddingValues)
+  - FeedbackScreen.kt: Column uses padding(paddingValues)
+  - GlossaryScreen.kt: Column uses padding(paddingValues)
+  - OnboardingScreen.kt: Box uses padding(paddingValues)
+- System bars will have transparent background via enableEdgeToEdge() API
+- Content does not overlap with system bars due to proper WindowInsets handling via paddingValues
+- Build successful: ./gradlew assembleDebug passes (41 tasks, all up-to-date)
+**Learnings for future iterations:**
+  - Edge-to-edge display was already properly implemented in the codebase
+  - enableEdgeToEdge() automatically handles system bar transparency and WindowInsets
+  - All Scaffolds must pass their paddingValues lambda parameter down to their content
+  - Common pattern: Scaffold { paddingValues -> Content(modifier = Modifier.padding(paddingValues)) }
+  - enableEdgeToEdge() is part of androidx.activity:activity-compose library
+  - The API automatically sets LAYOUT_STABLE and LAYOUT_HIDE_NAVIGATION flags
+  - Theme.xml colors for statusBarColor/navigationBarColor are overridden by enableEdgeToEdge()
+---
