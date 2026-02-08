@@ -3,10 +3,15 @@ package com.vettr.android.feature.stockdetail
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.vettr.android.core.data.VetrScoreResult
 import com.vettr.android.core.data.repository.FilingRepository
+import com.vettr.android.core.data.repository.PeerComparison
+import com.vettr.android.core.data.repository.ScoreTrend
 import com.vettr.android.core.data.repository.StockRepository
+import com.vettr.android.core.data.repository.VetrScoreRepository
 import com.vettr.android.core.model.Filing
 import com.vettr.android.core.model.Stock
+import com.vettr.android.core.model.VetrScoreHistory
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -42,6 +47,7 @@ enum class TimeRange {
 class StockDetailViewModel @Inject constructor(
     private val stockRepository: StockRepository,
     private val filingRepository: FilingRepository,
+    private val vetrScoreRepository: VetrScoreRepository,
     savedStateHandle: SavedStateHandle
 ) : ViewModel() {
 
@@ -64,6 +70,18 @@ class StockDetailViewModel @Inject constructor(
 
     private val _errorMessage = MutableStateFlow<String?>(null)
     val errorMessage: StateFlow<String?> = _errorMessage.asStateFlow()
+
+    private val _vetrScoreResult = MutableStateFlow<VetrScoreResult?>(null)
+    val vetrScoreResult: StateFlow<VetrScoreResult?> = _vetrScoreResult.asStateFlow()
+
+    private val _scoreHistory = MutableStateFlow<List<Int>>(emptyList())
+    val scoreHistory: StateFlow<List<Int>> = _scoreHistory.asStateFlow()
+
+    private val _scoreTrend = MutableStateFlow<String>("Stable")
+    val scoreTrend: StateFlow<String> = _scoreTrend.asStateFlow()
+
+    private val _peerComparison = MutableStateFlow<PeerComparison?>(null)
+    val peerComparison: StateFlow<PeerComparison?> = _peerComparison.asStateFlow()
 
     init {
         loadStock()
@@ -139,5 +157,56 @@ class StockDetailViewModel @Inject constructor(
      */
     fun selectTimeRange(timeRange: TimeRange) {
         _selectedTimeRange.value = timeRange
+    }
+
+    /**
+     * Load VETR Score details for the current stock.
+     * Fetches score calculation, history, trend, and peer comparison.
+     */
+    fun loadVetrScoreDetails() {
+        val currentStock = _stock.value
+        if (currentStock == null) {
+            _errorMessage.value = "Stock not loaded"
+            return
+        }
+
+        viewModelScope.launch {
+            try {
+                // Calculate current score
+                launch {
+                    val scoreResult = vetrScoreRepository.calculateScore(currentStock.ticker)
+                    _vetrScoreResult.value = scoreResult
+                }
+
+                // Load score history (last 30 days)
+                launch {
+                    vetrScoreRepository.getScoreHistory(currentStock.ticker, months = 1)
+                        .catch { error ->
+                            _errorMessage.value = "Failed to load score history: ${error.message}"
+                        }
+                        .collect { history ->
+                            _scoreHistory.value = history.map { it.overallScore }
+                        }
+                }
+
+                // Get score trend
+                launch {
+                    val trend = vetrScoreRepository.getScoreTrend(currentStock.ticker)
+                    _scoreTrend.value = when (trend.direction) {
+                        com.vettr.android.core.data.repository.ScoreTrendDirection.IMPROVING -> "Trending up"
+                        com.vettr.android.core.data.repository.ScoreTrendDirection.DECLINING -> "Trending down"
+                        com.vettr.android.core.data.repository.ScoreTrendDirection.STABLE -> "Stable"
+                    }
+                }
+
+                // Get peer comparison
+                launch {
+                    val comparison = vetrScoreRepository.compareScores(currentStock.ticker)
+                    _peerComparison.value = comparison
+                }
+            } catch (e: Exception) {
+                _errorMessage.value = "Failed to load VETR score details: ${e.message}"
+            }
+        }
     }
 }
