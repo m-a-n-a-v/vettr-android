@@ -1962,7 +1962,7 @@
         "Create privacy policy: data collection, user tracking, third-party services, GDPR/CCPA compliance"
       ],
       "priority": 141,
-      "passes": false
+      "passes": true
     },
     {
       "id": "US-142",
