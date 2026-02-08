@@ -2052,3 +2052,251 @@ Files changed:
 - SavedStateHandle needs to be mocked with proper stockId parameter for StockDetailViewModel
 - Test both success and error paths for comprehensive coverage
 ---
+
+## US-090: Create ExecutiveRepository interface and implementation
+Status: ✅ COMPLETE
+Date: 2026-02-07
+Details:
+- Created ExecutiveRepository.kt interface with three methods:
+  - getExecutivesForStock(stockId): Flow<List<Executive>>
+  - searchByName(query): Flow<List<Executive>>
+  - getExecutiveScore(stockId): Int - calculates team quality score (0-100)
+- Created ExecutiveRepositoryImpl.kt with @Inject constructor taking ExecutiveDao
+- Implemented scoring algorithm based on team size, average tenure, and specialization diversity
+- Added binding in RepositoryModule with @Binds and @Singleton
+- Build successful: ./gradlew assembleDebug passes
+**Learnings for future iterations:**
+  - Executive score calculation: max 30 points for team size, 40 for tenure, 30 for diversity
+  - Flow.first() suspends to get single snapshot from Flow for score calculation
+  - Repository pattern separates data access from business logic in ViewModels
+  - Files created: ExecutiveRepository.kt, ExecutiveRepositoryImpl.kt; modified: RepositoryModule.kt
+---
+
+## US-091: Create PedigreeViewModel with Hilt
+Status: ✅ COMPLETE
+Date: 2026-02-07
+Details:
+- Created PedigreeViewModel.kt in feature/stockdetail/
+- Annotated with @HiltViewModel and @Inject constructor
+- Injected ExecutiveRepository and SavedStateHandle dependencies
+- Implemented StateFlow for UI state: executives, filteredExecutives, searchQuery, sortOption, filterTitle, isLoading, errorMessage
+- Implemented methods: loadExecutives(), search(), sort(), filter(), refresh(), applyFiltersAndSort()
+- Created SortOption enum: NAME, TENURE, SCORE
+- Created FilterTitle enum: ALL, CEO, CFO, COO
+- StockId retrieved from SavedStateHandle for navigation support
+- Executives with < 1 year tenure are marked as risky (sorted last in SCORE mode)
+- Build successful: ./gradlew assembleDebug passes
+**Learnings for future iterations:**
+  - SavedStateHandle is used to retrieve navigation arguments (stockId) passed via Navigation Compose
+  - filteredExecutives StateFlow is separate from executives to maintain original data for filtering
+  - applyFiltersAndSort() is called after each search/filter/sort operation to update filteredExecutives
+  - Executive score sorting considers tenure < 1 year as risky (negative score for sorting)
+  - Title filtering uses case-insensitive contains() for CEO/CFO/COO matching
+---
+
+## US-092: Build PedigreeScreen with executive list
+Status: ✅ COMPLETE
+Date: 2026-02-08
+Details:
+- Created PedigreeScreen.kt in feature/stockdetail/ with complete executive team UI
+- Implemented SearchBarView at top for filtering executives by name
+- Added SortMenuView dropdown with three options: Name, Tenure, Score
+- Created FilterChip row with four options: All, CEO, CFO, COO
+- LazyColumn displays ExecutiveRowView items showing:
+  - Executive name, title, specialization
+  - Years at company with "yrs" suffix
+  - Red background tint (VettrRed with 10% alpha) when tenure < 1 year
+  - "RISK" badge in red for executives with < 1 year tenure
+- EmptyStateView shown when no executives match search/filter criteria
+- LoadingView shown during data loading
+- Three preview functions: ExecutiveRowViewPreview, ExecutiveRowViewRiskPreview, PedigreeScreenPreview, PedigreeScreenEmptyPreview
+- Build passes: ./gradlew assembleDebug succeeds
+
+Files changed:
+- app/src/main/java/com/vettr/android/feature/stockdetail/PedigreeScreen.kt (new, 437 lines)
+- scripts/ralph/prd.json (updated US-092 to passes: true)
+
+**Learnings for future iterations:**
+  - FlowRow from ExperimentalLayoutApi is perfect for filter chips that wrap to multiple lines
+  - DropdownMenu needs expanded state management with remember { mutableStateOf(false) }
+  - Red background tint uses .copy(alpha = 0.1f) for subtle warning without overwhelming the UI
+  - Risk badge uses small padding (horizontal: Spacing.sm, vertical: 2.dp) for compact appearance
+  - ExecutiveRowView uses Card with clickable modifier for proper touch feedback
+  - Preview functions should show both normal and edge cases (risk scenarios, empty states)
+  - Extension properties (SortOption.displayName, FilterTitle.displayName) keep string mapping logic clean
+  - collectAsStateWithLifecycle() collects multiple StateFlows from ViewModel efficiently
+  - Separation of PedigreeScreen (ViewModel holder) and PedigreeScreenContent (pure composable) enables easier preview and testing
+---
+
+## US-093: Build ExecutiveDetailScreen with career history
+Status: ✅ COMPLETE
+Date: 2026-02-08
+Details:
+- Created ExecutiveDetailScreen.kt in feature/stockdetail/ as a ModalBottomSheet
+- Implemented ExecutiveHeader with circular photo placeholder, name, title, and tenure badge
+- Tenure badge shows red color for < 1 year, green (VettrAccent) for >= 1 year
+- CareerTimeline section displays up to 5 previous companies from JSON array using JSONArray parser
+- Education section shows education credentials in an InfoCard
+- Specialization badge shows specialization in a rounded box with VettrAccent background
+- Social links section with clickable buttons for LinkedIn and Twitter (via Intent.ACTION_VIEW)
+- Report button opens email client with mailto:support@vettr.ca (via Intent.ACTION_SENDTO)
+- Scrollable content with verticalScroll modifier for long executive profiles
+- Two preview functions: ExecutiveDetailContentPreview (full data) and ExecutiveDetailContentRiskPreview (low tenure)
+- Build passes: ./gradlew assembleDebug succeeds
+
+Files changed:
+- app/src/main/java/com/vettr/android/feature/stockdetail/ExecutiveDetailScreen.kt (new, 388 lines)
+- scripts/ralph/prd.json (updated US-093 to passes: true)
+
+**Learnings for future iterations:**
+  - ModalBottomSheet requires @OptIn(ExperimentalMaterial3Api::class) annotation
+  - Use rememberModalBottomSheetState() for controlling bottom sheet state
+  - JSONArray from org.json package (Android SDK built-in) is better than kotlinx.serialization for simple JSON parsing
+  - Parse JSON arrays with: JSONArray(jsonString) then List(array.length()) { i -> array.getString(i) }
+  - Intent.ACTION_VIEW for web URLs (LinkedIn, Twitter), Intent.ACTION_SENDTO with mailto: URI for email
+  - SocialLinkButton component is reusable for all clickable link buttons
+  - InfoCard component displays icon + text in a consistent card layout (used for education, career timeline)
+  - Scrollable ModalBottomSheet needs verticalScroll(rememberScrollState()) on content Column
+  - Circular photo placeholder uses Box with CircleShape clip and Icon inside for placeholder avatar
+  - Spacer(height = Spacing.lg/xl) for section spacing, Spacer(height = Spacing.sm) for subsection spacing
+---
+
+## US-094: Add Pedigree tab to StockDetailScreen
+Status: ✅ COMPLETE
+Date: 2026-02-08
+Details:
+- Updated StockDetailTab enum to replace ANALYSIS and NEWS with PEDIGREE and RED_FLAGS
+- Modified StockDetailScreen tab labels from "Overview", "Analysis", "News" to "Overview", "Pedigree", "Red Flags"
+- Updated StockDetailRoute tab mapping to map PEDIGREE to index 1 and RED_FLAGS to index 2
+- Wired PedigreeScreen() to display when tab 1 (Pedigree) is selected
+- PedigreeScreen automatically receives stockId via hiltViewModel() and SavedStateHandle from navigation
+- Created RedFlagsTab placeholder composable showing "Red Flags analysis coming soon" message
+- Tab indicator already uses VettrAccent color (no change needed)
+- Build passes: ./gradlew assembleDebug succeeds
+
+Files changed:
+- app/src/main/java/com/vettr/android/feature/stockdetail/StockDetailViewModel.kt (updated StockDetailTab enum)
+- app/src/main/java/com/vettr/android/feature/stockdetail/StockDetailScreen.kt (updated tabs, tab content, added RedFlagsTab)
+- scripts/ralph/prd.json (updated US-094 to passes: true)
+
+**Learnings for future iterations:**
+  - StockDetailTab enum drives tab navigation, keeping UI logic clean and type-safe
+  - PedigreeScreen automatically gets stockId from SavedStateHandle via navigation arguments
+  - Tab content uses when(selectedTab) to switch between different composables inline
+  - VettrAccent color for tab indicator provides consistent design system theming
+  - RedFlagsTab placeholder allows tab structure to be complete while feature is pending
+  - Tab index mapping in StockDetailRoute ensures ViewModel tab state matches UI tab indices
+---
+
+## US-095: Create AlertRuleRepository interface and implementation
+Status: ✅ COMPLETE
+Date: 2026-02-08
+Details:
+- Created AlertRuleRepository.kt interface with methods: createRule, updateRule, deleteRule, getRulesForUser, getRulesForStock, toggleActive, getRuleCount
+- Created AlertRuleRepositoryImpl.kt with @Inject constructor taking AlertRuleDao
+- Implemented validation logic:
+  - Max 50 rules per user enforced in createRule method
+  - Duplicate detection for same stock ticker + rule type combination
+  - Returns Result<AlertRule> from createRule for proper error handling
+- Implemented toggleActive method to toggle isActive status using copy() pattern
+- Bound AlertRuleRepository in RepositoryModule using @Binds pattern
+- Build successful: ./gradlew assembleDebug passes
+**Learnings for future iterations:**
+  - Repository validation should use Flow.first() to get current count for limit checks
+  - Duplicate detection compares both stockTicker and ruleType fields
+  - Result<T> type provides clean error handling for creation operations
+  - Delete operations require fetching entity first with Flow.first(), then passing to DAO delete method
+  - Toggle pattern: fetch entity, create copy with inverted boolean, update via DAO
+---
+
+## US-096: Create AlertsViewModel with Hilt
+Status: ✅ COMPLETE
+Date: 2026-02-08
+Details:
+- Created feature/alerts/AlertsViewModel.kt with @HiltViewModel annotation
+- Added @Inject constructor with AlertRuleRepository and AuthRepository dependencies
+- Implemented StateFlow for UI state management: alertRules, groupedAlertRules, selectedFilter, isLoading
+- Implemented loadRules() method that fetches rules for current user and applies filtering
+- Implemented toggleRule(ruleId) method to toggle active status via repository
+- Implemented deleteRule(ruleId) method to delete rules via repository
+- Implemented duplicateRule(rule) method to create a copy of an existing rule
+- Implemented setFilter(filter) method to change the selected filter (All/Active/Triggered)
+- Added groupRulesByTicker() private method that groups rules by stock ticker alphabetically
+- Created AlertsUiState data class with alertRules, groupedAlertRules, selectedFilter, and isLoading properties
+- Created AlertFilter enum with ALL, ACTIVE, and TRIGGERED options
+- Build successful: ./gradlew assembleDebug passes
+Files changed:
+- app/src/main/java/com/vettr/android/feature/alerts/AlertsViewModel.kt (created)
+- scripts/ralph/prd.json (updated US-096 passes to true)
+**Learnings for future iterations:**
+  - ViewModels should collect from repositories in init block or when needed
+  - Use collectLatest for Flow collection to cancel previous emissions when new ones arrive
+  - Group-by operations can be done with groupBy() and toSortedMap() for alphabetical sorting
+  - StateFlow.update {} is preferred over direct MutableStateFlow assignment
+  - When duplicating entities, create a new copy with reset ID and timestamps
+  - Filter logic should be applied before grouping for efficiency
+---
+
+## US-097: Build AlertsScreen with rule management
+Status: ✅ COMPLETE
+Date: 2026-02-08
+Details:
+- Implemented complete AlertsScreen with filter tabs (All/Active/Triggered)
+- Created AlertRuleRow composable with type icon, condition text, and active Switch
+- Implemented swipe-to-delete functionality using SwipeToDismissBox with red background
+- Added Recent Triggers section showing last 5 triggered alerts with timestamps
+- Added FAB with + icon to create new alerts
+- Created EmptyStateView with notification icon and helpful message
+- LazyColumn groups alert rules by stock ticker (alphabetically sorted)
+- Filter chips dynamically filter rules based on status
+- Used formatTimestamp helper for relative time display (e.g., "2 hours ago")
+- Build successful: ./gradlew assembleDebug passes
+**Learnings for future iterations:**
+  - SwipeToDismissBox requires SwipeToDismissBoxValue.EndToStart for right-to-left swipe
+  - FilterChip.entries provides all enum values for filter tabs
+  - Recent triggers can be computed inline within LazyColumn items using filter and sortedByDescending
+  - Material 3 uses MaterialTheme.colorScheme (not MaterialTheme.colors from M2)
+  - Relative timestamp formatting improves UX for triggered alerts
+  - AlertsViewModel already had excellent state management with groupedAlertRules map
+---
+
+## US-098: Build AlertRuleCreatorScreen (guided wizard)
+Status: ✅ COMPLETE
+Date: 2026-02-08
+Details:
+- Created AlertRuleCreatorScreen.kt with 5-step wizard: Stock Selection -> Rule Type -> Condition -> Frequency -> Review
+- Implemented StockSelectionStep with search/filter functionality using OutlinedTextField
+- Implemented RuleTypeStep with 5 rule type cards: Price Above, Price Below, Price Increase, Price Decrease, VETR Score Change
+- Implemented ConditionStep with contextual inputs based on rule type (price threshold, percentage, score points)
+- Implemented FrequencyStep with 3 options: Real-time, Once per day, Once per week
+- Implemented ReviewStep with Edit buttons for each step to allow user to go back and modify selections
+- Added LinearProgressIndicator at top of screen showing current step progress (step/5)
+- Created AlertRuleCreatorViewModel with @HiltViewModel and state management using StateFlow
+- Implemented stock search filtering in ViewModel with updateSearchQuery method
+- Implemented navigation methods: nextStep, previousStep, goToStep for wizard flow
+- Implemented validation: canProceedToNextStep checks each step's requirements, canSaveRule validates all fields
+- Implemented saveRule method that creates AlertRule via AlertRuleRepository and shows success Snackbar
+- Added navigation route "alert_rule_creator" in MainScreen.kt
+- Connected AlertsScreen FAB to navigate to AlertRuleCreatorScreen
+- Used Material 3 components: Scaffold, TopAppBar, Card, OutlinedTextField, Button, TextButton, FilterChip
+- Fixed deprecation warnings by using Icons.AutoMirrored.Filled.TrendingUp/TrendingDown
+- Build successful: ./gradlew assembleDebug passes with no warnings
+
+Files changed:
+- app/src/main/java/com/vettr/android/feature/alerts/AlertRuleCreatorScreen.kt (created)
+- app/src/main/java/com/vettr/android/feature/alerts/AlertRuleCreatorViewModel.kt (created)
+- app/src/main/java/com/vettr/android/feature/main/MainScreen.kt (added route and import)
+- scripts/ralph/prd.json (updated US-098 passes to true)
+
+**Learnings for future iterations:**
+  - Multi-step wizards should use a currentStep state variable to track progress
+  - LinearProgressIndicator can use currentStep / totalSteps for progress tracking
+  - Each step should be a separate composable for modularity and readability
+  - Navigation between steps should validate current step before proceeding
+  - Review step should allow users to edit any previous step using goToStep(stepNumber)
+  - SnackbarHostState should be remembered and LaunchedEffect used to trigger snackbar on state change
+  - Search/filter functionality can be implemented inline in ViewModel by filtering availableStocks list
+  - Contextual UI (like Condition step) can use when() expressions to show different content based on rule type
+  - Save operations should handle both success and failure cases with Result<T> pattern
+  - onSaveComplete callback allows parent screen to handle navigation after successful save
+---
