@@ -1397,3 +1397,23 @@ Details:
   - Update state immutably with _uiState.update { it.copy(...) }
   - Validation logic (e.g., blank email/password) should happen in ViewModel
 ---
+
+## US-063: Create WelcomeScreen composable
+Status: ✅ COMPLETE
+Date: 2026-02-07
+Details:
+- Created feature/auth/WelcomeScreen.kt with @Composable function
+- Implemented VETTR logo placeholder (green box with "V")
+- Added dog mascot placeholder (🐕 emoji in surfaceVariant box)
+- Included tagline "Smart Investing for Canadians"
+- Added "Get Started" PrimaryButton with fullWidth
+- Added "Log In" TextButton for secondary navigation
+- Added @Preview with VettrTheme and dark background (0xFF0D1B2A)
+- Build successful: ./gradlew assembleDebug passes
+**Learnings for future iterations:**
+  - PrimaryButton already has horizontal padding, so set modifier padding to 0.dp when using fullWidth
+  - Use MaterialTheme.colorScheme for colors, not hardcoded values
+  - TextButton content should use MaterialTheme.typography and colorScheme.primary for consistency
+  - Dog emoji (🐕) used as placeholder for mascot illustration
+  - Layout uses SpaceBetween arrangement for proper spacing of logo, mascot, and action buttons
+---
