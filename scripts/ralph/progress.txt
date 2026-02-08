@@ -498,3 +498,30 @@ Files changed:
   - Avoided forward reference to PrimaryButton (US-027) by using Material3 Button directly
   - Preview with dark background (0xFF0D1B2A) validates appearance in VETTR dark theme
 ---
+
+## US-026: Create EmptyStateView composable component
+Status: ✅ COMPLETE
+Date: 2026-02-07
+Details:
+- Created designsystem/component/EmptyStateView.kt @Composable function
+- Displays Material Icon, title, subtitle text with centered layout
+- Optional action button appears only when actionLabel and onAction are provided
+- Parameters: icon: ImageVector, title: String, subtitle: String, actionLabel: String?, onAction: (() -> Unit)?
+- Uses Box with fillMaxSize and Center alignment for centered empty state
+- Column with Arrangement.spacedBy(Spacing.md) provides consistent spacing
+- Icon size set to 64.dp with onSurfaceVariant tint
+- Button uses VettrAccent background and white text for consistency with brand
+- Added 2 @Preview composables: EmptyStateViewPreview (no action) and EmptyStateViewWithActionPreview (with action button)
+- Build successful: ./gradlew assembleDebug passes
+Files changed:
+- app/src/main/java/com/vettr/android/designsystem/component/EmptyStateView.kt (created)
+**Learnings for future iterations:**
+  - EmptyStateView provides consistent empty state messaging across all screens (Watchlist, Alerts, Discovery, etc.)
+  - Optional parameters (actionLabel, onAction) allow component to work with or without action button
+  - Using Box with fillMaxSize and Center alignment ensures empty state is properly centered on screen
+  - 64.dp icon size provides good visual prominence without overwhelming the message
+  - TextAlign.Center on Text composables ensures multi-line text is center-aligned
+  - Button with VettrAccent background maintains brand consistency across all action buttons
+  - Preview composables with realistic use cases (watchlist, alerts) help validate component appearance
+  - Conditional rendering (if actionLabel != null && onAction != null) ensures both parameters are provided before showing button
+---
