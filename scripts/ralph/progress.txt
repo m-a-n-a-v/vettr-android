@@ -853,3 +853,26 @@ Files changed:
   - DAO abstract methods must be added to RoomDatabase class to expose database operations
 ---
 
+## US-042: Create ExecutiveDao interface
+Status: ✅ COMPLETE
+Date: 2026-02-07
+Details:
+- Created core/data/local/ExecutiveDao.kt interface annotated with @Dao
+- Implemented query methods: getByStockId(), searchByName(), getById() with Flow return types
+- searchByName() uses LIKE query for searching executive names
+- Implemented mutation methods: insert(), insertAll(), delete()
+- Used OnConflictStrategy.REPLACE for insert operations (upsert behavior)
+- Added executiveDao() abstract method to VettrDatabase class
+- Build successful: ./gradlew assembleDebug passes
+Files changed:
+- app/src/main/java/com/vettr/android/core/data/local/ExecutiveDao.kt (created)
+- app/src/main/java/com/vettr/android/core/data/local/VettrDatabase.kt (updated)
+**Learnings for future iterations:**
+  - ExecutiveDao follows established DAO pattern with Flow for queries and suspend for mutations
+  - searchByName() enables searching through executive names for discovery features
+  - getByStockId() filters executives for specific stock, useful for Pedigree screen
+  - OnConflictStrategy.REPLACE provides upsert behavior for insert operations
+  - Pattern follows established conventions: Flow return types for reactive queries, suspend for mutations
+  - DAO abstract methods must be added to RoomDatabase class to expose database operations
+---
+
