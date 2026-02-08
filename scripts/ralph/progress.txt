@@ -57,3 +57,34 @@ Details:
   - Hilt version 2.53.1 with androidx.hilt:hilt-navigation-compose 1.2.0 for Compose integration
   - ksp tasks (kspDebugKotlin, hiltAggregateDepsDebug, hiltJavaCompileDebug) run automatically during build
 ---
+## US-004: Verify Room database dependencies
+Status: ✅ COMPLETE
+Date: 2026-02-07
+Details:
+- Verified room-runtime, room-ktx, and room-compiler (ksp) dependencies in build.gradle.kts (lines 76-78)
+- Verified KSP plugin applied in build.gradle.kts (line 6)
+- Created VettrDatabase abstract class in core/data/local/VettrDatabase.kt
+- Created PlaceholderEntity in core/model/PlaceholderEntity.kt (Room requires at least one entity in @Database annotation)
+- Build successful: ./gradlew assembleDebug passes
+**Learnings for future iterations:**
+  - Room @Database annotation requires at least one entity in entities array - empty array causes KSP compilation error
+  - Created placeholder entity PlaceholderEntity to satisfy Room requirement until real entities are added
+  - Room dependencies were already properly configured in initial scaffold (room-runtime, room-ktx, room-compiler with ksp)
+  - VettrDatabase will be used as the single source of truth for local data persistence
+---
+## US-005: Verify Retrofit and OkHttp networking dependencies
+Status: ✅ COMPLETE
+Date: 2026-02-07
+Details:
+- Verified retrofit and retrofit-converter-gson dependencies (version 2.11.0) in app/build.gradle.kts:89-90
+- Verified okhttp and okhttp-logging-interceptor dependencies (version 4.12.0) in app/build.gradle.kts:91-92
+- Verified kotlinx-coroutines-android and kotlinx-coroutines-core dependencies (version 1.9.0) in app/build.gradle.kts:99-100
+- All dependencies properly defined in gradle/libs.versions.toml version catalog
+- Build successful: ./gradlew assembleDebug passes
+**Learnings for future iterations:**
+  - Networking dependencies were already properly configured in the initial scaffold
+  - Retrofit 2.11.0 provides type-safe HTTP client with Gson converter for JSON serialization
+  - OkHttp 4.12.0 provides HTTP client with logging interceptor for debugging network calls
+  - Coroutines 1.9.0 enables suspend functions for asynchronous networking operations
+  - Version catalog pattern (libs.versions.toml) centralizes dependency version management
+---
