@@ -3116,3 +3116,44 @@ Details:
   - ResponseBody.create(null, "") is deprecated but still works for unit tests - warnings are acceptable
   - ProfileViewModelTest needed syncManager and syncHistoryDao added to all ProfileViewModel() constructor calls
 ---
+
+## US-121: Implement skeleton loading screens
+Status: ✅ COMPLETE
+Date: 2026-02-08
+Details:
+- Created designsystem/component/SkeletonView.kt with shimmer animation using InfiniteTransition
+- Implemented base SkeletonView composable with animated gradient that transitions between 0.3f and 0.7f alpha
+- Created three skeleton variant composables:
+  - SkeletonStockRow: mimics StockRowView with circular logo, ticker/name lines, and price/change lines
+  - SkeletonMetricCard: mimics MetricCard with title, value, and change lines
+  - SkeletonEventCard: mimics EventCard with indicator dot and title/subtitle/date lines
+- Integrated skeleton screens into PulseScreen with Crossfade transition:
+  - Shows skeleton placeholders for Market Overview (3 metric cards), Strategic Events (5 event cards), and Trending Stocks (6 stock rows)
+  - Crossfade animation smoothly transitions between skeleton and actual content
+- Integrated skeleton screens into DiscoveryScreen with Crossfade transition:
+  - Shows skeleton for filter chips, Top Sectors grid (4 metric cards), and Recent Updates (8 event cards)
+- Integrated skeleton screens into StocksScreen with Crossfade transition:
+  - Shows 8 skeleton stock rows during initial load
+- Skeleton colors use VettrCardBackground with gray gradient overlay matching the design system
+- All skeleton elements use shimmer animation for visual feedback
+- Build verified: ./gradlew assembleDebug passes
+- Files created:
+  - app/src/main/java/com/vettr/android/designsystem/component/SkeletonView.kt (305 lines)
+- Files modified:
+  - app/src/main/java/com/vettr/android/feature/pulse/PulseScreen.kt
+  - app/src/main/java/com/vettr/android/feature/discovery/DiscoveryScreen.kt
+  - app/src/main/java/com/vettr/android/feature/stockdetail/StocksScreen.kt
+
+**Learnings for future iterations:**
+  - InfiniteTransition with animateFloat is the recommended way to create shimmer animations
+  - Use RepeatMode.Reverse for smooth back-and-forth shimmer effect
+  - Crossfade provides smooth transitions between loading and content states (better than AnimatedVisibility for this use case)
+  - Skeleton colors should match the background with a lighter gray overlay for contrast
+  - Skeleton shapes should closely mimic the actual component dimensions for seamless transitions
+  - For PullToRefreshBox, set isRefreshing to `isLoading && data.isNotEmpty()` to avoid refresh indicator on initial load
+  - Crossfade targetState should check `isLoading && data.isEmpty()` to show skeleton only on initial load
+  - LazyRow and LazyVerticalGrid can be used in skeleton states with fixed item counts
+  - All skeleton variants should include @Preview composables for easy design iteration
+  - SkeletonView uses Brush.linearGradient with varying colors for shimmer effect
+  - FastOutSlowInEasing provides a natural animation curve for shimmer transitions
+---
