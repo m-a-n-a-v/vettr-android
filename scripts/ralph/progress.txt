@@ -977,3 +977,24 @@ Files changed:
   - Database follows single-responsibility principle: one DAO per entity for clean separation
   - All DAOs follow established pattern: Flow for queries, suspend for mutations, OnConflictStrategy.REPLACE for upserts
 ---
+## US-047: Create DatabaseModule for Hilt DI
+Status: ✅ COMPLETE
+Date: 2026-02-07
+Details:
+- Created core/di/DatabaseModule.kt annotated with @Module @InstallIn(SingletonComponent::class)
+- Added provideVettrDatabase() @Provides @Singleton method using Room.databaseBuilder()
+- Added @Provides @Singleton methods for all 8 DAOs: StockDao, FilingDao, ExecutiveDao, UserDao, AlertRuleDao, RedFlagHistoryDao, VetrScoreHistoryDao, SyncHistoryDao
+- Each DAO provider method accepts VettrDatabase as parameter and calls corresponding dao() method
+- Build successful: ./gradlew assembleDebug passes
+Files changed:
+- app/src/main/java/com/vettr/android/core/di/DatabaseModule.kt (created)
+**Learnings for future iterations:**
+  - DatabaseModule follows standard Hilt pattern: @Module + @InstallIn(SingletonComponent::class) for app-level dependencies
+  - Room database must be singleton to prevent multiple instances and ensure data consistency
+  - DAO providers depend on VettrDatabase parameter, Hilt automatically resolves the dependency graph
+  - @ApplicationContext qualifier required for Context parameter to ensure Application context, not Activity context
+  - Room.databaseBuilder() pattern: context, database class, database name ("vettr-db")
+  - Each DAO accessor method (database.stockDao(), etc.) returns DAO instance configured with the database
+  - Providing DAOs separately from database enables flexible dependency injection in repositories and ViewModels
+  - All 8 entities now have corresponding DAOs available for injection throughout the app
+---
