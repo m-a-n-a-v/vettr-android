@@ -12,6 +12,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
+import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
@@ -35,6 +36,7 @@ import com.vettr.android.designsystem.component.EventCard
 import com.vettr.android.designsystem.component.MetricCard
 import com.vettr.android.designsystem.component.SearchBarView
 import com.vettr.android.designsystem.component.SectionHeader
+import com.vettr.android.designsystem.component.StockRowView
 import com.vettr.android.designsystem.theme.Spacing
 import com.vettr.android.designsystem.theme.VettrGreen
 import com.vettr.android.designsystem.theme.VettrRed
@@ -159,6 +161,33 @@ fun PulseScreen(
                         indicatorColor = VettrYellow,
                         onClick = {}
                     )
+                }
+            }
+
+            // Trending Stocks Section
+            Column(
+                verticalArrangement = Arrangement.spacedBy(Spacing.md)
+            ) {
+                SectionHeader(
+                    title = "Trending Stocks",
+                    onSeeAllClick = { /* TODO: Navigate to full stock list */ }
+                )
+
+                LazyRow(
+                    horizontalArrangement = Arrangement.spacedBy(Spacing.md),
+                    contentPadding = PaddingValues(horizontal = 0.dp)
+                ) {
+                    items(stocks.take(6)) { stock ->
+                        StockRowView(
+                            ticker = stock.ticker,
+                            companyName = stock.name,
+                            price = stock.price,
+                            priceChange = stock.priceChange,
+                            logoUrl = null, // TODO: Add logo URL when available
+                            onClick = { /* TODO: Navigate to StockDetailScreen */ },
+                            modifier = Modifier.width(280.dp)
+                        )
+                    }
                 }
             }
 
