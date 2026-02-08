@@ -11,6 +11,9 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
@@ -24,10 +27,18 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Tab
+import androidx.compose.material3.TabRow
+import androidx.compose.material3.TabRowDefaults
+import androidx.compose.material3.TabRowDefaults.tabIndicatorOffset
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -35,16 +46,21 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.vettr.android.core.model.Filing
 import com.vettr.android.core.model.Stock
+import com.vettr.android.designsystem.component.MetricCard
 import com.vettr.android.designsystem.component.VettrScoreView
 import com.vettr.android.designsystem.component.getScoreLabel
 import com.vettr.android.feature.stockdetail.TimeRange
 import com.vettr.android.designsystem.theme.Spacing
+import com.vettr.android.designsystem.theme.VettrAccent
 import com.vettr.android.designsystem.theme.VettrGreen
 import com.vettr.android.designsystem.theme.VettrRed
 import com.vettr.android.designsystem.theme.VettrTextSecondary
 import com.vettr.android.designsystem.theme.VettrTheme
 import java.text.NumberFormat
+import java.text.SimpleDateFormat
+import java.util.Date
 import java.util.Locale
 
 /**
@@ -54,11 +70,14 @@ import java.util.Locale
 @Composable
 fun StockDetailScreen(
     stock: Stock?,
+    filings: List<Filing> = emptyList(),
     selectedTimeRange: TimeRange = TimeRange.ONE_DAY,
+    selectedTab: Int = 0,
     onBackClick: () -> Unit = {},
     onShareClick: () -> Unit = {},
     onFavoriteClick: () -> Unit = {},
     onTimeRangeSelected: (TimeRange) -> Unit = {},
+    onTabSelected: (Int) -> Unit = {},
     modifier: Modifier = Modifier
 ) {
     Scaffold(
@@ -135,8 +154,22 @@ fun StockDetailScreen(
                     onTimeRangeSelected = onTimeRangeSelected
                 )
 
-                // Placeholder for rest of content
                 Spacer(modifier = Modifier.height(Spacing.lg))
+
+                // Tab navigation
+                StockDetailTabs(
+                    selectedTabIndex = selectedTab,
+                    onTabSelected = onTabSelected
+                )
+
+                Spacer(modifier = Modifier.height(Spacing.md))
+
+                // Tab content
+                when (selectedTab) {
+                    0 -> OverviewTab(stock = stock)
+                    1 -> AnalysisTab(stock = stock)
+                    2 -> NewsTab(filings = filings)
+                }
             }
         } else {
             // Loading or error state
@@ -371,6 +404,281 @@ private fun TimeRangeChip(
     )
 }
 
+/**
+ * Custom TabRow for Stock Detail screen tabs.
+ */
+@Composable
+private fun StockDetailTabs(
+    selectedTabIndex: Int,
+    onTabSelected: (Int) -> Unit,
+    modifier: Modifier = Modifier
+) {
+    val tabs = listOf("Overview", "Analysis", "News")
+
+    TabRow(
+        selectedTabIndex = selectedTabIndex,
+        modifier = modifier.fillMaxWidth(),
+        containerColor = MaterialTheme.colorScheme.surface,
+        contentColor = MaterialTheme.colorScheme.onSurface,
+        indicator = { tabPositions ->
+            TabRowDefaults.SecondaryIndicator(
+                modifier = Modifier.tabIndicatorOffset(tabPositions[selectedTabIndex]),
+                color = VettrAccent
+            )
+        }
+    ) {
+        tabs.forEachIndexed { index, title ->
+            Tab(
+                selected = selectedTabIndex == index,
+                onClick = { onTabSelected(index) },
+                text = {
+                    Text(
+                        text = title,
+                        style = MaterialTheme.typography.labelLarge,
+                        fontWeight = if (selectedTabIndex == index) FontWeight.Bold else FontWeight.Normal
+                    )
+                },
+                selectedContentColor = MaterialTheme.colorScheme.onSurface,
+                unselectedContentColor = VettrTextSecondary
+            )
+        }
+    }
+}
+
+/**
+ * Overview tab content showing company description and key metrics.
+ */
+@Composable
+private fun OverviewTab(
+    stock: Stock,
+    modifier: Modifier = Modifier
+) {
+    val currencyFormat = NumberFormat.getCurrencyInstance(Locale.CANADA)
+
+    // Format market cap in compact form (e.g., $1.2B)
+    fun formatMarketCap(value: Double): String {
+        return when {
+            value >= 1_000_000_000 -> "$${String.format("%.1f", value / 1_000_000_000)}B"
+            value >= 1_000_000 -> "$${String.format("%.1f", value / 1_000_000)}M"
+            value >= 1_000 -> "$${String.format("%.1f", value / 1_000)}K"
+            else -> currencyFormat.format(value)
+        }
+    }
+
+    Column(
+        modifier = modifier.fillMaxWidth(),
+        verticalArrangement = Arrangement.spacedBy(Spacing.md)
+    ) {
+        // Company description
+        Text(
+            text = "Company Overview",
+            style = MaterialTheme.typography.titleMedium,
+            fontWeight = FontWeight.Bold,
+            color = MaterialTheme.colorScheme.onSurface
+        )
+
+        Text(
+            text = "${stock.name} operates in the ${stock.sector} sector and is listed on the ${stock.exchange} exchange. " +
+                    "The company has demonstrated consistent growth and innovation in its market segment.",
+            style = MaterialTheme.typography.bodyMedium,
+            color = VettrTextSecondary
+        )
+
+        Spacer(modifier = Modifier.height(Spacing.sm))
+
+        // Key metrics section
+        Text(
+            text = "Key Metrics",
+            style = MaterialTheme.typography.titleMedium,
+            fontWeight = FontWeight.Bold,
+            color = MaterialTheme.colorScheme.onSurface
+        )
+
+        // Metrics grid
+        Column(
+            verticalArrangement = Arrangement.spacedBy(Spacing.sm)
+        ) {
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.spacedBy(Spacing.sm)
+            ) {
+                MetricCard(
+                    title = "Market Cap",
+                    value = formatMarketCap(stock.marketCap),
+                    modifier = Modifier.weight(1f)
+                )
+                MetricCard(
+                    title = "Sector",
+                    value = stock.sector,
+                    modifier = Modifier.weight(1f)
+                )
+            }
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.spacedBy(Spacing.sm)
+            ) {
+                MetricCard(
+                    title = "Exchange",
+                    value = stock.exchange,
+                    modifier = Modifier.weight(1f)
+                )
+                MetricCard(
+                    title = "VETR Score",
+                    value = "${stock.vetrScore}/100",
+                    modifier = Modifier.weight(1f)
+                )
+            }
+        }
+    }
+}
+
+/**
+ * Analysis tab content showing VETR analysis.
+ */
+@Composable
+private fun AnalysisTab(
+    stock: Stock,
+    modifier: Modifier = Modifier
+) {
+    Column(
+        modifier = modifier.fillMaxWidth(),
+        verticalArrangement = Arrangement.spacedBy(Spacing.md)
+    ) {
+        // VETR Analysis header
+        Text(
+            text = "VETR Analysis",
+            style = MaterialTheme.typography.titleMedium,
+            fontWeight = FontWeight.Bold,
+            color = MaterialTheme.colorScheme.onSurface
+        )
+
+        // Analysis bullet points
+        Column(
+            verticalArrangement = Arrangement.spacedBy(Spacing.sm)
+        ) {
+            AnalysisBulletPoint(
+                text = "Strong fundamentals with consistent revenue growth and healthy profit margins."
+            )
+            AnalysisBulletPoint(
+                text = "Management team has demonstrated effective capital allocation and strategic vision."
+            )
+            AnalysisBulletPoint(
+                text = "Market position is strengthening with increasing competitive advantages."
+            )
+            AnalysisBulletPoint(
+                text = "Risk factors include sector volatility and regulatory changes that may impact operations."
+            )
+            AnalysisBulletPoint(
+                text = "VETR Score of ${stock.vetrScore}/100 reflects ${getScoreLabel(stock.vetrScore).lowercase()} investment quality."
+            )
+        }
+    }
+}
+
+/**
+ * Analysis bullet point composable.
+ */
+@Composable
+private fun AnalysisBulletPoint(
+    text: String,
+    modifier: Modifier = Modifier
+) {
+    Row(
+        modifier = modifier.fillMaxWidth(),
+        horizontalArrangement = Arrangement.spacedBy(Spacing.sm)
+    ) {
+        Text(
+            text = "•",
+            style = MaterialTheme.typography.bodyMedium,
+            color = VettrAccent
+        )
+        Text(
+            text = text,
+            style = MaterialTheme.typography.bodyMedium,
+            color = VettrTextSecondary,
+            modifier = Modifier.weight(1f)
+        )
+    }
+}
+
+/**
+ * News tab content showing recent filings.
+ */
+@Composable
+private fun NewsTab(
+    filings: List<Filing>,
+    modifier: Modifier = Modifier
+) {
+    if (filings.isEmpty()) {
+        Box(
+            modifier = modifier
+                .fillMaxWidth()
+                .height(200.dp),
+            contentAlignment = Alignment.Center
+        ) {
+            Text(
+                text = "No recent filings available",
+                style = MaterialTheme.typography.bodyMedium,
+                color = VettrTextSecondary
+            )
+        }
+    } else {
+        LazyColumn(
+            modifier = modifier.fillMaxWidth(),
+            verticalArrangement = Arrangement.spacedBy(Spacing.sm)
+        ) {
+            items(filings) { filing ->
+                FilingCard(filing = filing)
+            }
+        }
+    }
+}
+
+/**
+ * Filing card composable for displaying individual filing information.
+ */
+@Composable
+private fun FilingCard(
+    filing: Filing,
+    modifier: Modifier = Modifier
+) {
+    val dateFormat = SimpleDateFormat("MMM dd, yyyy", Locale.CANADA)
+    val dateString = dateFormat.format(Date(filing.date))
+
+    Column(
+        modifier = modifier
+            .fillMaxWidth()
+            .background(
+                color = MaterialTheme.colorScheme.surfaceVariant,
+                shape = RoundedCornerShape(8.dp)
+            )
+            .padding(Spacing.md),
+        verticalArrangement = Arrangement.spacedBy(Spacing.xs)
+    ) {
+        // Date
+        Text(
+            text = dateString,
+            style = MaterialTheme.typography.labelSmall,
+            color = VettrTextSecondary
+        )
+
+        // Title
+        Text(
+            text = filing.title,
+            style = MaterialTheme.typography.titleSmall,
+            fontWeight = FontWeight.SemiBold,
+            color = MaterialTheme.colorScheme.onSurface
+        )
+
+        // Summary
+        Text(
+            text = filing.summary,
+            style = MaterialTheme.typography.bodySmall,
+            color = VettrTextSecondary
+        )
+    }
+}
+
 @Preview(showBackground = true, backgroundColor = 0xFF0D1B2A)
 @Composable
 fun StockDetailScreenPreview() {
@@ -387,7 +695,26 @@ fun StockDetailScreenPreview() {
                 priceChange = 2.35,
                 vetrScore = 85,
                 isFavorite = true
-            )
+            ),
+            filings = listOf(
+                Filing(
+                    id = "1",
+                    stockId = "1",
+                    type = "8-K",
+                    title = "Quarterly Earnings Report",
+                    date = System.currentTimeMillis(),
+                    summary = "Company reports strong Q4 earnings with revenue growth of 15% year-over-year."
+                ),
+                Filing(
+                    id = "2",
+                    stockId = "1",
+                    type = "10-K",
+                    title = "Annual Report Filing",
+                    date = System.currentTimeMillis() - 86400000L,
+                    summary = "Annual financial statements showing improved profitability and market expansion."
+                )
+            ),
+            selectedTab = 0
         )
     }
 }
@@ -408,7 +735,8 @@ fun StockDetailScreenPreview_NotFavorite() {
                 priceChange = -0.45,
                 vetrScore = 45,
                 isFavorite = false
-            )
+            ),
+            selectedTab = 1
         )
     }
 }
