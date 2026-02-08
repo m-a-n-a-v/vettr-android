@@ -1,5 +1,7 @@
 package com.vettr.android.core.di
 
+import com.vettr.android.core.data.repository.AuthRepository
+import com.vettr.android.core.data.repository.AuthRepositoryImpl
 import com.vettr.android.core.data.repository.FilingRepository
 import com.vettr.android.core.data.repository.FilingRepositoryImpl
 import com.vettr.android.core.data.repository.StockRepository
@@ -25,4 +27,10 @@ abstract class RepositoryModule {
     abstract fun bindFilingRepository(
         filingRepositoryImpl: FilingRepositoryImpl
     ): FilingRepository
+
+    @Binds
+    @Singleton
+    abstract fun bindAuthRepository(
+        authRepositoryImpl: AuthRepositoryImpl
+    ): AuthRepository
 }
