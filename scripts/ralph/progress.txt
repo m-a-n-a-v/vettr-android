@@ -3721,3 +3721,31 @@ Details:
   - Firebase Console provides valuable metrics: downloads, adoption rate, crash-free rate, feedback submissions
   - Success criteria should be clearly defined upfront: >98% crash-free, 10+ testers, 2+ weeks, positive feedback
 ---
+
+## US-138: Set up CI/CD pipeline with GitHub Actions
+Status: ✅ COMPLETE
+Date: 2026-02-08
+Details:
+- Enhanced .github/workflows/build.yml with comprehensive CI/CD pipeline
+- Added detekt static code analysis step (non-blocking with continue-on-error: true)
+- Added release job that triggers on version tag push (v*)
+- Release job builds assembleRelease and uploads APK artifacts
+- Gradle dependency caching enabled via setup-java action
+- GitHub status checks automatically enforce build + test passage on PRs
+- Created comprehensive CI_CD_PROCESS.md documentation
+- All acceptance criteria met and verified
+
+Files changed:
+- .github/workflows/build.yml (added detekt step, release job, tag triggers)
+- docs/CI_CD_PROCESS.md (created comprehensive CI/CD documentation)
+
+**Learnings for future iterations:**
+- GitHub Actions workflow structure: The workflow now has two jobs - 'build' for standard checks and 'release' for tag-based releases
+- The release job uses 'needs: build' to ensure tests pass before creating release artifacts
+- continue-on-error: true on detekt allows the pipeline to succeed even if detekt fails (useful during gradual adoption)
+- GitHub status checks are automatically created for all jobs in the workflow
+- Cache configuration via setup-java is simpler than manual Gradle caching
+- Release artifacts are uploaded via actions/upload-artifact@v4 for easy download from GitHub Actions UI
+- Tag triggers use 'refs/tags/v*' pattern to match version tags like v1.0.0
+- Documentation should cover both automated CI/CD and local development workflows
+---
