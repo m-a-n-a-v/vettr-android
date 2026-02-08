@@ -876,7 +876,7 @@ private fun RedFlagsTab(
     }
 }
 
-@Preview(showBackground = true, backgroundColor = 0xFF0D1B2A)
+@Preview(name = "Phone", showBackground = true, backgroundColor = 0xFF0D1B2A)
 @Composable
 fun StockDetailScreenPreview() {
     VettrTheme {
@@ -916,32 +916,42 @@ fun StockDetailScreenPreview() {
     }
 }
 
-@Preview(showBackground = true, backgroundColor = 0xFF0D1B2A)
+@Preview(name = "Tablet", showBackground = true, backgroundColor = 0xFF0D1B2A, widthDp = 840)
 @Composable
-fun StockDetailScreenPreview_NotFavorite() {
+fun StockDetailScreenTabletPreview() {
     VettrTheme {
         StockDetailScreen(
             stock = Stock(
-                id = "2",
-                ticker = "WEED",
-                name = "Canopy Growth Corporation",
+                id = "1",
+                ticker = "SHOP",
+                name = "Shopify Inc.",
                 exchange = "TSX",
-                sector = "Healthcare",
-                marketCap = 3500000000.0,
-                price = 8.75,
-                priceChange = -0.45,
-                vetrScore = 45,
-                isFavorite = false
+                sector = "Technology",
+                marketCap = 85000000000.0,
+                price = 120.50,
+                priceChange = 2.35,
+                vetrScore = 85,
+                isFavorite = true
             ),
-            selectedTab = 1
+            filings = listOf(
+                Filing(
+                    id = "1",
+                    stockId = "1",
+                    type = "8-K",
+                    title = "Quarterly Earnings Report",
+                    date = System.currentTimeMillis(),
+                    summary = "Company reports strong Q4 earnings with revenue growth of 15% year-over-year."
+                ),
+                Filing(
+                    id = "2",
+                    stockId = "1",
+                    type = "10-K",
+                    title = "Annual Report Filing",
+                    date = System.currentTimeMillis() - 86400000L,
+                    summary = "Annual financial statements showing improved profitability and market expansion."
+                )
+            ),
+            selectedTab = 0
         )
-    }
-}
-
-@Preview(showBackground = true, backgroundColor = 0xFF0D1B2A)
-@Composable
-fun StockDetailScreenPreview_Loading() {
-    VettrTheme {
-        StockDetailScreen(stock = null)
     }
 }

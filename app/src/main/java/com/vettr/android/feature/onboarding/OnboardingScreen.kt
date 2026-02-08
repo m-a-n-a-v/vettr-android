@@ -222,7 +222,7 @@ val onboardingSlides = listOf(
     )
 )
 
-@Preview(showBackground = true)
+@Preview(name = "Phone", showBackground = true, backgroundColor = 0xFF0D1B2A)
 @Composable
 fun OnboardingScreenPreview() {
     VettrTheme {
@@ -233,12 +233,13 @@ fun OnboardingScreenPreview() {
     }
 }
 
-@Preview(showBackground = true)
+@Preview(name = "Tablet", showBackground = true, backgroundColor = 0xFF0D1B2A, widthDp = 840)
 @Composable
-fun OnboardingSlidePreview() {
+fun OnboardingScreenTabletPreview() {
     VettrTheme {
-        OnboardingSlide(
-            slide = onboardingSlides[0]
+        OnboardingScreen(
+            onComplete = {},
+            onSkip = {}
         )
     }
 }

@@ -352,11 +352,5 @@ fun FeedbackScreen(
     }
 }
 
-@Preview(showBackground = true)
-@Composable
-fun FeedbackScreenPreview() {
-    VettrTheme {
-        // Preview requires mocked dependencies - will show compile error without them
-        // This is intentional for preview purposes
-    }
-}
+// Note: Preview is not possible for FeedbackScreen as it requires FeedbackService and AnalyticsService
+// which need Android Context and cannot be mocked in preview environment

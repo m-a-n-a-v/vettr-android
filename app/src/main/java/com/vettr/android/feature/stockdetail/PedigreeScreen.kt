@@ -377,9 +377,48 @@ fun ExecutiveRowViewRiskPreview() {
     }
 }
 
-@Preview(showBackground = true, backgroundColor = 0xFF0D1B2A)
+@Preview(name = "Phone", showBackground = true, backgroundColor = 0xFF0D1B2A)
 @Composable
 fun PedigreeScreenPreview() {
+    VettrTheme {
+        PedigreeScreenContent(
+            executives = listOf(
+                Executive(
+                    id = "1",
+                    stockId = "1",
+                    name = "John Smith",
+                    title = "Chief Executive Officer",
+                    yearsAtCompany = 5.5,
+                    previousCompanies = "[]",
+                    education = "MBA from Harvard",
+                    specialization = "Technology & Innovation"
+                ),
+                Executive(
+                    id = "2",
+                    stockId = "1",
+                    name = "Jane Doe",
+                    title = "Chief Financial Officer",
+                    yearsAtCompany = 0.8,
+                    previousCompanies = "[]",
+                    education = "CPA",
+                    specialization = "Financial Planning"
+                )
+            ),
+            searchQuery = "",
+            onSearchQueryChange = {},
+            sortOption = SortOption.NAME,
+            onSortOptionChange = {},
+            filterTitle = FilterTitle.ALL,
+            onFilterTitleChange = {},
+            isLoading = false,
+            onRefresh = {}
+        )
+    }
+}
+
+@Preview(name = "Tablet", showBackground = true, backgroundColor = 0xFF0D1B2A, widthDp = 840)
+@Composable
+fun PedigreeScreenTabletPreview() {
     VettrTheme {
         PedigreeScreenContent(
             executives = listOf(

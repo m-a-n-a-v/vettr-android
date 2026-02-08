@@ -337,7 +337,7 @@ private fun getAllFaqItems(): List<FaqItem> {
     )
 }
 
-@Preview(showBackground = true)
+@Preview(name = "Phone", showBackground = true, backgroundColor = 0xFF0D1B2A)
 @Composable
 fun FaqScreenPreview() {
     VettrTheme {
@@ -345,19 +345,10 @@ fun FaqScreenPreview() {
     }
 }
 
-@Preview(showBackground = true)
+@Preview(name = "Tablet", showBackground = true, backgroundColor = 0xFF0D1B2A, widthDp = 840)
 @Composable
-fun ExpandableFaqCardPreview() {
+fun FaqScreenTabletPreview() {
     VettrTheme {
-        Surface(color = VettrNavy) {
-            ExpandableFaqCard(
-                faqItem = FaqItem(
-                    question = "What is a VETR Score?",
-                    answer = "The VETR Score is a proprietary 0-100 rating that evaluates a company's overall health based on financial metrics, management quality, filing activity, market performance, and other key indicators.",
-                    category = FaqCategory.SCORING
-                ),
-                modifier = Modifier.padding(Spacing.md)
-            )
-        }
+        FaqScreen()
     }
 }

@@ -717,7 +717,7 @@ private fun LogoutConfirmationDialog(
     )
 }
 
-@Preview(showBackground = true)
+@Preview(name = "Phone", showBackground = true, backgroundColor = 0xFF0D1B2A)
 @Composable
 fun ProfileScreenPreview() {
     VettrTheme {
@@ -749,24 +749,24 @@ fun ProfileScreenPreview() {
     }
 }
 
-@Preview(showBackground = true)
+@Preview(name = "Tablet", showBackground = true, backgroundColor = 0xFF0D1B2A, widthDp = 840)
 @Composable
-fun ProfileScreenProPreview() {
+fun ProfileScreenTabletPreview() {
     VettrTheme {
         ProfileScreenContent(
             user = User(
                 id = "1",
-                email = "pro@example.com",
-                displayName = "Pro Investor",
+                email = "investor@example.com",
+                displayName = "Jane Investor",
                 avatarUrl = null,
-                tier = "PRO",
+                tier = "FREE",
                 createdAt = System.currentTimeMillis()
             ),
-            tier = VettrTier.PRO,
+            tier = VettrTier.FREE,
             isLoading = false,
-            lastSyncTime = System.currentTimeMillis() - (60 * 60 * 1000), // 1 hour ago
-            isSyncing = true, // Show syncing state
-            nextSyncEta = System.currentTimeMillis() + (11 * 60 * 60 * 1000), // 11 hours from now
+            lastSyncTime = System.currentTimeMillis() - (2 * 60 * 1000), // 2 minutes ago
+            isSyncing = false,
+            nextSyncEta = System.currentTimeMillis() + (23 * 60 * 60 * 1000), // 23 hours from now
             appVersion = "1.0.0 (1)",
             buildType = "Debug",
             showLogoutDialog = false,
@@ -777,17 +777,6 @@ fun ProfileScreenProPreview() {
             onNavigateToGlossary = {},
             onNavigateToFaq = {},
             onLogout = {}
-        )
-    }
-}
-
-@Preview(showBackground = true)
-@Composable
-fun LogoutDialogPreview() {
-    VettrTheme {
-        LogoutConfirmationDialog(
-            onConfirm = {},
-            onDismiss = {}
         )
     }
 }

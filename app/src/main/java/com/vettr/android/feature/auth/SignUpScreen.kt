@@ -281,9 +281,17 @@ fun SignUpScreen(
     }
 }
 
-@Preview(showBackground = true, backgroundColor = 0xFF0D1B2A)
+@Preview(name = "Phone", showBackground = true, backgroundColor = 0xFF0D1B2A)
 @Composable
 fun SignUpScreenPreview() {
+    VettrTheme {
+        SignUpScreen()
+    }
+}
+
+@Preview(name = "Tablet", showBackground = true, backgroundColor = 0xFF0D1B2A, widthDp = 840)
+@Composable
+fun SignUpScreenTabletPreview() {
     VettrTheme {
         SignUpScreen()
     }

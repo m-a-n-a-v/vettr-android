@@ -670,7 +670,7 @@ private fun BiometricUnavailableDialog(
     )
 }
 
-@Preview(showBackground = true)
+@Preview(name = "Phone", showBackground = true, backgroundColor = 0xFF0D1B2A)
 @Composable
 fun SettingsScreenPreview() {
     VettrTheme {
@@ -709,15 +709,41 @@ fun SettingsScreenPreview() {
     }
 }
 
-@Preview(showBackground = true)
+@Preview(name = "Tablet", showBackground = true, backgroundColor = 0xFF0D1B2A, widthDp = 840)
 @Composable
-fun ResetDialogPreview() {
+fun SettingsScreenTabletPreview() {
     VettrTheme {
-        Surface(color = VettrNavy) {
-            ResetConfirmationDialog(
-                onConfirm = {},
-                onDismiss = {}
-            )
-        }
+        SettingsScreenContent(
+            uiState = SettingsUiState(
+                currency = "CAD",
+                darkMode = true,
+                language = "English",
+                filingNotifications = true,
+                priceAlertNotifications = true,
+                insiderNotifications = false,
+                redFlagNotifications = true,
+                notificationFrequency = "Real-time",
+                analyticsOptOut = false,
+                crashReportingOptOut = false,
+                hapticFeedbackEnabled = true,
+                biometricLoginEnabled = true,
+                biometricAvailable = true,
+                biometricUnavailableReason = null
+            ),
+            onCurrencyChange = {},
+            onDarkModeChange = {},
+            onLanguageChange = {},
+            onFilingNotificationsChange = {},
+            onPriceAlertNotificationsChange = {},
+            onInsiderNotificationsChange = {},
+            onRedFlagNotificationsChange = {},
+            onNotificationFrequencyChange = {},
+            onAnalyticsOptOutChange = {},
+            onCrashReportingOptOutChange = {},
+            onHapticFeedbackChange = {},
+            onBiometricLoginChange = {},
+            onResetApp = {},
+            onBackClick = {}
+        )
     }
 }

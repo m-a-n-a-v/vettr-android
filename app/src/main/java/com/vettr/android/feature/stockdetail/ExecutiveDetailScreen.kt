@@ -403,9 +403,31 @@ fun SocialLinkButton(
 
 // Previews
 @OptIn(ExperimentalMaterial3Api::class)
-@Preview(showBackground = true, backgroundColor = 0xFF0D1B2A)
+@Preview(name = "Phone", showBackground = true, backgroundColor = 0xFF0D1B2A)
 @Composable
 fun ExecutiveDetailContentPreview() {
+    VettrTheme {
+        ExecutiveDetailContent(
+            executive = Executive(
+                id = UUID.randomUUID().toString(),
+                stockId = "1",
+                name = "John Smith",
+                title = "Chief Executive Officer",
+                yearsAtCompany = 5.5,
+                previousCompanies = """["Microsoft", "Apple", "Google", "Amazon", "Tesla"]""",
+                education = "MBA from Harvard Business School, BS in Computer Science from MIT",
+                specialization = "Technology & Innovation",
+                socialLinkedIn = "https://linkedin.com/in/johnsmith",
+                socialTwitter = "https://twitter.com/johnsmith"
+            ),
+            stockTicker = "SHOP"
+        )
+    }
+}
+
+@Preview(name = "Tablet", showBackground = true, backgroundColor = 0xFF0D1B2A, widthDp = 840)
+@Composable
+fun ExecutiveDetailContentTabletPreview() {
     VettrTheme {
         ExecutiveDetailContent(
             executive = Executive(

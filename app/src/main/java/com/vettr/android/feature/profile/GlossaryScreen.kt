@@ -472,7 +472,7 @@ private fun getAllGlossaryTerms(): List<GlossaryTerm> {
     )
 }
 
-@Preview(showBackground = true)
+@Preview(name = "Phone", showBackground = true, backgroundColor = 0xFF0D1B2A)
 @Composable
 fun GlossaryScreenPreview() {
     VettrTheme {
@@ -480,19 +480,10 @@ fun GlossaryScreenPreview() {
     }
 }
 
-@Preview(showBackground = true)
+@Preview(name = "Tablet", showBackground = true, backgroundColor = 0xFF0D1B2A, widthDp = 840)
 @Composable
-fun GlossaryTermCardPreview() {
+fun GlossaryScreenTabletPreview() {
     VettrTheme {
-        Surface(color = VettrNavy) {
-            GlossaryTermCard(
-                term = GlossaryTerm(
-                    term = "VETR Score",
-                    definition = "A proprietary 0-100 score that evaluates a company's overall health based on financials, management quality, filing activity, and market performance.",
-                    category = GlossaryCategory.METRICS
-                ),
-                modifier = Modifier.padding(Spacing.md)
-            )
-        }
+        GlossaryScreen()
     }
 }

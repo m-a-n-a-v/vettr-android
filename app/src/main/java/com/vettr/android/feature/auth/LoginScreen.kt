@@ -184,7 +184,7 @@ fun LoginScreen(
     }
 }
 
-@Preview(showBackground = true, backgroundColor = 0xFF0D1B2A)
+@Preview(name = "Phone", showBackground = true, backgroundColor = 0xFF0D1B2A)
 @Composable
 fun LoginScreenPreview() {
     VettrTheme {
@@ -192,9 +192,9 @@ fun LoginScreenPreview() {
     }
 }
 
-@Preview(showBackground = true, backgroundColor = 0xFF0D1B2A)
+@Preview(name = "Tablet", showBackground = true, backgroundColor = 0xFF0D1B2A, widthDp = 840)
 @Composable
-fun LoginScreenWithErrorPreview() {
+fun LoginScreenTabletPreview() {
     VettrTheme {
         LoginScreen()
     }

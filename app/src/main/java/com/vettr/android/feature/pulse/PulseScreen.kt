@@ -315,9 +315,17 @@ fun PulseScreen(
     }
 }
 
-@Preview(showBackground = true, backgroundColor = 0xFF0D1B2A)
+@Preview(name = "Phone", showBackground = true, backgroundColor = 0xFF0D1B2A)
 @Composable
 fun PulseScreenPreview() {
+    VettrTheme {
+        PulseScreen()
+    }
+}
+
+@Preview(name = "Tablet", showBackground = true, backgroundColor = 0xFF0D1B2A, widthDp = 840)
+@Composable
+fun PulseScreenTabletPreview() {
     VettrTheme {
         PulseScreen()
     }

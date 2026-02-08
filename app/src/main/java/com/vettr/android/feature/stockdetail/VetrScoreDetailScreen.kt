@@ -965,9 +965,43 @@ private fun DisclaimersSection(
     }
 }
 
-@Preview(showBackground = true, backgroundColor = 0xFF0D1B2A)
+@Preview(name = "Phone", showBackground = true, backgroundColor = 0xFF0D1B2A)
 @Composable
 fun VetrScoreDetailContentPreview() {
+    VettrTheme {
+        VetrScoreDetailContent(
+            ticker = "SHOP",
+            vetrScoreResult = VetrScoreResult(
+                overallScore = 85,
+                components = mapOf(
+                    "pedigree" to 80,
+                    "filingVelocity" to 90,
+                    "redFlag" to 85,
+                    "growth" to 75,
+                    "governance" to 88
+                ),
+                lastUpdated = System.currentTimeMillis()
+            ),
+            scoreHistory = listOf(78, 80, 82, 83, 85, 84, 85, 86, 85, 85),
+            scoreTrend = "Trending up",
+            peerComparison = PeerComparison(
+                ticker = "SHOP",
+                score = 85,
+                sectorAverage = 72,
+                percentile = 78,
+                peerScores = listOf(
+                    PeerScore("AMZN", "Amazon", 88),
+                    PeerScore("EBAY", "eBay", 75),
+                    PeerScore("ETSY", "Etsy", 70)
+                )
+            )
+        )
+    }
+}
+
+@Preview(name = "Tablet", showBackground = true, backgroundColor = 0xFF0D1B2A, widthDp = 840)
+@Composable
+fun VetrScoreDetailContentTabletPreview() {
     VettrTheme {
         VetrScoreDetailContent(
             ticker = "SHOP",

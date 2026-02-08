@@ -795,9 +795,42 @@ private fun getFlagColor(score: Double): Color {
 
 // Previews
 
-@Preview(showBackground = true, backgroundColor = 0xFF0D1B2A)
+@Preview(name = "Phone", showBackground = true, backgroundColor = 0xFF0D1B2A)
 @Composable
 fun RedFlagScreenPreview_WithFlags() {
+    VettrTheme {
+        RedFlagScreenContent(
+            uiState = RedFlagUiState(
+                currentFlags = listOf(
+                    DetectedFlag(
+                        type = RedFlagType.CONSOLIDATION_VELOCITY,
+                        ticker = "XYZ",
+                        score = 30.0,
+                        description = "Detected 3 share consolidations in the past year. Frequent consolidations may indicate ongoing dilution concerns.",
+                        detectedAt = System.currentTimeMillis()
+                    ),
+                    DetectedFlag(
+                        type = RedFlagType.FINANCING_VELOCITY,
+                        ticker = "XYZ",
+                        score = 25.0,
+                        description = "Detected 4 equity financings in the past year. Frequent financings may indicate cash burn or operational challenges.",
+                        detectedAt = System.currentTimeMillis()
+                    )
+                ),
+                compositeScore = RedFlagScore(
+                    totalScore = 55.0,
+                    severity = RedFlagSeverity.MODERATE,
+                    flags = emptyList()
+                ),
+                isLoading = false
+            )
+        )
+    }
+}
+
+@Preview(name = "Tablet", showBackground = true, backgroundColor = 0xFF0D1B2A, widthDp = 840)
+@Composable
+fun RedFlagScreenTabletPreview() {
     VettrTheme {
         RedFlagScreenContent(
             uiState = RedFlagUiState(
