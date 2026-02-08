@@ -12,6 +12,15 @@ pluginManagement {
     }
 }
 
+// Enable build cache for faster builds
+buildCache {
+    local {
+        isEnabled = true
+        directory = File(rootDir, ".gradle/build-cache")
+        removeUnusedEntriesAfterDays = 7
+    }
+}
+
 dependencyResolutionManagement {
     repositoriesMode.set(RepositoriesMode.FAIL_ON_PROJECT_REPOS)
     repositories {
