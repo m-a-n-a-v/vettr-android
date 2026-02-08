@@ -2035,7 +2035,7 @@
         "./gradlew assembleDebug succeeds"
       ],
       "priority": 146,
-      "passes": false
+      "passes": true
     },
     {
       "id": "US-147",
@@ -2050,7 +2050,7 @@
         "./gradlew assembleDebug succeeds"
       ],
       "priority": 147,
-      "passes": false
+      "passes": true
     },
     {
       "id": "US-148",

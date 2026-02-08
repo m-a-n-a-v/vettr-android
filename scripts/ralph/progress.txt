@@ -3967,3 +3967,52 @@ Details:
   - The API automatically sets LAYOUT_STABLE and LAYOUT_HIDE_NAVIGATION flags
   - Theme.xml colors for statusBarColor/navigationBarColor are overridden by enableEdgeToEdge()
 ---
+
+## US-146: Add landscape and tablet layout support
+Status: ✅ COMPLETE
+Date: 2026-02-08
+Details:
+- Added androidx.compose.material3:material3-window-size-class dependency (aliased as androidx-material3-window-size to avoid Gradle reserved name 'class')
+- Updated MainActivity to calculate WindowSizeClass and pass it through navigation hierarchy
+- Updated VettrNavHost, MainScreen to accept and propagate windowSizeClass parameter
+- PulseScreen: Implemented 2-column grid layout for Strategic Events and Trending Stocks sections on expanded screens (WindowWidthSizeClass.Expanded)
+- StockDetailScreen: Implemented side-by-side layout with header/chart on left and tabs/content on right for expanded screens
+- DiscoveryScreen: Updated Top Sectors grid to use 3 fixed columns (GridCells.Fixed(3)) on expanded screens
+- Added preview functions for all screens with mock WindowSizeClass for phone (400x800dp) and tablet (840x1200dp)
+- Used @OptIn(ExperimentalMaterial3WindowSizeClassApi::class) for experimental API usage
+- Build successful: ./gradlew assembleDebug passes
+**Learnings for future iterations:**
+  - Gradle version catalog aliases cannot contain 'class' keyword (reserved name) - use alternative names like 'window-size' instead
+  - WindowSizeClass.calculateFromSize(DpSize) is experimental and requires @OptIn annotation
+  - WindowWidthSizeClass.Expanded is the key for tablet/landscape detection
+  - LazyVerticalGrid with GridCells.Fixed(n) provides consistent column count for responsive layouts
+  - Side-by-side Row layouts with weight(1f) columns work well for expanded screen layouts
+  - All @Preview functions need mock WindowSizeClass - use calculateFromSize for different screen sizes
+  - Adaptive layouts improve UX significantly on tablets and landscape orientations
+---
+
+## US-147: Add Material3 animated transitions between screens
+Status: ✅ COMPLETE
+Date: 2026-02-08
+Details:
+- Implemented smooth navigation animations across the entire app
+- Added enterTransition, exitTransition, popEnterTransition, and popExitTransition to VettrNavHost
+- Forward navigation: slide in from right with fade (300ms tween)
+- Back navigation: slide out to right with fade (300ms tween)
+- Tab switching: crossfade animations for all 5 bottom navigation tabs (Pulse, Discovery, Stocks, Alerts, Profile)
+- Detail screens (Settings, Onboarding, Glossary, FAQ, StockDetail): slide-in/slide-out animations
+- Alert Rule Creator: bottom sheet style animations (slide up from bottom)
+- ExecutiveDetail and VetrScoreDetail already use ModalBottomSheet composables (no navigation needed)
+- Files changed:
+  - app/src/main/java/com/vettr/android/feature/main/VettrNavHost.kt
+  - app/src/main/java/com/vettr/android/feature/main/MainScreen.kt
+- Build successful: ./gradlew assembleDebug passes
+
+**Learnings for future iterations:**
+- All animations use consistent 300ms tween timing for smooth UX
+- Crossfade (fadeIn/fadeOut) works best for tab switches to avoid disorienting horizontal slides
+- Bottom sheet screens use vertical slide animations (slideInVertically/slideOutVertically)
+- Detail screens use horizontal slide animations (slideInHorizontally/slideOutHorizontally)
+- ModalBottomSheet composables don't need navigation transitions - they're modal components, not routes
+- Exit transitions use targetOffsetX = { -it / 4 } for subtle parallax effect on the previous screen
+---
