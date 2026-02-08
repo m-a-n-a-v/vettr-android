@@ -408,3 +408,28 @@ Files changed:
   - Clickable modifier applied to entire row enables navigation to stock detail screen
   - Real stock examples (Canadian stocks like SHOP, RY, ENB, TD) provide realistic preview data
 ---
+
+## US-022: Create SearchBarView composable component
+Status: ✅ COMPLETE
+Date: 2026-02-07
+Details:
+- Created designsystem/component/SearchBarView.kt @Composable function
+- Implemented OutlinedTextField with Icons.Default.Search leading icon
+- Parameters: query (String), onQueryChange ((String) -> Unit)
+- Used VettrCardBackground for container color with dark theme styling
+- Added placeholder text "Search" with onSurfaceVariant color
+- Set colors for focused/unfocused border states with primary accent on focus
+- Made text field single line for optimal search input
+- Added 2 @Preview composables: empty state and populated state (query: "Shopify")
+- Build successful: ./gradlew assembleDebug passes
+Files changed:
+- app/src/main/java/com/vettr/android/designsystem/component/SearchBarView.kt (created)
+**Learnings for future iterations:**
+  - OutlinedTextField requires OutlinedTextFieldDefaults.colors() for custom dark theme styling
+  - VettrCardBackground (0xFF1B2838) provides proper contrast for text input on dark VettrNavy background
+  - leadingIcon parameter takes composable lambda, perfect for Material Icons
+  - textStyle parameter allows customization of input text appearance (color, typography)
+  - singleLine = true prevents multi-line search input and improves UX
+  - Placeholder uses onSurfaceVariant color for subtle hint text that doesn't distract
+  - Border colors use alpha transparency (0.5f) for unfocused state to reduce visual weight
+---
