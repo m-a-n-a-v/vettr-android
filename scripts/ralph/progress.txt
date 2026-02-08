@@ -210,3 +210,45 @@ Files changed:
   - CI workflow mirrors local build commands: assembleDebug and testDebugUnitTest
 ---
 
+## US-013: Create Color.kt with brand design tokens
+Status: ✅ COMPLETE
+Date: 2026-02-07
+Details:
+- Updated designsystem/theme/Color.kt with VETTR brand design tokens
+- Verified all required colors present: VettrNavy (0xFF0D1B2A), VettrAccent (0xFF00C853), VettrCardBackground (0xFF1B2838)
+- Updated VettrTextPrimary to use Color.White for consistency (same as 0xFFFFFFFF)
+- Added risk indicator colors: VettrGreen (0xFF00C853), VettrYellow (0xFFFFAB00), VettrRed (0xFFFF5252)
+- Build successful: ./gradlew assembleDebug passes
+Files changed:
+- app/src/main/java/com/vettr/android/designsystem/theme/Color.kt
+**Learnings for future iterations:**
+  - Color.kt file already had most brand colors defined in the initial scaffold
+  - Risk indicator colors (VettrGreen, VettrYellow, VettrRed) are essential for score/change indicators throughout the app
+  - Using Color.White is more idiomatic than 0xFFFFFFFF for white color definitions
+  - VettrGreen and VettrAccent share the same color value (0xFF00C853) as they both represent positive/primary actions
+  - Color definitions follow the pattern: brand colors, surface hierarchy, semantic colors, on-colors, risk indicators
+---
+
+
+## US-014: Create Typography.kt with text styles
+Status: ✅ COMPLETE
+Date: 2026-02-07
+Details:
+- Updated designsystem/theme/Type.kt with VETTR typography specifications
+- Updated displayLarge: 34sp, Bold (was 57sp)
+- Updated titleLarge: 28sp, SemiBold (was 22sp)
+- Updated titleMedium: 20sp, SemiBold (was 16sp, Medium)
+- Updated bodyLarge: 17sp, Normal (was 16sp)
+- Updated bodyMedium: 15sp, Normal (was 14sp)
+- Updated labelSmall: 12sp, Normal (was 11sp, Medium)
+- All text styles use FontFamily.Default (system font)
+- Build successful: ./gradlew assembleDebug passes
+Files changed:
+- app/src/main/java/com/vettr/android/designsystem/theme/Type.kt
+**Learnings for future iterations:**
+  - Type.kt file already had complete Material3 Typography structure in place from initial scaffold
+  - Updated 6 specific text styles to match VETTR design specifications while keeping other Material3 styles intact
+  - FontFamily.Default provides system font (SF Pro on iOS-style designs, Roboto on Android)
+  - Material3 Typography includes comprehensive set of text styles: displayLarge/Medium/Small, headlineLarge/Medium/Small, titleLarge/Medium/Small, bodyLarge/Medium/Small, labelLarge/Medium/Small
+  - Line heights should scale proportionally with font sizes for optimal readability
+---
