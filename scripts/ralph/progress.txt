@@ -1417,3 +1417,204 @@ Details:
   - Dog emoji (🐕) used as placeholder for mascot illustration
   - Layout uses SpaceBetween arrangement for proper spacing of logo, mascot, and action buttons
 ---
+
+## US-064: Create LoginScreen composable
+Status: ✅ COMPLETE
+Date: 2026-02-07
+Details:
+- Created LoginScreen.kt @Composable with email/password OutlinedTextFields
+- Added Google Sign-In outlined button and Log In PrimaryButton
+- Integrated with AuthViewModel using hiltViewModel() and collectAsStateWithLifecycle()
+- Email field with KeyboardType.Email
+- Password field with visibility toggle icon (show/hide password)
+- Error message display from viewModel.errorMessage
+- "Don't have an account? Sign Up" link at bottom
+- Added @Preview composables
+- Build passes: ./gradlew assembleDebug successful
+**Learnings for future iterations:**
+  - OutlinedTextField colors need explicit theming for dark mode compatibility
+  - Password visibility toggle uses Icons.Default.Visibility/VisibilityOff
+  - Use collectAsStateWithLifecycle() for state collection in Compose screens
+  - TextButton with custom text color for links
+  - OutlinedButton for secondary actions like Google Sign-In
+---
+
+## US-065: Create SignUpScreen composable
+Status: ✅ COMPLETE
+Date: 2026-02-07
+Details:
+- Created SignUpScreen.kt in feature/auth/ package
+- Implemented email, password, and confirm password fields with OutlinedTextField
+- Added field validation for email format using android.util.Patterns.EMAIL_ADDRESS
+- Added password matching validation between password and confirmPassword fields
+- Integrated with AuthViewModel using hiltViewModel() and collectAsStateWithLifecycle()
+- Added visibility toggles for both password fields using Icons.Default.Visibility/VisibilityOff
+- Included Google Sign-In button (OutlinedButton) and Sign Up PrimaryButton
+- Added "Already have an account? Log In" clickable TextButton at bottom
+- Added @Preview with VettrTheme and dark background (0xFF0D1B2A)
+- All acceptance criteria met: ./gradlew assembleDebug succeeds
+
+**Learnings for future iterations:**
+- SignUpScreen follows same pattern as LoginScreen with local state for form fields and validation
+- Field validation is done locally before calling ViewModel methods
+- Error states are shown using isError and supportingText parameters on OutlinedTextField
+- Email validation uses Android's built-in Patterns.EMAIL_ADDRESS matcher
+- Password visibility is managed with local mutableStateOf and IconButton toggles
+- The screen integrates with existing AuthViewModel's signUp(), onEmailChange(), and onPasswordChange() methods
+- Preview uses same dark theme background as other auth screens for consistency
+---
+
+## US-066: Set up Navigation Compose with auth routing
+Status: ✅ COMPLETE
+Date: 2026-02-07
+Details:
+- Created feature/main/VettrNavHost.kt with auth and main navigation graphs
+- Auth graph includes: Welcome, Login, SignUp screens with proper navigation
+- Main graph includes: placeholder for MainScreen (to be implemented in US-067)
+- Observes AuthRepository.isAuthenticated() flow to automatically navigate between auth/main
+- Uses LaunchedEffect to handle auth state changes and navigate accordingly
+- Wired VettrNavHost into MainActivity.setContent() with AuthRepository injection
+- Files changed:
+  - Created: app/src/main/java/com/vettr/android/feature/main/VettrNavHost.kt
+  - Modified: app/src/main/java/com/vettr/android/MainActivity.kt
+- Build verification: ./gradlew assembleDebug passes
+**Learnings for future iterations:**
+  - Navigation Compose: Use nested navigation graphs (navigation { }) for logical grouping
+  - Auth flow: LaunchedEffect(isAuthenticated) observes auth state and navigates automatically
+  - Screen parameters: Match existing screen composable signatures (onSignUpClick, onLoginClick)
+  - Navigation on auth success: Remove popUpTo in screen callbacks, let LaunchedEffect handle it
+  - MainActivity injection: Use @Inject lateinit var for repository injection in Activities
+  - Sealed classes for routes provide type-safe navigation
+---
+
+## US-067: Create MainScreen with bottom navigation
+Status: ✅ COMPLETE
+Date: 2026-02-07
+Details:
+- Created feature/main/MainScreen.kt with NavigationBar containing 5 tabs
+- Implemented BottomNavDestination sealed class for type-safe navigation routes
+- Added Material icons: TrendingUp (Pulse), Explore (Discovery), List (Stocks), Notifications (Alerts), Person (Profile)
+- Used VettrAccent color for selected tab tint per design system
+- Integrated nested NavHost within MainScreen for tab-based navigation
+- Updated VettrNavHost.kt to use MainScreen instead of placeholder
+- Added MainScreenPreview @Composable for preview support
+- Build successful: ./gradlew assembleDebug passes
+**Learnings for future iterations:**
+  - Use AutoMirrored versions of icons (Icons.AutoMirrored.Filled.TrendingUp, Icons.AutoMirrored.Filled.List) to avoid deprecation warnings
+  - NavigationBarItemDefaults.colors() allows customization of selected/unselected icon and text colors
+  - Use rememberSaveable for bottom nav state to preserve across configuration changes
+  - NavHost inside Scaffold with bottom bar creates proper nested navigation structure
+  - Set launchSingleTop = true and restoreState = true in navigation for proper back stack behavior
+  - Placeholder screens created for each tab (Pulse, Discovery, Stocks, Alerts, Profile) to be replaced in future stories
+---
+
+## US-068: Create placeholder screens for each tab
+Status: ✅ COMPLETE
+Date: 2026-02-07
+Details:
+- Created PulseScreen.kt in feature/pulse/ with Scaffold and TopAppBar
+- Created DiscoveryScreen.kt in feature/discovery/ with Scaffold and TopAppBar
+- Created StocksScreen.kt in feature/stockdetail/ with Scaffold and TopAppBar
+- Created AlertsScreen.kt in feature/alerts/ with Scaffold and TopAppBar
+- Created ProfileScreen.kt in feature/profile/ with Scaffold and TopAppBar
+- Updated MainScreen.kt to import and use new screen composables instead of inline PlaceholderScreen
+- Removed PlaceholderScreen composable as it's no longer needed
+- Each screen displays centered title text matching its navigation label
+- All screens include @Preview composables for design verification
+- Build successful: ./gradlew assembleDebug passes
+**Learnings for future iterations:**
+  - Feature screens should be in their respective feature packages, not inline in MainScreen
+  - Each screen follows consistent pattern: Scaffold with TopAppBar and centered content
+  - @OptIn(ExperimentalMaterial3Api::class) needed for TopAppBar
+  - Import cleanup: removed unused Box and Alignment imports from MainScreen after removing PlaceholderScreen
+  - Screen composables accept Modifier parameter for flexible layout integration
+---
+
+## US-069: Style bottom navigation bar
+Status: ✅ COMPLETE
+Date: 2026-02-07
+Details:
+- Updated NavigationBar styling in MainScreen.kt with VETTR dark theme colors
+- Set containerColor to VettrNavy (#0D1B2A) for consistent dark background
+- Set contentColor to VettrTextSecondary for default text color
+- Added tonalElevation of 8.dp to create subtle shadow/elevation effect
+- Updated NavigationBarItem colors:
+  - selectedIconColor: VettrAccent (green #00C853)
+  - selectedTextColor: VettrAccent
+  - unselectedIconColor: VettrTextSecondary (gray #A0A0A0)
+  - unselectedTextColor: VettrTextSecondary
+  - indicatorColor: VettrNavy (matches background for subtle selection)
+- Added imports for VettrNavy, VettrTextSecondary, and dp unit
+- Build successful: ./gradlew assembleDebug passes
+
+Files changed:
+- app/src/main/java/com/vettr/android/feature/main/MainScreen.kt
+
+**Learnings for future iterations:**
+- NavigationBar uses tonalElevation parameter for shadow/elevation (not shadowElevation)
+- Setting indicatorColor to match the background creates a more subtle selected state
+- All navigation bar colors should reference design system tokens (VettrNavy, VettrAccent, VettrTextSecondary)
+- The dark theme aesthetic requires VettrNavy (#0D1B2A) for navigation bar background
+- Material 3 NavigationBar has containerColor and contentColor for theming
+---
+
+## US-070: Create PulseViewModel with Hilt
+Status: ✅ COMPLETE
+Date: 2026-02-07
+Details:
+- Created PulseViewModel.kt in feature/pulse/ with @HiltViewModel annotation
+- Injected StockRepository and FilingRepository via @Inject constructor
+- Implemented StateFlow properties:
+  - stocks: StateFlow<List<Stock>> for stock data
+  - filings: StateFlow<List<Filing>> for filing data
+  - isLoading: StateFlow<Boolean> for loading state
+  - errorMessage: StateFlow<String?> for error handling
+- Implemented loadData() method that:
+  - Collects stocks from stockRepository.getStocks()
+  - Collects latest 10 filings from filingRepository.getLatestFilings(10)
+  - Uses viewModelScope.launch for coroutines
+  - Handles errors with try/catch and updates errorMessage
+  - Updates isLoading state appropriately
+- Implemented refresh() method that calls loadData()
+- Called loadData() in init block to auto-load data on ViewModel creation
+- Build successful: ./gradlew assembleDebug passes
+
+Files changed:
+- app/src/main/java/com/vettr/android/feature/pulse/PulseViewModel.kt (new file)
+
+**Learnings for future iterations:**
+- ViewModels use @HiltViewModel with @Inject constructor for dependency injection
+- StateFlow pattern: private MutableStateFlow with public StateFlow via asStateFlow()
+- Use viewModelScope.launch for coroutines in ViewModels (automatically cancelled when ViewModel cleared)
+- Repository methods return Flow<T>, collect them with .collect { } in viewModelScope
+- Error handling with .catch {} operator on flows to gracefully handle failures
+- init block is ideal for auto-loading data when ViewModel is first created
+- Separate launch blocks for independent data streams allow parallel collection
+- Always expose immutable StateFlow to UI, keep MutableStateFlow private
+---
+
+## US-071: Build PulseScreen with Market Overview section
+Status: ✅ COMPLETE
+Date: 2026-02-07
+Details:
+- Updated PulseScreen.kt to use PulseViewModel via hiltViewModel()
+- Added SearchBarView at top with notification bell IconButton
+- Added Market Overview section with SectionHeader component
+- Created horizontal LazyRow with 3 MetricCards for TSX, S&P 500, and NASDAQ
+- Each MetricCard displays mock index value and percentage change (+/-)
+- Used existing design system components: SearchBarView, MetricCard, SectionHeader
+- Applied proper spacing using Spacing design tokens (md, lg, sm)
+- Updated preview with navy background color (0xFF0D1B2A)
+- Build successful: ./gradlew assembleDebug passes
+Files changed:
+- app/src/main/java/com/vettr/android/feature/pulse/PulseScreen.kt
+**Learnings for future iterations:**
+  - All required components (SearchBarView, MetricCard, SectionHeader) already existed in designsystem/component/
+  - MetricCard component uses cardStyle() and vettrPadding() modifier extensions for consistent styling
+  - LazyRow with contentPadding should use PaddingValues(horizontal = 0.dp) to avoid extra padding
+  - MetricCard width should be explicitly set (150.dp) for horizontal scrolling cards
+  - SearchBarView requires query state management in the composable
+  - PulseViewModel was already created in US-070 and properly uses @HiltViewModel pattern
+  - Icons.Default.Notifications is available in material.icons.filled package
+  - collectAsStateWithLifecycle() should be used for collecting StateFlow in Compose
+---
