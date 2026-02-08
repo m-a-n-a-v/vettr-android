@@ -2300,3 +2300,29 @@ Files changed:
   - Save operations should handle both success and failure cases with Result<T> pattern
   - onSaveComplete callback allows parent screen to handle navigation after successful save
 ---
+
+## US-099: Create RedFlagDetector for thread-safe flag detection
+Status: ✅ COMPLETE
+Date: 2026-02-08
+Details:
+- Created RedFlagDetector.kt in core/data/ with thread-safe detection using Mutex and single-threaded dispatcher
+- Implemented 5 red flag detectors with weighted composite scoring:
+  * consolidationVelocity (30% weight) - detects rapid share consolidations in last 12 months
+  * financingVelocity (25% weight) - detects frequent equity financings indicating cash burn
+  * executiveChurn (20% weight) - detects high C-suite turnover (< 2 years tenure)
+  * disclosureGaps (15% weight) - detects filing delays > 120 days
+  * debtTrend (10% weight) - detects increasing debt mentions in recent filings
+- Created data classes: DetectedFlag, RedFlagScore, RedFlagType enum, RedFlagSeverity enum
+- Composite RedFlagScore (0-100) with severity thresholds: <30 (LOW), 30-60 (MODERATE), 60-85 (HIGH), >85 (CRITICAL)
+- Added 26 comprehensive unit tests in RedFlagDetectorTest.kt covering all severity levels
+- Fixed StockDetailViewModelTest to use correct StockDetailTab enum values (PEDIGREE, RED_FLAGS instead of ANALYSIS, NEWS)
+- Tests: ./gradlew testDebugUnitTest passes
+**Learnings for future iterations:**
+  - Use MockK for Android tests (mockk(), coEvery { } returns), not Mockito
+  - Test data must avoid unintended cross-detection: filing gaps > 120 days trigger disclosure gap flags
+  - Keep test filing dates within ~90-120 day intervals to avoid triggering multiple red flags
+  - StandardTestDispatcher with runTest(testDispatcher) handles coroutine scheduling automatically
+  - Red flag detection is cumulative - multiple detectors can flag the same stock
+  - Thread safety achieved with Mutex.withLock and single-threaded dispatcher pattern
+  - Detector logic uses time-windowed analysis (12 months for velocity, 6 months for debt trend)
+---
