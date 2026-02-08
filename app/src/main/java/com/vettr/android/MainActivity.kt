@@ -12,6 +12,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 import androidx.fragment.app.FragmentActivity
 import androidx.lifecycle.lifecycleScope
 import com.vettr.android.core.data.repository.AuthRepository
@@ -35,10 +36,20 @@ class MainActivity : FragmentActivity() {
     private var deepLinkUri by mutableStateOf<Uri?>(null)
     private var isAppUnlocked by mutableStateOf(false)
     private var isFirstResume = true
+    private var isDataInitialized by mutableStateOf(false)
 
     override fun onCreate(savedInstanceState: Bundle?) {
+        // Install splash screen before super.onCreate()
+        val splashScreen = installSplashScreen()
+
+        // Keep the splash screen visible while data initializes
+        splashScreen.setKeepOnScreenCondition { !isDataInitialized }
+
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
+
+        // Initialize app data
+        initializeAppData()
 
         // Handle deep link from intent
         handleDeepLink(intent)
@@ -115,6 +126,16 @@ class MainActivity : FragmentActivity() {
                 // Handle vettr:// or https://vettr.app deep links
                 deepLinkUri = intent.data
             }
+        }
+    }
+
+    private fun initializeAppData() {
+        lifecycleScope.launch {
+            // Simulate data initialization (database, auth check, etc.)
+            // In a real app, this would check auth state, load cached data, etc.
+            // For now, we'll just mark it as complete immediately
+            // The AppStartupTracker provider already handles WorkManager initialization
+            isDataInitialized = true
         }
     }
 }

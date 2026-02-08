@@ -2,7 +2,20 @@
 <resources>
 
     <!-- Base application theme for splash / launcher -->
-    <style name="Theme.VETTR" parent="android:Theme.Material.NoActionBar">
+    <style name="Theme.VETTR" parent="Theme.SplashScreen">
+        <item name="android:statusBarColor">#0D1B2A</item>
+        <item name="android:navigationBarColor">#0D1B2A</item>
+        <item name="android:windowBackground">#0D1B2A</item>
+
+        <!-- SplashScreen API (Android 12+) -->
+        <item name="windowSplashScreenBackground">#0D1B2A</item>
+        <item name="windowSplashScreenAnimatedIcon">@mipmap/ic_launcher</item>
+        <item name="windowSplashScreenAnimationDuration">500</item>
+        <item name="postSplashScreenTheme">@style/Theme.VETTR.NoSplash</item>
+    </style>
+
+    <!-- Theme after splash screen -->
+    <style name="Theme.VETTR.NoSplash" parent="android:Theme.Material.NoActionBar">
         <item name="android:statusBarColor">#0D1B2A</item>
         <item name="android:navigationBarColor">#0D1B2A</item>
         <item name="android:windowBackground">#0D1B2A</item>
