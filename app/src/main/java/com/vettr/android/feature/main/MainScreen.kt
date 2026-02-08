@@ -1,5 +1,12 @@
 package com.vettr.android.feature.main
 
+import androidx.compose.animation.core.tween
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.slideInHorizontally
+import androidx.compose.animation.slideInVertically
+import androidx.compose.animation.slideOutHorizontally
+import androidx.compose.animation.slideOutVertically
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.windowsizeclass.ExperimentalMaterial3WindowSizeClassApi
@@ -130,7 +137,14 @@ fun MainScreen(
             startDestination = BottomNavDestination.Pulse.route,
             modifier = Modifier.padding(paddingValues)
         ) {
-            composable(BottomNavDestination.Pulse.route) {
+            // Bottom navigation destinations use crossfade
+            composable(
+                route = BottomNavDestination.Pulse.route,
+                enterTransition = { fadeIn(animationSpec = tween(300)) },
+                exitTransition = { fadeOut(animationSpec = tween(300)) },
+                popEnterTransition = { fadeIn(animationSpec = tween(300)) },
+                popExitTransition = { fadeOut(animationSpec = tween(300)) }
+            ) {
                 PulseScreen(
                     modifier = Modifier.fillMaxSize(),
                     windowSizeClass = windowSizeClass,
@@ -139,7 +153,13 @@ fun MainScreen(
                     }
                 )
             }
-            composable(BottomNavDestination.Discovery.route) {
+            composable(
+                route = BottomNavDestination.Discovery.route,
+                enterTransition = { fadeIn(animationSpec = tween(300)) },
+                exitTransition = { fadeOut(animationSpec = tween(300)) },
+                popEnterTransition = { fadeIn(animationSpec = tween(300)) },
+                popExitTransition = { fadeOut(animationSpec = tween(300)) }
+            ) {
                 DiscoveryScreen(
                     modifier = Modifier.fillMaxSize(),
                     windowSizeClass = windowSizeClass,
@@ -148,7 +168,13 @@ fun MainScreen(
                     }
                 )
             }
-            composable(BottomNavDestination.Stocks.route) {
+            composable(
+                route = BottomNavDestination.Stocks.route,
+                enterTransition = { fadeIn(animationSpec = tween(300)) },
+                exitTransition = { fadeOut(animationSpec = tween(300)) },
+                popEnterTransition = { fadeIn(animationSpec = tween(300)) },
+                popExitTransition = { fadeOut(animationSpec = tween(300)) }
+            ) {
                 StocksScreen(
                     modifier = Modifier.fillMaxSize(),
                     onStockClick = { stockId ->
@@ -156,7 +182,13 @@ fun MainScreen(
                     }
                 )
             }
-            composable(BottomNavDestination.Alerts.route) {
+            composable(
+                route = BottomNavDestination.Alerts.route,
+                enterTransition = { fadeIn(animationSpec = tween(300)) },
+                exitTransition = { fadeOut(animationSpec = tween(300)) },
+                popEnterTransition = { fadeIn(animationSpec = tween(300)) },
+                popExitTransition = { fadeOut(animationSpec = tween(300)) }
+            ) {
                 AlertsScreen(
                     modifier = Modifier.fillMaxSize(),
                     onCreateAlert = {
@@ -164,7 +196,13 @@ fun MainScreen(
                     }
                 )
             }
-            composable(BottomNavDestination.Profile.route) {
+            composable(
+                route = BottomNavDestination.Profile.route,
+                enterTransition = { fadeIn(animationSpec = tween(300)) },
+                exitTransition = { fadeOut(animationSpec = tween(300)) },
+                popEnterTransition = { fadeIn(animationSpec = tween(300)) },
+                popExitTransition = { fadeOut(animationSpec = tween(300)) }
+            ) {
                 ProfileScreen(
                     modifier = Modifier.fillMaxSize(),
                     onNavigateToSettings = {
@@ -182,39 +220,139 @@ fun MainScreen(
                 )
             }
 
-            // Settings screen
-            composable("settings") {
+            // Detail screens use slide-in from right (forward) / slide-out to right (back)
+            composable(
+                route = "settings",
+                enterTransition = {
+                    slideInHorizontally(
+                        initialOffsetX = { it },
+                        animationSpec = tween(300)
+                    ) + fadeIn(animationSpec = tween(300))
+                },
+                exitTransition = {
+                    slideOutHorizontally(
+                        targetOffsetX = { -it / 4 },
+                        animationSpec = tween(300)
+                    ) + fadeOut(animationSpec = tween(300))
+                },
+                popEnterTransition = {
+                    slideInHorizontally(
+                        initialOffsetX = { -it / 4 },
+                        animationSpec = tween(300)
+                    ) + fadeIn(animationSpec = tween(300))
+                },
+                popExitTransition = {
+                    slideOutHorizontally(
+                        targetOffsetX = { it },
+                        animationSpec = tween(300)
+                    ) + fadeOut(animationSpec = tween(300))
+                }
+            ) {
                 com.vettr.android.feature.profile.SettingsScreen(
                     onBackClick = { navController.navigateUp() },
                     modifier = Modifier.fillMaxSize()
                 )
             }
 
-            // Onboarding screen
-            composable("onboarding") {
+            composable(
+                route = "onboarding",
+                enterTransition = {
+                    slideInHorizontally(
+                        initialOffsetX = { it },
+                        animationSpec = tween(300)
+                    ) + fadeIn(animationSpec = tween(300))
+                },
+                exitTransition = {
+                    slideOutHorizontally(
+                        targetOffsetX = { -it / 4 },
+                        animationSpec = tween(300)
+                    ) + fadeOut(animationSpec = tween(300))
+                },
+                popEnterTransition = {
+                    slideInHorizontally(
+                        initialOffsetX = { -it / 4 },
+                        animationSpec = tween(300)
+                    ) + fadeIn(animationSpec = tween(300))
+                },
+                popExitTransition = {
+                    slideOutHorizontally(
+                        targetOffsetX = { it },
+                        animationSpec = tween(300)
+                    ) + fadeOut(animationSpec = tween(300))
+                }
+            ) {
                 OnboardingScreen(
                     onComplete = { navController.navigateUp() },
                     onSkip = { navController.navigateUp() }
                 )
             }
 
-            // Glossary screen
-            composable("glossary") {
+            composable(
+                route = "glossary",
+                enterTransition = {
+                    slideInHorizontally(
+                        initialOffsetX = { it },
+                        animationSpec = tween(300)
+                    ) + fadeIn(animationSpec = tween(300))
+                },
+                exitTransition = {
+                    slideOutHorizontally(
+                        targetOffsetX = { -it / 4 },
+                        animationSpec = tween(300)
+                    ) + fadeOut(animationSpec = tween(300))
+                },
+                popEnterTransition = {
+                    slideInHorizontally(
+                        initialOffsetX = { -it / 4 },
+                        animationSpec = tween(300)
+                    ) + fadeIn(animationSpec = tween(300))
+                },
+                popExitTransition = {
+                    slideOutHorizontally(
+                        targetOffsetX = { it },
+                        animationSpec = tween(300)
+                    ) + fadeOut(animationSpec = tween(300))
+                }
+            ) {
                 com.vettr.android.feature.profile.GlossaryScreen(
                     onBackClick = { navController.navigateUp() },
                     modifier = Modifier.fillMaxSize()
                 )
             }
 
-            // FAQ screen
-            composable("faq") {
+            composable(
+                route = "faq",
+                enterTransition = {
+                    slideInHorizontally(
+                        initialOffsetX = { it },
+                        animationSpec = tween(300)
+                    ) + fadeIn(animationSpec = tween(300))
+                },
+                exitTransition = {
+                    slideOutHorizontally(
+                        targetOffsetX = { -it / 4 },
+                        animationSpec = tween(300)
+                    ) + fadeOut(animationSpec = tween(300))
+                },
+                popEnterTransition = {
+                    slideInHorizontally(
+                        initialOffsetX = { -it / 4 },
+                        animationSpec = tween(300)
+                    ) + fadeIn(animationSpec = tween(300))
+                },
+                popExitTransition = {
+                    slideOutHorizontally(
+                        targetOffsetX = { it },
+                        animationSpec = tween(300)
+                    ) + fadeOut(animationSpec = tween(300))
+                }
+            ) {
                 com.vettr.android.feature.profile.FaqScreen(
                     onBackClick = { navController.navigateUp() },
                     modifier = Modifier.fillMaxSize()
                 )
             }
 
-            // Stock detail screen with optional tab query parameter
             composable(
                 route = "stock_detail/{stockId}?tab={tab}",
                 arguments = listOf(
@@ -224,7 +362,31 @@ fun MainScreen(
                         nullable = true
                         defaultValue = null
                     }
-                )
+                ),
+                enterTransition = {
+                    slideInHorizontally(
+                        initialOffsetX = { it },
+                        animationSpec = tween(300)
+                    ) + fadeIn(animationSpec = tween(300))
+                },
+                exitTransition = {
+                    slideOutHorizontally(
+                        targetOffsetX = { -it / 4 },
+                        animationSpec = tween(300)
+                    ) + fadeOut(animationSpec = tween(300))
+                },
+                popEnterTransition = {
+                    slideInHorizontally(
+                        initialOffsetX = { -it / 4 },
+                        animationSpec = tween(300)
+                    ) + fadeIn(animationSpec = tween(300))
+                },
+                popExitTransition = {
+                    slideOutHorizontally(
+                        targetOffsetX = { it },
+                        animationSpec = tween(300)
+                    ) + fadeOut(animationSpec = tween(300))
+                }
             ) {
                 StockDetailRoute(
                     onBackClick = { navController.navigateUp() },
@@ -233,8 +395,34 @@ fun MainScreen(
                 )
             }
 
-            // Alert rule creator screen
-            composable("alert_rule_creator") {
+            // Alert rule creator uses bottom sheet slide-up animation
+            composable(
+                route = "alert_rule_creator",
+                enterTransition = {
+                    slideInVertically(
+                        initialOffsetY = { it },
+                        animationSpec = tween(300)
+                    ) + fadeIn(animationSpec = tween(300))
+                },
+                exitTransition = {
+                    slideOutVertically(
+                        targetOffsetY = { it / 4 },
+                        animationSpec = tween(300)
+                    ) + fadeOut(animationSpec = tween(300))
+                },
+                popEnterTransition = {
+                    slideInVertically(
+                        initialOffsetY = { it / 4 },
+                        animationSpec = tween(300)
+                    ) + fadeIn(animationSpec = tween(300))
+                },
+                popExitTransition = {
+                    slideOutVertically(
+                        targetOffsetY = { it },
+                        animationSpec = tween(300)
+                    ) + fadeOut(animationSpec = tween(300))
+                }
+            ) {
                 AlertRuleCreatorScreen(
                     onBackClick = { navController.navigateUp() },
                     onSaveComplete = { navController.navigateUp() },
