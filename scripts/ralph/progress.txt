@@ -1843,3 +1843,22 @@ Details:
   - LazyColumn items() function works well for displaying list of filings
   - Custom bullet points with Row composable provide clean analysis presentation
 ---
+
+## US-081: Add favorite/watchlist toggle to StockDetailScreen
+Status: ✅ COMPLETE
+Date: 2026-02-07
+Details:
+- Created StockDetailRoute wrapper composable that integrates with StockDetailViewModel
+- Added imports for hiltViewModel and collectAsStateWithLifecycle
+- Wired favorite IconButton (already in UI) to call viewModel.toggleFavorite()
+- State updates reactively via Flow collection - when toggleFavorite() is called, it updates Room, and the Flow emits the updated Stock with new isFavorite value
+- Star icon already implemented in UI: Icons.Default.Star (filled) when favorited, Icons.Default.StarBorder when not
+- Repository and DAO methods (toggleFavorite) were already implemented in previous stories
+Files changed:
+- app/src/main/java/com/vettr/android/feature/stockdetail/StockDetailScreen.kt
+**Learnings for future iterations:**
+  - When UI is already implemented but not wired to ViewModel, create a Route wrapper composable
+  - Use StockDetailRoute for navigation integration, keep StockDetailScreen stateless for previews
+  - Flow-based state updates work automatically via collectAsStateWithLifecycle
+  - ViewModel pattern: collect StateFlows with collectAsStateWithLifecycle(), wire callbacks to ViewModel methods
+---
