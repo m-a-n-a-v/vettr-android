@@ -924,3 +924,28 @@ Files changed:
   - Pattern follows established DAO conventions: Flow for queries, suspend for mutations, OnConflictStrategy.REPLACE for upserts
   - DAO abstract methods must be added to RoomDatabase class to expose database operations
 ---
+## US-045: Create VetrScoreHistoryDao interface
+Status: ✅ COMPLETE
+Date: 2026-02-07
+Details:
+- Created core/data/local/VetrScoreHistoryDao.kt interface annotated with @Dao
+- Implemented query methods: getByStockTicker(ticker, limit), getLatest(ticker) with Flow return types
+- Both queries use ORDER BY calculated_at DESC for chronological ordering (newest first)
+- getByStockTicker() uses LIMIT parameter to fetch N most recent score records for a stock
+- getLatest() fetches the single most recent score record for a stock using LIMIT 1
+- Implemented mutation methods: insert(), insertAll() with suspend modifiers
+- Used OnConflictStrategy.REPLACE for insert operations (upsert behavior)
+- Added vetrScoreHistoryDao() abstract method to VettrDatabase class
+- Build successful: ./gradlew assembleDebug passes
+Files changed:
+- app/src/main/java/com/vettr/android/core/data/local/VetrScoreHistoryDao.kt (created)
+- app/src/main/java/com/vettr/android/core/data/local/VettrDatabase.kt (updated)
+**Learnings for future iterations:**
+  - VetrScoreHistoryDao provides database operations for VetrScoreHistory entities with reactive Flow return types
+  - getByStockTicker() enables fetching historical Vetr scores for trend visualization and time-series analysis
+  - getLatest() provides quick access to the most recent score calculation for display on stock detail screen
+  - Pattern allows limiting the number of historical records to prevent excessive memory usage for long histories
+  - Pattern follows established DAO conventions: Flow for queries, suspend for mutations, OnConflictStrategy.REPLACE for upserts
+  - ORDER BY calculated_at DESC ensures scores are returned in reverse chronological order for trend charts
+  - DAO abstract methods must be added to RoomDatabase class to expose database operations
+---
