@@ -46,6 +46,8 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.vettr.android.core.model.Filing
 import com.vettr.android.core.model.Stock
 import com.vettr.android.designsystem.component.MetricCard
@@ -64,7 +66,51 @@ import java.util.Date
 import java.util.Locale
 
 /**
+ * Stock Detail screen wrapper that connects to ViewModel.
+ * Use this composable when navigating to stock details with ViewModel integration.
+ */
+@Composable
+fun StockDetailRoute(
+    onBackClick: () -> Unit,
+    onShareClick: () -> Unit = {},
+    viewModel: StockDetailViewModel = hiltViewModel(),
+    modifier: Modifier = Modifier
+) {
+    val stock by viewModel.stock.collectAsStateWithLifecycle()
+    val filings by viewModel.filings.collectAsStateWithLifecycle()
+    val selectedTab by viewModel.selectedTab.collectAsStateWithLifecycle()
+    val selectedTimeRange by viewModel.selectedTimeRange.collectAsStateWithLifecycle()
+
+    StockDetailScreen(
+        stock = stock,
+        filings = filings,
+        selectedTimeRange = selectedTimeRange,
+        selectedTab = when (selectedTab) {
+            StockDetailTab.OVERVIEW -> 0
+            StockDetailTab.ANALYSIS -> 1
+            StockDetailTab.NEWS -> 2
+        },
+        onBackClick = onBackClick,
+        onShareClick = onShareClick,
+        onFavoriteClick = { viewModel.toggleFavorite() },
+        onTimeRangeSelected = { viewModel.selectTimeRange(it) },
+        onTabSelected = { tabIndex ->
+            viewModel.selectTab(
+                when (tabIndex) {
+                    0 -> StockDetailTab.OVERVIEW
+                    1 -> StockDetailTab.ANALYSIS
+                    2 -> StockDetailTab.NEWS
+                    else -> StockDetailTab.OVERVIEW
+                }
+            )
+        },
+        modifier = modifier
+    )
+}
+
+/**
  * Stock Detail screen - displays detailed information about a specific stock.
+ * This is the stateless UI component. For ViewModel integration, use StockDetailRoute.
  */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
