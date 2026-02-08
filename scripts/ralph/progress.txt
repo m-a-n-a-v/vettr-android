@@ -3863,3 +3863,48 @@ Files changed:
 - Document scoring algorithms and calculation formulas so backend can implement them correctly
 - Testing recommendations and mock data specifications help backend developers test their implementations
 ---
+
+## US-143: Create comprehensive code documentation
+Status: ✅ COMPLETE
+Date: 2026-02-08
+Details:
+- Added comprehensive KDoc to all DAO interfaces (StockDao, FilingDao, AlertRuleDao, ExecutiveDao, UserDao, RedFlagHistoryDao, VetrScoreHistoryDao, SyncHistoryDao)
+- Added KDoc to FilingRepository interface
+- Enhanced KDoc for all Room @Entity classes (Stock, User, AlertRule, Filing, Executive, RedFlagHistory, VetrScoreHistory, SyncHistory) with detailed property documentation
+- Complex logic in VetrScoreCalculator and RedFlagDetector already had excellent inline comments explaining scoring algorithms and detection logic
+- Created comprehensive ARCHITECTURE.md documenting:
+  - MVVM architecture pattern
+  - Repository pattern
+  - Dependency injection with Hilt
+  - Navigation with Navigation Compose
+  - Room database architecture
+  - Retrofit API layer
+  - DataStore for preferences
+  - Jetpack Compose UI patterns
+  - State management with StateFlow
+  - Design system organization
+  - VETR Score calculation details
+  - Red Flag detection methodology
+  - Coroutines and threading
+  - Testing strategy
+  - Key architectural decisions
+  - Module structure
+  - Data flow
+  - Performance and security considerations
+- All ViewModels already had KDoc comments
+- All public services already had KDoc comments
+- Build verified: ./gradlew assembleDebug passes successfully
+
+Files changed:
+- app/ARCHITECTURE.md (new file)
+- app/src/main/java/com/vettr/android/core/data/local/*.kt (8 DAOs)
+- app/src/main/java/com/vettr/android/core/data/repository/FilingRepository.kt
+- app/src/main/java/com/vettr/android/core/model/*.kt (8 entities)
+
+**Learnings for future iterations:**
+- The codebase already had good documentation practices in place for ViewModels, services, and complex algorithms
+- The scoring and detection logic (VetrScoreCalculator, RedFlagDetector) had excellent inline comments explaining the weighted algorithms
+- Creating a centralized ARCHITECTURE.md provides valuable context for new developers joining the project
+- KDoc on entities is particularly important for Room databases as it documents the data model and relationships
+- DAOs benefit from KDoc as they define the contract between the data layer and repositories
+---
