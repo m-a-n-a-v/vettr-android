@@ -1722,3 +1722,42 @@ Details:
   - SectorCard follows same design pattern as other card components (cardStyle + vettrPadding)
   - Color-coded indicators (VettrGreen, VettrRed, VettrYellow) provide visual status differentiation
 ---
+
+## US-077: Create StockDetailViewModel with Hilt
+Status: ✅ COMPLETE
+Date: 2026-02-07
+Details:
+- Created feature/stockdetail/StockDetailViewModel.kt with @HiltViewModel annotation
+- Injected StockRepository, FilingRepository, and SavedStateHandle via @Inject constructor
+- Added StockDetailTab enum with OVERVIEW, ANALYSIS, and NEWS options
+- Implemented StateFlow properties:
+  - stock: StateFlow<Stock?> for current stock details
+  - filings: StateFlow<List<Filing>> for stock-related filings
+  - selectedTab: StateFlow<StockDetailTab> for tab navigation state
+  - isLoading: StateFlow<Boolean> for loading state
+  - errorMessage: StateFlow<String?> for error handling
+- Implemented loadStock() method that:
+  - Retrieves stockId from SavedStateHandle navigation argument
+  - Loads stock details using stockRepository.getStock(stockId)
+  - Loads associated filings using filingRepository.getFilingsForStock(stockId)
+  - Uses parallel launch blocks for concurrent data loading
+  - Handles errors with .catch {} operator and updates errorMessage
+  - Manages isLoading state appropriately
+- Implemented toggleFavorite() method that calls stockRepository.toggleFavorite(stockId)
+- Implemented selectTab(tab: StockDetailTab) method to switch between Overview/Analysis/News tabs
+- Called loadStock() in init block to auto-load data on ViewModel creation
+- Build successful: ./gradlew assembleDebug passes
+
+Files changed:
+- app/src/main/java/com/vettr/android/feature/stockdetail/StockDetailViewModel.kt (new file)
+
+**Learnings for future iterations:**
+  - SavedStateHandle is injected via Hilt to access navigation arguments (stockId in this case)
+  - SavedStateHandle.get<String>("stockId") retrieves the navigation argument passed to the screen
+  - StockDetailTab enum provides type-safe tab selection instead of using strings
+  - Same ViewModel pattern as PulseViewModel and DiscoveryViewModel: @HiltViewModel, StateFlow, viewModelScope
+  - Repository methods getStock(id) and getFilingsForStock(stockId) provide data specific to one stock
+  - toggleFavorite() is a suspend function in repository, so called within viewModelScope.launch
+  - Parallel data loading with separate launch blocks allows stock and filings to load concurrently
+  - Stock detail screens need both general stock info and related filings for the News tab
+---
