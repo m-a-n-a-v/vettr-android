@@ -171,3 +171,19 @@ Files changed:
 - Following the established pattern of using version catalog for all dependencies maintains consistency
 - BiometricPrompt will be used for secure authentication alongside Google Sign-In
 ---
+## US-011: Create .gitignore for Android project
+Status: ✅ COMPLETE
+Date: 2026-02-07
+Details:
+- Verified .gitignore already contains all required entries from acceptance criteria
+- .gitignore includes: .gradle/, build/, .idea/, *.iml, local.properties, .DS_Store, captures/, .externalNativeBuild/, .cxx/
+- Verified git status --ignored shows no tracked files in ignore list (all properly excluded)
+- Build successful: ./gradlew assembleDebug passes
+Files changed:
+- .gitignore was already properly configured in the initial project scaffold
+**Learnings for future iterations:**
+  - The initial project scaffold included a comprehensive .gitignore file
+  - git status --ignored command is useful to verify ignored files aren't being tracked
+  - Android projects typically ignore: build artifacts (.gradle/, build/, *.iml), IDE files (.idea/), local config (local.properties), OS files (.DS_Store), native build outputs (.externalNativeBuild/, .cxx/), and profiling data (*.hprof)
+---
+
