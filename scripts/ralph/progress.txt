@@ -2420,3 +2420,33 @@ Files changed:
   - Use formatFlagName to convert enum RedFlagType to user-friendly display names
   - Severity thresholds for individual flags differ from composite score thresholds
 ---
+
+## US-102: Create VetrScoreCalculator
+Status: ✅ COMPLETE
+Date: 2026-02-08
+Details:
+- Created VetrScoreCalculator.kt in core/data with full component calculations
+- Implements 5-component scoring: Pedigree (25%), Filing Velocity (20%), Red Flag (25%), Growth (15%), Governance (15%)
+- Pedigree score delegates to ExecutiveRepository.getExecutiveScore
+- Filing Velocity scores based on frequency (4+ filings/year = 60) and consistency (avg gap timing = up to 40)
+- Red Flag score inverts red flag total: 100 - total red flags (0 flags = 100 score)
+- Growth score combines market cap (up to 40 points) and price momentum (up to 60 points)
+- Governance score combines team size (up to 35), transparency via material filings (up to 35), and tenure stability (up to 30)
+- Bonus +5 for audited financials detected in past year
+- Penalty -10 for overdue filings (no filings in 6+ months) or regulatory issues (disclosure gaps)
+- Final score clamped to 0-100 range
+- Implemented thread-safe caching with Mutex and 24-hour TTL using CachedScore data class
+- clearCache() method supports clearing specific ticker or all tickers
+- getCachedScore() method returns cached result if within TTL
+- Created VetrScoreCalculatorTest.kt with 31 comprehensive unit tests covering all components, adjustments, caching, edge cases
+- All tests pass: ./gradlew testDebugUnitTest succeeds
+**Learnings for future iterations:**
+  - VetrScoreCalculator uses Mutex for thread-safe cache access, following same pattern as RedFlagDetector
+  - Component scores are calculated independently and combined with weighted average
+  - Adjustments (bonuses/penalties) are applied after base score calculation
+  - Type mismatches with coerceIn: must use Double literals (0.0, 100.0) when working with Double values
+  - Test mocking order matters: call setupMockRepositories() first, then override specific mocks
+  - Test assertions should match actual formula outputs, not just expectations
+  - VetrScoreResult data class includes components map for UI breakdown display
+  - Cache uses ticker as key since it's the primary lookup identifier
+---
