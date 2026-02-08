@@ -23,6 +23,9 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.TrendingDown
+import androidx.compose.material.icons.automirrored.filled.TrendingFlat
+import androidx.compose.material.icons.automirrored.filled.TrendingUp
 import androidx.compose.material.icons.filled.ExpandLess
 import androidx.compose.material.icons.filled.ExpandMore
 import androidx.compose.material.icons.filled.Info
@@ -307,12 +310,30 @@ private fun TrendSparkline(
                 color = MaterialTheme.colorScheme.onSurface
             )
 
-            Text(
-                text = trend,
-                style = MaterialTheme.typography.bodyMedium,
-                fontWeight = FontWeight.SemiBold,
-                color = trendColor
-            )
+            Row(
+                horizontalArrangement = Arrangement.spacedBy(Spacing.xs),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                val trendIcon = when {
+                    trend.contains("up", ignoreCase = true) -> Icons.AutoMirrored.Filled.TrendingUp
+                    trend.contains("down", ignoreCase = true) -> Icons.AutoMirrored.Filled.TrendingDown
+                    else -> Icons.AutoMirrored.Filled.TrendingFlat
+                }
+
+                Icon(
+                    imageVector = trendIcon,
+                    contentDescription = null,
+                    tint = trendColor,
+                    modifier = Modifier.size(20.dp)
+                )
+
+                Text(
+                    text = trend,
+                    style = MaterialTheme.typography.bodyMedium,
+                    fontWeight = FontWeight.SemiBold,
+                    color = trendColor
+                )
+            }
         }
 
         Spacer(modifier = Modifier.height(Spacing.sm))
