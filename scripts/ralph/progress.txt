@@ -1761,3 +1761,24 @@ Files changed:
   - Parallel data loading with separate launch blocks allows stock and filings to load concurrently
   - Stock detail screens need both general stock info and related filings for the News tab
 ---
+
+## US-078: Build StockDetailScreen shell with header
+Status: ✅ COMPLETE
+Date: 2026-02-07
+Details:
+- Created StockDetailScreen.kt in feature/stockdetail/ with complete header implementation
+- Implemented Scaffold with TopAppBar containing back (ArrowBack), share, and favorite (Star/StarBorder) icons
+- Created StockDetailHeader composable with ticker, exchange badge, company name, and VettrScoreView (100dp)
+- Exchange badge displays with surfaceVariant background and rounded corners
+- VettrScoreView positioned on the right side of header with proper spacing
+- Added three @Preview composables: standard stock (favorite), non-favorite stock, and loading state
+- Build successful: ./gradlew assembleDebug passes
+**Learnings for future iterations:**
+  - Material3 Icons use Icons.AutoMirrored.Filled.ArrowBack for back navigation (not Icons.Default)
+  - TopAppBar actions use IconButton with proper content descriptions for accessibility
+  - Stock detail screens use Row layout for header: Column (left) with ticker/name and VettrScoreView (right)
+  - Exchange badges use Box with background color and RoundedCornerShape for pill-style badges
+  - VettrScoreView size parameter allows customization (default 80.dp, header uses 100.dp)
+  - Preview composables should include backgroundColor parameter matching VettrNavy (#0D1B2A) for dark theme
+  - StockDetailViewModel already existed with proper Hilt setup and state management
+---
