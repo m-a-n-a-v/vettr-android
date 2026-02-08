@@ -88,3 +88,17 @@ Details:
   - Coroutines 1.9.0 enables suspend functions for asynchronous networking operations
   - Version catalog pattern (libs.versions.toml) centralizes dependency version management
 ---
+## US-006: Verify Coil image loading dependency
+Status: ✅ COMPLETE
+Date: 2026-02-07
+Details:
+- Verified coil-compose and coil-network-okhttp dependencies in app/build.gradle.kts (lines 95-96)
+- Verified Coil version 3.0.4 in gradle/libs.versions.toml
+- Created CoilVerification.kt in core/util/ with AsyncImage composable to verify import compiles
+- Build successful: ./gradlew assembleDebug passes
+**Learnings for future iterations:**
+  - Coil 3.x uses coil3.compose.AsyncImage (not coil.compose.AsyncImage from v2)
+  - Coil dependencies were already properly configured in the initial scaffold
+  - Coil 3.0.4 with coil-network-okhttp provides efficient image loading with OkHttp backend
+  - AsyncImage is the primary composable for loading images in Jetpack Compose
+---
