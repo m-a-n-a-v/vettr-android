@@ -18,6 +18,8 @@ import androidx.compose.material.icons.filled.Share
 import androidx.compose.material.icons.filled.Star
 import androidx.compose.material.icons.filled.StarBorder
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.FilterChip
+import androidx.compose.material3.FilterChipDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -36,9 +38,14 @@ import androidx.compose.ui.unit.sp
 import com.vettr.android.core.model.Stock
 import com.vettr.android.designsystem.component.VettrScoreView
 import com.vettr.android.designsystem.component.getScoreLabel
+import com.vettr.android.feature.stockdetail.TimeRange
 import com.vettr.android.designsystem.theme.Spacing
+import com.vettr.android.designsystem.theme.VettrGreen
+import com.vettr.android.designsystem.theme.VettrRed
 import com.vettr.android.designsystem.theme.VettrTextSecondary
 import com.vettr.android.designsystem.theme.VettrTheme
+import java.text.NumberFormat
+import java.util.Locale
 
 /**
  * Stock Detail screen - displays detailed information about a specific stock.
@@ -47,9 +54,11 @@ import com.vettr.android.designsystem.theme.VettrTheme
 @Composable
 fun StockDetailScreen(
     stock: Stock?,
+    selectedTimeRange: TimeRange = TimeRange.ONE_DAY,
     onBackClick: () -> Unit = {},
     onShareClick: () -> Unit = {},
     onFavoriteClick: () -> Unit = {},
+    onTimeRangeSelected: (TimeRange) -> Unit = {},
     modifier: Modifier = Modifier
 ) {
     Scaffold(
@@ -107,6 +116,24 @@ fun StockDetailScreen(
             ) {
                 // Header section with ticker, exchange badge, company name, and VETR score
                 StockDetailHeader(stock = stock)
+
+                Spacer(modifier = Modifier.height(Spacing.lg))
+
+                // Price display section
+                PriceSection(stock = stock)
+
+                Spacer(modifier = Modifier.height(Spacing.lg))
+
+                // Mini chart placeholder
+                ChartPlaceholder()
+
+                Spacer(modifier = Modifier.height(Spacing.md))
+
+                // Time range selector
+                TimeRangeSelector(
+                    selectedTimeRange = selectedTimeRange,
+                    onTimeRangeSelected = onTimeRangeSelected
+                )
 
                 // Placeholder for rest of content
                 Spacer(modifier = Modifier.height(Spacing.lg))
@@ -198,6 +225,150 @@ private fun StockDetailHeader(
             )
         }
     }
+}
+
+/**
+ * Price section displaying current price, change amount, and change percentage.
+ */
+@Composable
+private fun PriceSection(
+    stock: Stock,
+    modifier: Modifier = Modifier
+) {
+    val isPositive = stock.priceChange >= 0
+    val changeColor = if (isPositive) VettrGreen else VettrRed
+    val changeSign = if (isPositive) "+" else ""
+
+    // Calculate percentage change
+    val percentageChange = if (stock.price > 0) {
+        (stock.priceChange / (stock.price - stock.priceChange)) * 100
+    } else {
+        0.0
+    }
+
+    val currencyFormat = NumberFormat.getCurrencyInstance(Locale.CANADA)
+
+    Column(
+        modifier = modifier.fillMaxWidth(),
+        verticalArrangement = Arrangement.spacedBy(Spacing.xs)
+    ) {
+        // Current price
+        Text(
+            text = currencyFormat.format(stock.price),
+            style = MaterialTheme.typography.displaySmall,
+            fontWeight = FontWeight.Bold,
+            color = MaterialTheme.colorScheme.onSurface
+        )
+
+        // Change amount and percentage
+        Row(
+            horizontalArrangement = Arrangement.spacedBy(Spacing.sm),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Text(
+                text = "$changeSign${currencyFormat.format(stock.priceChange)}",
+                style = MaterialTheme.typography.titleMedium,
+                fontWeight = FontWeight.SemiBold,
+                color = changeColor
+            )
+            Text(
+                text = "$changeSign${"%.2f".format(percentageChange)}%",
+                style = MaterialTheme.typography.titleMedium,
+                fontWeight = FontWeight.SemiBold,
+                color = changeColor
+            )
+        }
+    }
+}
+
+/**
+ * Placeholder box for the mini line chart.
+ */
+@Composable
+private fun ChartPlaceholder(
+    modifier: Modifier = Modifier
+) {
+    Box(
+        modifier = modifier
+            .fillMaxWidth()
+            .height(200.dp)
+            .background(
+                color = Color.Gray.copy(alpha = 0.2f),
+                shape = RoundedCornerShape(8.dp)
+            ),
+        contentAlignment = Alignment.Center
+    ) {
+        Text(
+            text = "Chart Placeholder",
+            style = MaterialTheme.typography.bodyMedium,
+            color = VettrTextSecondary
+        )
+    }
+}
+
+/**
+ * Time range selector using FilterChip composables.
+ */
+@Composable
+private fun TimeRangeSelector(
+    selectedTimeRange: TimeRange,
+    onTimeRangeSelected: (TimeRange) -> Unit,
+    modifier: Modifier = Modifier
+) {
+    Row(
+        modifier = modifier.fillMaxWidth(),
+        horizontalArrangement = Arrangement.spacedBy(Spacing.sm)
+    ) {
+        TimeRangeChip(
+            label = "1D",
+            selected = selectedTimeRange == TimeRange.ONE_DAY,
+            onClick = { onTimeRangeSelected(TimeRange.ONE_DAY) }
+        )
+        TimeRangeChip(
+            label = "1W",
+            selected = selectedTimeRange == TimeRange.ONE_WEEK,
+            onClick = { onTimeRangeSelected(TimeRange.ONE_WEEK) }
+        )
+        TimeRangeChip(
+            label = "1M",
+            selected = selectedTimeRange == TimeRange.ONE_MONTH,
+            onClick = { onTimeRangeSelected(TimeRange.ONE_MONTH) }
+        )
+        TimeRangeChip(
+            label = "1Y",
+            selected = selectedTimeRange == TimeRange.ONE_YEAR,
+            onClick = { onTimeRangeSelected(TimeRange.ONE_YEAR) }
+        )
+    }
+}
+
+/**
+ * Individual FilterChip for time range selection.
+ */
+@Composable
+private fun TimeRangeChip(
+    label: String,
+    selected: Boolean,
+    onClick: () -> Unit,
+    modifier: Modifier = Modifier
+) {
+    FilterChip(
+        modifier = modifier,
+        selected = selected,
+        onClick = onClick,
+        label = {
+            Text(
+                text = label,
+                style = MaterialTheme.typography.labelMedium
+            )
+        },
+        colors = FilterChipDefaults.filterChipColors(
+            containerColor = MaterialTheme.colorScheme.surfaceVariant,
+            labelColor = MaterialTheme.colorScheme.onSurface,
+            selectedContainerColor = VettrGreen,
+            selectedLabelColor = Color.Black
+        )
+    )
 }
 
 @Preview(showBackground = true, backgroundColor = 0xFF0D1B2A)

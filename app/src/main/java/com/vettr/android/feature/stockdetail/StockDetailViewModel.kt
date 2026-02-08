@@ -25,6 +25,16 @@ enum class StockDetailTab {
 }
 
 /**
+ * Time range options for the price chart.
+ */
+enum class TimeRange {
+    ONE_DAY,
+    ONE_WEEK,
+    ONE_MONTH,
+    ONE_YEAR
+}
+
+/**
  * ViewModel for the Stock Detail screen.
  * Manages UI state for stock details, filings, and tab navigation.
  */
@@ -45,6 +55,9 @@ class StockDetailViewModel @Inject constructor(
 
     private val _selectedTab = MutableStateFlow(StockDetailTab.OVERVIEW)
     val selectedTab: StateFlow<StockDetailTab> = _selectedTab.asStateFlow()
+
+    private val _selectedTimeRange = MutableStateFlow(TimeRange.ONE_DAY)
+    val selectedTimeRange: StateFlow<TimeRange> = _selectedTimeRange.asStateFlow()
 
     private val _isLoading = MutableStateFlow(false)
     val isLoading: StateFlow<Boolean> = _isLoading.asStateFlow()
@@ -118,5 +131,13 @@ class StockDetailViewModel @Inject constructor(
      */
     fun selectTab(tab: StockDetailTab) {
         _selectedTab.value = tab
+    }
+
+    /**
+     * Select a time range for the price chart.
+     * @param timeRange The time range to select
+     */
+    fun selectTimeRange(timeRange: TimeRange) {
+        _selectedTimeRange.value = timeRange
     }
 }
