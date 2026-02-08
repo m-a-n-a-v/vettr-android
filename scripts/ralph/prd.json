@@ -1821,7 +1821,7 @@
         "./gradlew detekt passes with zero errors"
       ],
       "priority": 131,
-      "passes": false
+      "passes": true
     },
     {
       "id": "US-132",
