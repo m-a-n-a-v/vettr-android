@@ -3364,3 +3364,28 @@ Details:
   - Demonstrated pattern in WelcomeScreen.kt can be replicated across all other screens
   - Build system automatically picks up locale-specific resources based on device language
 ---
+
+## US-128: Create integration tests for core workflows
+Status: ✅ COMPLETE
+Date: 2026-02-08
+Details:
+- Created CoreWorkflowTest.kt with 23 comprehensive integration tests
+- Auth workflow tests: signup, login, logout, Google sign-in, error handling (5 tests)
+- Watchlist workflow tests: add/remove stocks from favorites (3 tests)
+- Alert CRUD workflow tests: create, update, delete, toggle active, max rules validation (6 tests)
+- VETR score calculation tests: validates 0-100 range, perfect/low scores, all components present (4 tests)
+- Red flag detection tests: verifies detection results, multiple flag types, valid scores (4 tests)
+- Fixed StockDetailViewModelTest.kt to include HapticService parameter
+- All tests passing with ./gradlew testDebugUnitTest
+- **Files changed:**
+  - app/src/test/java/com/vettr/android/CoreWorkflowTest.kt (new, 599 lines)
+  - app/src/test/java/com/vettr/android/feature/stockdetail/StockDetailViewModelTest.kt (fixed)
+- **Learnings for future iterations:**
+  - Integration tests use mockk library with coEvery for suspend functions
+  - Test structure: mock repositories in @Before, create test using runTest coroutine scope
+  - VetrScoreResult uses `lastUpdated` not `timestamp`, and no `ticker` field
+  - AlertRule uses `stockTicker`, `ruleType`, `triggerCondition`, `frequency` fields
+  - Mock all repository interfaces, use flowOf() for Flow returns
+  - Use relaxed = true for mocks like HapticService that don't need verification
+  - When ViewModel constructors change, update all test instantiations
+---
