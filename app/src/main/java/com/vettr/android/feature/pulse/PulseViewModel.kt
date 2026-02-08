@@ -6,6 +6,7 @@ import com.vettr.android.core.data.repository.FilingRepository
 import com.vettr.android.core.data.repository.StockRepository
 import com.vettr.android.core.model.Filing
 import com.vettr.android.core.model.Stock
+import com.vettr.android.core.util.ObservabilityService
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -21,7 +22,8 @@ import javax.inject.Inject
 @HiltViewModel
 class PulseViewModel @Inject constructor(
     private val stockRepository: StockRepository,
-    private val filingRepository: FilingRepository
+    private val filingRepository: FilingRepository,
+    private val observabilityService: ObservabilityService
 ) : ViewModel() {
 
     private val _stocks = MutableStateFlow<List<Stock>>(emptyList())
@@ -41,8 +43,10 @@ class PulseViewModel @Inject constructor(
 
     private var lastRefreshTime: Long = 0
     private val refreshDebounceMs = 10_000L // 10 seconds
+    private var screenLoadStartTime: Long = 0
 
     init {
+        screenLoadStartTime = System.currentTimeMillis()
         loadData()
     }
 
@@ -65,6 +69,13 @@ class PulseViewModel @Inject constructor(
                         .collect { stockList ->
                             _stocks.value = stockList
                             _lastUpdatedAt.value = System.currentTimeMillis()
+
+                            // Track screen load time on first data load
+                            if (screenLoadStartTime > 0) {
+                                val loadTime = System.currentTimeMillis() - screenLoadStartTime
+                                observabilityService.trackScreenLoadTime("Pulse", loadTime)
+                                screenLoadStartTime = 0 // Only track once
+                            }
                         }
                 }
 

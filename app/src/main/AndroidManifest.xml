@@ -15,6 +15,12 @@
         android:theme="@style/Theme.VETTR"
         android:networkSecurityConfig="@xml/network_security_config">
 
+        <!-- App startup time tracking -->
+        <provider
+            android:name=".core.util.AppStartupTracker"
+            android:authorities="${applicationId}.startup"
+            android:exported="false" />
+
         <!-- Disable default WorkManager initializer -->
         <provider
             android:name="androidx.startup.InitializationProvider"

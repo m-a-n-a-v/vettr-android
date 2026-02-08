@@ -6,6 +6,7 @@ import com.vettr.android.core.data.repository.AlertRuleRepository
 import com.vettr.android.core.data.repository.AuthRepository
 import com.vettr.android.core.model.AlertRule
 import com.vettr.android.core.util.HapticService
+import com.vettr.android.core.util.ObservabilityService
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -23,7 +24,8 @@ import javax.inject.Inject
 class AlertsViewModel @Inject constructor(
     private val alertRuleRepository: AlertRuleRepository,
     private val authRepository: AuthRepository,
-    val hapticService: HapticService
+    val hapticService: HapticService,
+    private val observabilityService: ObservabilityService
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow(AlertsUiState())
@@ -31,8 +33,10 @@ class AlertsViewModel @Inject constructor(
 
     private var lastRefreshTime: Long = 0
     private val refreshDebounceMs = 10_000L // 10 seconds
+    private var screenLoadStartTime: Long = 0
 
     init {
+        screenLoadStartTime = System.currentTimeMillis()
         loadRules()
     }
 
@@ -62,6 +66,13 @@ class AlertsViewModel @Inject constructor(
                                 isLoading = false,
                                 lastUpdatedAt = System.currentTimeMillis()
                             )
+                        }
+
+                        // Track screen load time on first data load
+                        if (screenLoadStartTime > 0) {
+                            val loadTime = System.currentTimeMillis() - screenLoadStartTime
+                            observabilityService.trackScreenLoadTime("Alerts", loadTime)
+                            screenLoadStartTime = 0 // Only track once
                         }
                     }
                 } else {
