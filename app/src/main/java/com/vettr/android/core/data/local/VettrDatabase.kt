@@ -9,6 +9,7 @@ import com.vettr.android.core.model.Filing
 import com.vettr.android.core.model.PlaceholderEntity
 import com.vettr.android.core.model.RedFlagHistory
 import com.vettr.android.core.model.Stock
+import com.vettr.android.core.model.SyncHistory
 import com.vettr.android.core.model.User
 import com.vettr.android.core.model.VetrScoreHistory
 import com.vettr.android.core.util.Converters
@@ -22,7 +23,8 @@ import com.vettr.android.core.util.Converters
         User::class,
         AlertRule::class,
         RedFlagHistory::class,
-        VetrScoreHistory::class
+        VetrScoreHistory::class,
+        SyncHistory::class
     ],
     version = 1,
     exportSchema = false
