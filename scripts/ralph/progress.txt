@@ -1862,3 +1862,28 @@ Files changed:
   - Flow-based state updates work automatically via collectAsStateWithLifecycle
   - ViewModel pattern: collect StateFlows with collectAsStateWithLifecycle(), wire callbacks to ViewModel methods
 ---
+
+## US-082: Add share functionality to StockDetailScreen
+Status: ✅ COMPLETE
+Date: 2026-02-07
+Details:
+- Added Android share sheet integration to StockDetailScreen
+- Imported android.content.Intent and androidx.compose.ui.platform.LocalContext
+- Created shareStock() helper function that:
+  - Builds share text with ticker, company name, VETR Score, and placeholder link
+  - Creates Intent.ACTION_SEND with text/plain MIME type
+  - Launches Android share sheet via Intent.createChooser()
+- Wired share functionality in StockDetailRoute using LocalContext.current
+- Share button in TopAppBar now launches share sheet when clicked
+- Build passes with ./gradlew assembleDebug
+
+Files changed:
+- app/src/main/java/com/vettr/android/feature/stockdetail/StockDetailScreen.kt
+
+**Learnings for future iterations:**
+- For sharing functionality in Compose, use LocalContext.current to get Android Context
+- Intent.createChooser() provides the standard Android share sheet UI
+- Intent.ACTION_SEND with type "text/plain" is the standard way to share text
+- Helper functions for Android API interactions should be private top-level functions
+- Share functionality can be implemented even before navigation is fully wired
+---
