@@ -1956,3 +1956,48 @@ Details:
   - HorizontalDivider with low alpha creates subtle visual separation between list items
   - Logo URLs use Clearbit pattern: https://logo.clearbit.com/{ticker}.com
 ---
+
+## US-086: Create ProfileViewModel with Hilt
+Status: ✅ COMPLETE
+Date: 2026-02-07
+Details:
+- Created ProfileViewModel.kt in feature/profile package with @HiltViewModel annotation
+- Injected AuthRepository via @Inject constructor
+- Implemented StateFlow properties: user (User?), tier (VettrTier), isLoading (Boolean)
+- Created loadUserData() method that collects current user from AuthRepository and parses tier from user data
+- Created logout() method that calls authRepository.signOut() and clears local state
+- Added init block that calls loadUserData() on ViewModel creation
+- Tier parsing handles invalid tier strings by defaulting to VettrTier.FREE
+- Build successful: ./gradlew assembleDebug passes
+**Learnings for future iterations:**
+  - ProfileViewModel follows established pattern: @HiltViewModel with @Inject constructor and StateFlow for UI state
+  - AuthRepository.getCurrentUser() returns Flow<User?> which is collected in viewModelScope
+  - User.tier is stored as String in database, must be parsed to VettrTier enum using valueOf()
+  - Always provide default/fallback values for enum parsing to handle invalid data gracefully
+  - logout() method clears local state but navigation to auth screen is handled by the UI layer (not ViewModel)
+  - Using viewModelScope.launch for coroutines ensures lifecycle-aware cancellation
+---
+
+## US-087: Build ProfileScreen with user info and menu
+Status: ✅ COMPLETE
+Date: 2026-02-07
+Details:
+- Implemented ProfileScreen with comprehensive UI layout
+- Header section: circular avatar (AsyncImage for avatarUrl or default AccountCircle icon), display name, email, tier badge
+- Tier badge with color-coded styling: Free (gray), Pro/Premium (green accent)
+- Menu rows with icons and chevrons: My Account & Settings, Notification Settings, Educational Hub
+- Upgrade to Pro card (only shown for FREE tier): $10.99/month pricing, green accent background
+- Help & Support and Log Out menu rows
+- Logout confirmation AlertDialog with confirm/cancel actions
+- Integrated with ProfileViewModel using collectAsStateWithLifecycle()
+- Three @Preview composables: Free tier, Pro tier, Logout dialog
+- Build successful: ./gradlew assembleDebug passes
+**Learnings for future iterations:**
+  - Used VettrCardBackground for all cards to maintain consistent dark theme surface colors
+  - AsyncImage from Coil for avatar images with fallback to icon-based avatar
+  - AlertDialog uses VettrCardBackground container color for dark theme consistency
+  - Menu rows use Card with onClick for easy tap targets and visual feedback
+  - Conditional rendering (tier == VettrTier.FREE) to show/hide Upgrade card based on user tier
+  - Multiple preview functions help visualize different states (Free vs Pro tier, dialog states)
+  - Icons from material.icons.automirrored.filled for chevrons and navigation icons ensure proper RTL support
+---

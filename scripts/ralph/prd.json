@@ -1196,7 +1196,7 @@
         "./gradlew assembleDebug succeeds"
       ],
       "priority": 86,
-      "passes": false
+      "passes": true
     },
     {
       "id": "US-087",
@@ -1210,7 +1210,7 @@
         "./gradlew assembleDebug succeeds"
       ],
       "priority": 87,
-      "passes": false
+      "passes": true
     },
     {
       "id": "US-088",
