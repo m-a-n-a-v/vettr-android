@@ -525,3 +525,54 @@ Files changed:
   - Preview composables with realistic use cases (watchlist, alerts) help validate component appearance
   - Conditional rendering (if actionLabel != null && onAction != null) ensures both parameters are provided before showing button
 ---
+## US-027: Create PrimaryButton composable component
+Status: ✅ COMPLETE
+Date: 2026-02-07
+Details:
+- Created designsystem/component/PrimaryButton.kt @Composable function
+- Implemented green background (VettrAccent), white text
+- Parameters: text, onClick, isLoading, enabled, fullWidth
+- Shows CircularProgressIndicator (20dp, white, 2dp stroke) when isLoading=true
+- Disabled state uses 50% alpha transparency on container and content colors
+- fullWidth parameter uses Modifier.fillMaxWidth() when true
+- Added 4 @Preview composables: normal, loading, disabled, full-width states
+- Build successful: ./gradlew assembleDebug passes
+Files changed:
+- app/src/main/java/com/vettr/android/designsystem/component/PrimaryButton.kt (created)
+**Learnings for future iterations:**
+  - PrimaryButton provides consistent primary action styling across all screens (auth, profile actions, etc.)
+  - Loading state disables button and replaces text with CircularProgressIndicator for better UX
+  - Disabled state uses alpha transparency (0.5f) to visually indicate non-interactive state
+  - fullWidth parameter allows flexible button sizing for different layout contexts
+  - Modifier.then() conditional pattern allows optional modifier application (fillMaxWidth)
+  - Button is disabled when either enabled=false OR isLoading=true to prevent duplicate actions
+  - CircularProgressIndicator size (20dp) and strokeWidth (2dp) fit well within button height
+  - Preview composables with realistic labels (Sign In, Continue) demonstrate button in context
+---
+
+## US-028: Create EventCard composable component
+Status: ✅ COMPLETE
+Date: 2026-02-07
+Details:
+- Created designsystem/component/EventCard.kt @Composable function
+- Implemented Row layout with colored indicator dot (12.dp CircleShape) and content column
+- Parameters: title, subtitle, date, indicatorColor (Color), onClick
+- Uses Modifier.cardStyle() for consistent card styling with VettrCardBackground
+- Uses Modifier.vettrPadding() for consistent padding
+- Indicator dot positioned on left, vertically centered with content
+- Column shows title (titleMedium), subtitle (bodyMedium), and date (labelSmall)
+- Entire card is clickable with onClick callback for navigation to event details
+- Added 3 @Preview composables: red indicator (SEC Investigation), yellow indicator (Insider Trading), green indicator (Price Target Upgrade)
+- Build successful: ./gradlew assembleDebug passes
+Files changed:
+- app/src/main/java/com/vettr/android/designsystem/component/EventCard.kt (created)
+**Learnings for future iterations:**
+  - EventCard provides consistent event/alert styling across Pulse and Alerts screens
+  - Color-coded indicator dots enable quick visual identification of event severity/type
+  - 12.dp CircleShape for indicator dot provides clear visual marker without overwhelming content
+  - Using weight(1f) on content column allows proper text wrapping while keeping indicator dot fixed size
+  - Three text levels (title, subtitle, date) provide hierarchical information display
+  - Clickable modifier on entire card enables navigation to full event details
+  - Preview composables with realistic Canadian stock events (SHOP, RY, ENB) demonstrate different indicator colors
+  - Red/Yellow/Green color coding follows common severity conventions: red (critical/negative), yellow (warning/moderate), green (positive/informational)
+---
