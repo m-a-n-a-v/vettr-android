@@ -876,3 +876,51 @@ Files changed:
   - DAO abstract methods must be added to RoomDatabase class to expose database operations
 ---
 
+## US-043: Create AlertRuleDao interface
+Status: ✅ COMPLETE
+Date: 2026-02-07
+Details:
+- Created core/data/local/AlertRuleDao.kt interface annotated with @Dao
+- Implemented query methods: getByUserId(), getByStockTicker(), getById(), getActive() with Flow return types
+- Implemented mutation methods: insert(), update(), delete() with suspend modifiers
+- Added getCountByUserId() method for rule limit enforcement (Free tier: 5 rules, Pro: 25, Premium: unlimited)
+- Used OnConflictStrategy.REPLACE for insert operations (upsert behavior)
+- getActive() queries for is_active = 1 to fetch only active alert rules
+- Added alertRuleDao() abstract method to VettrDatabase class
+- Build successful: ./gradlew assembleDebug passes
+Files changed:
+- app/src/main/java/com/vettr/android/core/data/local/AlertRuleDao.kt (created)
+- app/src/main/java/com/vettr/android/core/data/local/VettrDatabase.kt (updated)
+**Learnings for future iterations:**
+  - AlertRuleDao provides database operations for AlertRule entities with reactive Flow return types
+  - getByUserId() enables fetching user-specific alert rules for alerts screen
+  - getByStockTicker() enables fetching stock-specific rules for stock detail screen
+  - getActive() filters for active rules (is_active = 1) that should trigger notifications
+  - getCountByUserId() enables tier-based rule limit enforcement: Free (5), Pro (25), Premium (unlimited)
+  - Pattern follows established DAO conventions: Flow for queries, suspend for mutations, OnConflictStrategy.REPLACE for upserts
+  - DAO abstract methods must be added to RoomDatabase class to expose database operations
+---
+## US-044: Create RedFlagHistoryDao interface
+Status: ✅ COMPLETE
+Date: 2026-02-07
+Details:
+- Created core/data/local/RedFlagHistoryDao.kt interface annotated with @Dao
+- Implemented query methods: getByStockTicker(ticker), getRecent(limit) with Flow return types
+- Both queries use ORDER BY detected_at DESC for chronological ordering (newest first)
+- Implemented mutation methods: insert(), insertAll(), acknowledge(id), acknowledgeAllForStock(ticker)
+- Used OnConflictStrategy.REPLACE for insert operations (upsert behavior)
+- acknowledge() and acknowledgeAllForStock() use UPDATE query to set is_acknowledged = 1
+- Added redFlagHistoryDao() abstract method to VettrDatabase class
+- Build successful: ./gradlew assembleDebug passes
+Files changed:
+- app/src/main/java/com/vettr/android/core/data/local/RedFlagHistoryDao.kt (created)
+- app/src/main/java/com/vettr/android/core/data/local/VettrDatabase.kt (updated)
+**Learnings for future iterations:**
+  - RedFlagHistoryDao provides database operations for RedFlagHistory entities with reactive Flow return types
+  - getByStockTicker() filters red flags by stock ticker for stock detail screen, ordered by detection date
+  - getRecent() fetches N most recent red flags across all stocks for Pulse screen red flag feed
+  - acknowledge() and acknowledgeAllForStock() implement partial updates using UPDATE queries instead of @Update annotation
+  - Pattern allows individual flag acknowledgment or bulk acknowledgment for all flags on a stock
+  - Pattern follows established DAO conventions: Flow for queries, suspend for mutations, OnConflictStrategy.REPLACE for upserts
+  - DAO abstract methods must be added to RoomDatabase class to expose database operations
+---
