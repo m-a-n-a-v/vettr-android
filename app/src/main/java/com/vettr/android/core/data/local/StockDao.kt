@@ -37,4 +37,7 @@ interface StockDao {
 
     @Delete
     suspend fun delete(stock: Stock)
+
+    @Query("UPDATE stocks SET is_favorite = NOT is_favorite WHERE id = :stockId")
+    suspend fun toggleFavorite(stockId: String)
 }
