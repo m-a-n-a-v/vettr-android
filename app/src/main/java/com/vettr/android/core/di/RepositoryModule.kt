@@ -1,5 +1,7 @@
 package com.vettr.android.core.di
 
+import com.vettr.android.core.data.repository.AlertRuleRepository
+import com.vettr.android.core.data.repository.AlertRuleRepositoryImpl
 import com.vettr.android.core.data.repository.AuthRepository
 import com.vettr.android.core.data.repository.AuthRepositoryImpl
 import com.vettr.android.core.data.repository.ExecutiveRepository
@@ -41,4 +43,10 @@ abstract class RepositoryModule {
     abstract fun bindExecutiveRepository(
         executiveRepositoryImpl: ExecutiveRepositoryImpl
     ): ExecutiveRepository
+
+    @Binds
+    @Singleton
+    abstract fun bindAlertRuleRepository(
+        alertRuleRepositoryImpl: AlertRuleRepositoryImpl
+    ): AlertRuleRepository
 }
