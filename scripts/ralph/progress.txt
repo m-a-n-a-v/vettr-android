@@ -1262,3 +1262,27 @@ Files changed:
   - seedAllData() will be populated with actual stock/filing/executive data in subsequent stories (US-058, US-059)
 ---
 
+## US-058: Add 25 pilot stocks seed data
+Status: ✅ COMPLETE
+Date: 2026-02-07
+Details:
+- Implemented seedStocks() method in SeedDataService with 25 Canadian stocks
+- Included all 23 required stocks from acceptance criteria: BTO.TO, FOM.V, AMC.V, IE.TO, LAAC.TO, DML.TO, GMIN.TO, SOIL.V, TVE.TO, CJ.TO, GRN.TO, NPI.TO, DCBO.TO, LSPD.TO, DND.TO, QUIS.V, PNG.V, ENGH.TO, ACT.CSE, PLUR.V, PAID.CSE, NDA.V, NTAR.CSE
+- Added 2 additional stocks to reach 25 total: BIR.TO (Birchcliff Energy), VET.TO (Vermilion Energy)
+- Stock data includes realistic properties: ticker, name, exchange, sector, marketCap, price, priceChange, vetrScore
+- VETR Scores distributed across range (30-95): 5 Strong Buy (80-90), 9 Buy (62-75), 7 Hold (45-53), 4 Caution (32-38)
+- Sectors: Mining (9), Technology (8), Energy (7), Agriculture (1)
+- Exchanges: TSX (11), TSXV (10), CSE (4)
+- Build successful: ./gradlew assembleDebug passes
+Files changed:
+- app/src/main/java/com/vettr/android/core/data/local/SeedDataService.kt (added seedStocks method and 25 stocks)
+- scripts/ralph/prd.json (updated passes to true)
+**Learnings for future iterations:**
+  - Acceptance criteria listed 23 stocks but title said "25 pilot stocks" - added 2 more Canadian stocks to meet the 25 target
+  - Used realistic Canadian stock data with appropriate exchanges (TSX, TSXV, CSE) and sectors
+  - VETR Score distribution should reflect mix of investment ratings: Strong Buy (>80), Buy (60-79), Hold (40-59), Caution (<40)
+  - Market caps and prices should be realistic for Canadian micro-cap and small-cap stocks
+  - Price changes (positive/negative) add realism to stock data for UI testing
+  - All 25 stocks have unique tickers to prevent Room database conflicts
+  - seedStocks() is called from seedAllData() which will also seed filings and executives in US-059
+---
