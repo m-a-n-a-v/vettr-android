@@ -3908,3 +3908,31 @@ Files changed:
 - KDoc on entities is particularly important for Room databases as it documents the data model and relationships
 - DAOs benefit from KDoc as they define the contract between the data layer and repositories
 ---
+
+## US-144: Add Compose @Preview for all screens
+Status: ✅ COMPLETE
+Date: 2026-02-08
+Details:
+- Added multi-device preview annotations to all screen composables
+- Added @Preview(name = "Phone") for phone-sized previews
+- Added @Preview(name = "Tablet", widthDp = 840) for tablet-sized previews
+- Applied dark mode backgroundColor (0xFF0D1B2A) to all previews to match app theme
+- Updated 20 screen files across all feature modules:
+  - Auth: WelcomeScreen, LoginScreen, SignUpScreen
+  - Main navigation: PulseScreen, DiscoveryScreen, StocksScreen, AlertsScreen, ProfileScreen
+  - Stock detail: StockDetailScreen, PedigreeScreen, RedFlagScreen, ExecutiveDetailScreen, VetrScoreDetailScreen
+  - Profile: SettingsScreen, FaqScreen, GlossaryScreen
+  - Onboarding: OnboardingScreen
+  - Alerts: AlertRuleCreatorScreen
+  - Main: MainScreen
+- All previews use sample data and avoid real ViewModel instances
+- FeedbackScreen preview removed (requires Android Context dependencies)
+- Build verification: ./gradlew assembleDebug passes with only 2 deprecation warnings (non-blocking)
+
+**Learnings for future iterations:**
+- Previews should use composable content functions rather than full screen composables when ViewModels are required
+- Services requiring Android Context (like FeedbackService) cannot be mocked in preview environment
+- Multi-device previews are essential for responsive design verification
+- backgroundColor parameter ensures consistent dark theme preview rendering
+- Preview naming convention: "{ScreenName}Preview" for phone, "{ScreenName}TabletPreview" for tablet
+---
