@@ -315,3 +315,24 @@ Files changed:
   - Modifier extension functions follow Kotlin convention: they are top-level functions that extend Modifier and return Modifier
   - Design token objects (Spacing, Dimensions, VettrCardBackground) ensure all styling uses centralized values
 ---
+## US-018: Create VettrScoreView composable component
+Status: ✅ COMPLETE
+Date: 2026-02-07
+Details:
+- Created designsystem/component/VettrScoreView.kt with circular badge component
+- Implemented Canvas-based circular score display with progress arc (0-360 degrees)
+- Added color-coded scoring: VettrGreen (>80 Strong Buy), VettrYellow (60-80 Buy), Orange (40-60 Hold), VettrRed (<40 Caution)
+- Added descriptive labels below score: Strong Buy, Buy, Hold, Caution
+- Created 4 @Preview composables for different score ranges: 85, 70, 50, 30
+- Build successful: ./gradlew assembleDebug passes
+Files changed:
+- app/src/main/java/com/vettr/android/designsystem/component/VettrScoreView.kt (created)
+**Learnings for future iterations:**
+  - Canvas drawContext.canvas.nativeCanvas is not available in Compose Multiplatform/modern Compose APIs
+  - Use Box with Canvas for drawing and Text composable for text overlay instead of native canvas text
+  - Canvas drawArc with startAngle=-90f starts from top (12 o'clock position) for intuitive circular progress
+  - Color-coded scoring system requires clear thresholds: >80 (green), 60-80 (yellow), 40-60 (orange), <40 (red)
+  - Text composable with MaterialTheme.typography.displaySmall works well for centered score display
+  - Background circle with gray color (0xFF3A4A5A) provides visual track for progress arc
+  - StrokeCap.Round on arc creates polished, modern circular progress appearance
+---
