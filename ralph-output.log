@@ -1187,3 +1187,119 @@ Iteration 40 complete. Continuing...
 ===============================================================
   Ralph Iteration 41 of 158 (claude)
 ===============================================================
+Excellent! I have successfully completed US-042: Create ExecutiveDao interface.
+
+## Summary
+
+I've implemented US-042 by creating the ExecutiveDao interface with the following functionality:
+
+### Files Created/Modified:
+1. **ExecutiveDao.kt** (created) - DAO interface for Executive database operations
+   - `getByStockId(stockId: String): Flow<List<Executive>>` - Get all executives for a stock
+   - `searchByName(query: String): Flow<List<Executive>>` - Search executives by name
+   - `getById(id: String): Flow<Executive?>` - Get a specific executive by ID
+   - `insert(executive: Executive)` - Insert a single executive
+   - `insertAll(executives: List<Executive>)` - Insert multiple executives
+   - `delete(executive: Executive)` - Delete an executive
+
+2. **VettrDatabase.kt** (updated) - Added `executiveDao()` abstract method
+
+### Key Implementation Details:
+- All query methods return `Flow` for reactive data observation
+- All mutation methods are `suspend` functions for coroutine support
+- Used `OnConflictStrategy.REPLACE` for upsert behavior on inserts
+- Follows the same pattern as StockDao and FilingDao for consistency
+
+The build passed successfully, and all changes have been committed with proper documentation updates to the PRD and progress log.
+Iteration 41 complete. Continuing...
+
+===============================================================
+  Ralph Iteration 42 of 158 (claude)
+===============================================================
+Excellent! ✅ US-043 has been completed successfully. Here's a summary of what was implemented:
+
+## US-043: Create AlertRuleDao interface - COMPLETE
+
+**What was created:**
+- `AlertRuleDao.kt` interface with all required database operations
+- Query methods: `getByUserId()`, `getByStockTicker()`, `getById()`, `getActive()` returning Flow for reactive updates
+- Mutation methods: `insert()`, `update()`, `delete()` with suspend modifiers
+- `getCountByUserId()` for enforcing tier-based rule limits (Free: 5, Pro: 25, Premium: unlimited)
+- Added `alertRuleDao()` to VettrDatabase class
+
+**Key implementation details:**
+- All query methods use Flow return types for reactive UI updates
+- Insert operations use `OnConflictStrategy.REPLACE` for upsert behavior
+- `getActive()` filters for `is_active = 1` to fetch only active alert rules
+- Pattern follows established DAO conventions from previous stories
+
+**Build status:** ✅ ./gradlew assembleDebug passes
+**Committed:** feat: US-043 - Create AlertRuleDao interface
+**PRD updated:** US-043 marked as `passes: true`
+**Progress logged:** Appended to scripts/ralph/progress.txt
+
+The implementation is ready for the next story (US-044: Create RedFlagHistoryDao interface).
+Iteration 42 complete. Continuing...
+
+===============================================================
+  Ralph Iteration 43 of 158 (claude)
+===============================================================
+Excellent! I've successfully completed **US-044: Create RedFlagHistoryDao interface**. 
+
+## Summary
+
+I implemented the RedFlagHistoryDao interface with the following features:
+
+**Query Methods:**
+- `getByStockTicker(ticker)`: Fetches all red flags for a specific stock, ordered by detection date (newest first)
+- `getRecent(limit)`: Fetches the N most recent red flags across all stocks for the Pulse screen
+
+**Mutation Methods:**
+- `insert()` and `insertAll()`: Insert operations with REPLACE conflict strategy for upsert behavior
+- `acknowledge(id)`: Marks a specific red flag as acknowledged (sets is_acknowledged = 1)
+- `acknowledgeAllForStock(ticker)`: Bulk acknowledgment of all red flags for a specific stock
+
+The DAO follows the established pattern with Flow return types for reactive queries and suspend functions for mutations. The implementation has been added to VettrDatabase, and the build passes successfully.
+
+Files changed:
+- Created: app/src/main/java/com/vettr/android/core/data/local/RedFlagHistoryDao.kt
+- Updated: app/src/main/java/com/vettr/android/core/data/local/VettrDatabase.kt
+
+The next story to implement would be US-045: Create VetrScoreHistoryDao interface.
+Iteration 43 complete. Continuing...
+
+===============================================================
+  Ralph Iteration 44 of 158 (claude)
+===============================================================
+## Summary
+
+I've successfully completed **US-045: Create VetrScoreHistoryDao interface**. Here's what was implemented:
+
+### Created Files:
+- **VetrScoreHistoryDao.kt** - DAO interface with methods for querying and inserting Vetr score history records
+
+### Key Implementation Details:
+1. **Query Methods** (with Flow return types):
+   - `getByStockTicker(ticker, limit)` - Fetches N most recent score records for a stock, ordered by calculation date (DESC)
+   - `getLatest(ticker)` - Fetches the single most recent score record for a stock
+
+2. **Mutation Methods** (suspend functions):
+   - `insert(score)` - Insert single score record
+   - `insertAll(scores)` - Bulk insert score records
+   - Both use `OnConflictStrategy.REPLACE` for upsert behavior
+
+3. **Updated VettrDatabase.kt**:
+   - Added `vetrScoreHistoryDao()` abstract method to expose the DAO
+
+### Quality Checks:
+✅ Build successful: `./gradlew assembleDebug` passes  
+✅ Committed with proper message format  
+✅ Progress logged to progress.txt  
+✅ PRD updated to mark US-045 as complete
+
+The VetrScoreHistoryDao enables the app to track historical Vetr scores over time, which will be essential for visualizing score trends and understanding how stock ratings evolve.
+Iteration 44 complete. Continuing...
+
+===============================================================
+  Ralph Iteration 45 of 158 (claude)
+===============================================================
