@@ -738,3 +738,24 @@ Files changed:
   - Rule lifecycle: created (createdAt), activated/deactivated (isActive), triggered (lastTriggeredAt)
   - ruleType, triggerCondition, and frequency stored as String for flexibility (can be converted to enums later if needed)
 ---
+## US-037: Create RedFlagHistory Room entity
+Status: ✅ COMPLETE
+Date: 2026-02-07
+Details:
+- Created core/model/RedFlagHistory.kt data class annotated with @Entity(tableName = "red_flag_history")
+- Added all required properties: id (String, @PrimaryKey), stockTicker, flagType, severity, score (Double), description, detectedAt (Long), isAcknowledged (Boolean)
+- Added @ColumnInfo annotations for snake_case column names: stock_ticker, flag_type, detected_at, is_acknowledged
+- Added @Index on stock_ticker column to optimize queries for stock-specific red flags
+- Updated VettrDatabase.kt to include RedFlagHistory entity in entities array
+- Build successful: ./gradlew assembleDebug passes
+Files changed:
+- app/src/main/java/com/vettr/android/core/model/RedFlagHistory.kt (created)
+- app/src/main/java/com/vettr/android/core/data/local/VettrDatabase.kt (updated)
+**Learnings for future iterations:**
+  - RedFlagHistory entity stores detected red flags with severity levels for risk assessment
+  - Index on stockTicker optimizes queries when fetching red flag history for specific stocks
+  - isAcknowledged default value (false) allows tracking whether user has reviewed the red flag
+  - severity, flagType, and score properties enable comprehensive risk analysis and categorization
+  - detectedAt stored as Long (Unix timestamp) for efficient date/time storage and chronological queries
+  - Pattern follows established entity conventions: UUID primary key, snake_case column names, proper indexing
+---
