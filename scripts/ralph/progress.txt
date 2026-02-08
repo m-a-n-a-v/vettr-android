@@ -252,3 +252,24 @@ Files changed:
   - Material3 Typography includes comprehensive set of text styles: displayLarge/Medium/Small, headlineLarge/Medium/Small, titleLarge/Medium/Small, bodyLarge/Medium/Small, labelLarge/Medium/Small
   - Line heights should scale proportionally with font sizes for optimal readability
 ---
+
+## US-015: Create Spacing.kt and Dimensions.kt constants
+Status: ✅ COMPLETE
+Date: 2026-02-07
+Details:
+- Created designsystem/theme/Spacing.kt with spacing constants: xs=4.dp, sm=8.dp, md=16.dp, lg=24.dp, xl=32.dp
+- Created designsystem/theme/Dimensions.kt with dimension constants
+- Added corner radii: cardRadius=12.dp, chipRadius=20.dp, buttonRadius=8.dp
+- Added icon sizes: iconSm=16.dp, iconMd=24.dp, iconLg=32.dp
+- Build successful: ./gradlew assembleDebug passes
+Files changed:
+- app/src/main/java/com/vettr/android/designsystem/theme/Spacing.kt (created)
+- app/src/main/java/com/vettr/android/designsystem/theme/Dimensions.kt (created)
+**Learnings for future iterations:**
+  - Spacing and Dimensions objects provide centralized design token constants for consistent UI
+  - Using Dp type from androidx.compose.ui.unit ensures proper density-independent sizing
+  - Spacing follows a modular scale: xs(4dp), sm(8dp), md(16dp), lg(24dp), xl(32dp)
+  - Corner radii vary by component: cards(12dp), chips(20dp), buttons(8dp) for visual hierarchy
+  - Icon sizes follow standard Material guidelines: sm(16dp), md(24dp), lg(32dp)
+  - These design tokens should be used throughout the app instead of hardcoding dimension values
+---
