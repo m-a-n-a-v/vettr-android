@@ -3157,3 +3157,33 @@ Details:
   - SkeletonView uses Brush.linearGradient with varying colors for shimmer effect
   - FastOutSlowInEasing provides a natural animation curve for shimmer transitions
 ---
+
+## US-122: Add haptic feedback for key interactions
+Status: ✅ COMPLETE
+Date: 2026-02-08
+Details:
+- Created HapticService.kt in core/util with four feedback types:
+  - light: CLOCK_TICK for simple taps and selections
+  - medium: CONTEXT_CLICK for successful actions (favorite, alert creation)
+  - heavy: LONG_PRESS for destructive actions (delete, reset)
+  - error: REJECT for errors and failures
+- Added hapticFeedbackEnabled preference to SettingsRepository with default true
+- Added "Accessibility" section to SettingsScreen with haptic toggle
+- Integrated haptics into:
+  - StockDetailViewModel.toggleFavorite() - medium haptic on success, error on failure
+  - AlertsViewModel.deleteRule() - heavy haptic for delete
+  - AlertRuleCreatorViewModel.saveRule() - medium on success, error on failure
+  - SettingsViewModel.resetApp() - heavy haptic for reset
+- All ViewModels take optional View parameter and pass to HapticService
+- All Screens use LocalView.current to get View reference
+- Build passes: ./gradlew assembleDebug succeeds
+
+**Learnings for future iterations:**
+- Haptic feedback in Compose requires LocalView.current to get View reference
+- HapticService needs nullable View parameter since some contexts may not have View
+- Suspend functions in HapticService work well with ViewModelScope coroutines
+- User preference checking happens inside HapticService to centralize logic
+- Medium haptic (CONTEXT_CLICK) works well for successful actions
+- Heavy haptic (LONG_PRESS) provides good tactile feedback for destructive actions
+- Error haptic (REJECT) is distinctive for failures (requires API 30+, but gracefully handles older APIs)
+---
