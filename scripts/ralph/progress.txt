@@ -1887,3 +1887,32 @@ Files changed:
 - Helper functions for Android API interactions should be private top-level functions
 - Share functionality can be implemented even before navigation is fully wired
 ---
+
+## US-083: Wire stock navigation from lists to detail
+Status: ✅ COMPLETE
+Date: 2026-02-07
+Details:
+- Added navigation from PulseScreen to StockDetailScreen via onStockClick callback
+- Added navigation from DiscoveryScreen to StockDetailScreen (prepared for future stock displays)
+- Added navigation from StocksScreen to StockDetailScreen via onStockClick callback
+- Updated MainScreen to include stock_detail/{stockId} route with NavArgument
+- Added StockDetailRoute composable to MainScreen's NavHost
+- All screens now accept onStockClick: (String) -> Unit parameter for navigation
+- Navigation uses navController.navigate("stock_detail/$stockId") pattern
+- Back navigation handled via navController.navigateUp()
+- Build passes successfully
+
+Files changed:
+- app/src/main/java/com/vettr/android/feature/main/MainScreen.kt
+- app/src/main/java/com/vettr/android/feature/pulse/PulseScreen.kt
+- app/src/main/java/com/vettr/android/feature/discovery/DiscoveryScreen.kt
+- app/src/main/java/com/vettr/android/feature/stockdetail/StocksScreen.kt
+
+**Learnings for future iterations:**
+- Navigation between screens in Compose Navigation requires NavController.navigate() with route patterns
+- Stock detail screen uses {stockId} path parameter for dynamic routing
+- StockDetailRoute is the ViewModel-connected wrapper, StockDetailScreen is the stateless UI
+- onStockClick callbacks allow decoupling between presentation and navigation logic
+- MainScreen's NavHost handles both bottom tab navigation and detail screen navigation
+
+---
