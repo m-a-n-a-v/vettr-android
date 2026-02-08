@@ -3187,3 +3187,30 @@ Details:
 - Heavy haptic (LONG_PRESS) provides good tactile feedback for destructive actions
 - Error haptic (REJECT) is distinctive for failures (requires API 30+, but gracefully handles older APIs)
 ---
+
+## US-123: Implement BiometricPrompt authentication
+Status: ✅ COMPLETE
+Date: 2026-02-08
+Details:
+- Created BiometricService.kt in core/util/ with BiometricPrompt using BIOMETRIC_STRONG authenticator
+- Implements biometric availability check with detailed error messages for no hardware, none enrolled, etc.
+- Shows biometric prompt with 3-failure limit and automatic fallback to password
+- Added biometricLoginEnabled setting to SettingsRepository with DataStore persistence
+- Added Security section to SettingsScreen with biometric login toggle
+- Toggle shows availability status and type display (fingerprint/face)
+- Shows dialog when biometric unavailable with specific reason
+- Integrated biometric prompt with MainActivity onResume lifecycle
+- Changed MainActivity from ComponentActivity to FragmentActivity (required for BiometricPrompt)
+- App locks on onPause and shows biometric prompt on onResume if enabled
+- Skips prompt on first resume (onCreate) to avoid showing on app launch
+**Learnings for future iterations:**
+  - BiometricPrompt requires FragmentActivity, not ComponentActivity
+  - MainActivity must extend FragmentActivity for BiometricPrompt.authenticate() to work
+  - BiometricManager.canAuthenticate() provides detailed error codes for hardware availability
+  - BIOMETRIC_STRONG requires Class 3 biometric (fingerprint, iris, face) - most secure
+  - Failure count tracking must be handled manually in onAuthenticationFailed callback
+  - ERROR_NEGATIVE_BUTTON is triggered when user clicks "Use Password" button
+  - ERROR_USER_CANCELED and ERROR_CANCELED should not trigger error callbacks (user intentionally dismissed)
+  - isFirstResume flag prevents biometric prompt from showing on onCreate (only show on app resume from background)
+  - SettingToggleRow enabled parameter controls both visual state and interactivity
+---
