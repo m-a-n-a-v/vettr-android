@@ -40,6 +40,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -69,6 +70,7 @@ fun SettingsScreen(
     modifier: Modifier = Modifier
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
+    val view = LocalView.current
 
     SettingsScreenContent(
         uiState = uiState,
@@ -82,7 +84,8 @@ fun SettingsScreen(
         onNotificationFrequencyChange = { viewModel.setNotificationFrequency(it) },
         onAnalyticsOptOutChange = { viewModel.setAnalyticsOptOut(it) },
         onCrashReportingOptOutChange = { viewModel.setCrashReportingOptOut(it) },
-        onResetApp = { viewModel.resetApp() },
+        onHapticFeedbackChange = { viewModel.setHapticFeedbackEnabled(it) },
+        onResetApp = { viewModel.resetApp(view) },
         onBackClick = onBackClick,
         modifier = modifier
     )
@@ -102,6 +105,7 @@ private fun SettingsScreenContent(
     onNotificationFrequencyChange: (String) -> Unit,
     onAnalyticsOptOutChange: (Boolean) -> Unit,
     onCrashReportingOptOutChange: (Boolean) -> Unit,
+    onHapticFeedbackChange: (Boolean) -> Unit,
     onResetApp: () -> Unit,
     onBackClick: () -> Unit,
     modifier: Modifier = Modifier
@@ -250,6 +254,23 @@ private fun SettingsScreenContent(
                         subtitle = "Disable crash report collection",
                         checked = uiState.crashReportingOptOut,
                         onCheckedChange = onCrashReportingOptOutChange
+                    )
+                }
+            }
+
+            Spacer(modifier = Modifier.height(Spacing.lg))
+
+            // Accessibility Section
+            SectionHeader(title = "Accessibility")
+            Spacer(modifier = Modifier.height(Spacing.sm))
+
+            SettingCard {
+                Column {
+                    SettingToggleRow(
+                        title = "Haptic Feedback",
+                        subtitle = "Vibrate on taps and interactions",
+                        checked = uiState.hapticFeedbackEnabled,
+                        onCheckedChange = onHapticFeedbackChange
                     )
                 }
             }
@@ -566,7 +587,8 @@ fun SettingsScreenPreview() {
                 redFlagNotifications = true,
                 notificationFrequency = "Real-time",
                 analyticsOptOut = false,
-                crashReportingOptOut = false
+                crashReportingOptOut = false,
+                hapticFeedbackEnabled = true
             ),
             onCurrencyChange = {},
             onDarkModeChange = {},
@@ -578,6 +600,7 @@ fun SettingsScreenPreview() {
             onNotificationFrequencyChange = {},
             onAnalyticsOptOutChange = {},
             onCrashReportingOptOutChange = {},
+            onHapticFeedbackChange = {},
             onResetApp = {},
             onBackClick = {}
         )

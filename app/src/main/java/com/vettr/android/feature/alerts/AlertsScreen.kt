@@ -51,6 +51,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -75,6 +76,7 @@ fun AlertsScreen(
     onCreateAlert: () -> Unit = {}
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
+    val view = LocalView.current
 
     Scaffold(
         modifier = modifier,
@@ -157,7 +159,7 @@ fun AlertsScreen(
                             RecentTriggersSection(
                                 rules = recentlyTriggeredRules,
                                 onToggle = { viewModel.toggleRule(it) },
-                                onDelete = { viewModel.deleteRule(it) },
+                                onDelete = { viewModel.deleteRule(it, view) },
                                 modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp)
                             )
                         }
@@ -191,7 +193,7 @@ fun AlertsScreen(
                             AlertRuleRow(
                                 rule = rule,
                                 onToggle = { viewModel.toggleRule(rule.id) },
-                                onDelete = { viewModel.deleteRule(rule.id) },
+                                onDelete = { viewModel.deleteRule(rule.id, view) },
                                 modifier = Modifier.padding(horizontal = 16.dp, vertical = 4.dp)
                             )
                         }

@@ -5,6 +5,7 @@ import androidx.lifecycle.viewModelScope
 import com.vettr.android.core.data.repository.AlertRuleRepository
 import com.vettr.android.core.data.repository.AuthRepository
 import com.vettr.android.core.model.AlertRule
+import com.vettr.android.core.util.HapticService
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -21,7 +22,8 @@ import javax.inject.Inject
 @HiltViewModel
 class AlertsViewModel @Inject constructor(
     private val alertRuleRepository: AlertRuleRepository,
-    private val authRepository: AuthRepository
+    private val authRepository: AuthRepository,
+    val hapticService: HapticService
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow(AlertsUiState())
@@ -89,9 +91,11 @@ class AlertsViewModel @Inject constructor(
      * Delete an alert rule.
      * @param ruleId ID of the rule to delete
      */
-    fun deleteRule(ruleId: String) {
+    fun deleteRule(ruleId: String, view: android.view.View?) {
         viewModelScope.launch {
             alertRuleRepository.deleteRule(ruleId)
+            // Heavy haptic for delete action
+            hapticService.heavy(view)
         }
     }
 

@@ -12,6 +12,7 @@ import com.vettr.android.core.data.repository.VetrScoreRepository
 import com.vettr.android.core.model.Filing
 import com.vettr.android.core.model.Stock
 import com.vettr.android.core.model.VetrScoreHistory
+import com.vettr.android.core.util.HapticService
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -48,6 +49,7 @@ class StockDetailViewModel @Inject constructor(
     private val stockRepository: StockRepository,
     private val filingRepository: FilingRepository,
     private val vetrScoreRepository: VetrScoreRepository,
+    val hapticService: HapticService,
     savedStateHandle: SavedStateHandle
 ) : ViewModel() {
 
@@ -131,14 +133,18 @@ class StockDetailViewModel @Inject constructor(
     /**
      * Toggle favorite status for the current stock.
      */
-    fun toggleFavorite() {
+    fun toggleFavorite(view: android.view.View?) {
         if (stockId.isEmpty()) return
 
         viewModelScope.launch {
             try {
                 stockRepository.toggleFavorite(stockId)
+                // Medium haptic for successful favorite toggle
+                hapticService.medium(view)
             } catch (e: Exception) {
                 _errorMessage.value = "Failed to toggle favorite: ${e.message}"
+                // Error haptic for failure
+                hapticService.error(view)
             }
         }
     }

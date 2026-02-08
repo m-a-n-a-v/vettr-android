@@ -3,6 +3,7 @@ package com.vettr.android.feature.profile
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.vettr.android.core.data.repository.SettingsRepository
+import com.vettr.android.core.util.HapticService
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -25,7 +26,8 @@ data class SettingsUiState(
     val redFlagNotifications: Boolean = true,
     val notificationFrequency: String = "Real-time",
     val analyticsOptOut: Boolean = false,
-    val crashReportingOptOut: Boolean = false
+    val crashReportingOptOut: Boolean = false,
+    val hapticFeedbackEnabled: Boolean = true
 )
 
 /**
@@ -34,7 +36,8 @@ data class SettingsUiState(
  */
 @HiltViewModel
 class SettingsViewModel @Inject constructor(
-    private val settingsRepository: SettingsRepository
+    private val settingsRepository: SettingsRepository,
+    val hapticService: HapticService
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow(SettingsUiState())
@@ -53,7 +56,8 @@ class SettingsViewModel @Inject constructor(
                 settingsRepository.redFlagNotifications,
                 settingsRepository.notificationFrequency,
                 settingsRepository.analyticsOptOut,
-                settingsRepository.crashReportingOptOut
+                settingsRepository.crashReportingOptOut,
+                settingsRepository.hapticFeedbackEnabled
             ) { values ->
                 SettingsUiState(
                     currency = values[0] as String,
@@ -65,7 +69,8 @@ class SettingsViewModel @Inject constructor(
                     redFlagNotifications = values[6] as Boolean,
                     notificationFrequency = values[7] as String,
                     analyticsOptOut = values[8] as Boolean,
-                    crashReportingOptOut = values[9] as Boolean
+                    crashReportingOptOut = values[9] as Boolean,
+                    hapticFeedbackEnabled = values[10] as Boolean
                 )
             }.collect { newState ->
                 _uiState.value = newState
@@ -136,10 +141,19 @@ class SettingsViewModel @Inject constructor(
         }
     }
 
+    // Accessibility settings
+    fun setHapticFeedbackEnabled(value: Boolean) {
+        viewModelScope.launch {
+            settingsRepository.setHapticFeedbackEnabled(value)
+        }
+    }
+
     // Reset app data
-    fun resetApp() {
+    fun resetApp(view: android.view.View?) {
         viewModelScope.launch {
             settingsRepository.resetAllSettings()
+            // Heavy haptic for reset action
+            hapticService.heavy(view)
             // TODO: Clear database and other app data in future story
         }
     }

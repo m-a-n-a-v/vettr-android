@@ -45,6 +45,9 @@ class SettingsRepository @Inject constructor(
         val ANALYTICS_OPT_OUT = booleanPreferencesKey("analytics_opt_out")
         val CRASH_REPORTING_OPT_OUT = booleanPreferencesKey("crash_reporting_opt_out")
 
+        // Accessibility settings keys
+        val HAPTIC_FEEDBACK_ENABLED = booleanPreferencesKey("haptic_feedback_enabled")
+
         // Default values
         const val DEFAULT_CURRENCY = "CAD"
         const val DEFAULT_DARK_MODE = true
@@ -56,6 +59,7 @@ class SettingsRepository @Inject constructor(
         const val DEFAULT_NOTIFICATION_FREQUENCY = "Real-time"
         const val DEFAULT_ANALYTICS_OPT_OUT = false
         const val DEFAULT_CRASH_REPORTING_OPT_OUT = false
+        const val DEFAULT_HAPTIC_FEEDBACK_ENABLED = true
     }
 
     // General settings flows
@@ -99,6 +103,11 @@ class SettingsRepository @Inject constructor(
 
     val crashReportingOptOut: Flow<Boolean> = dataStore.data.map { preferences ->
         preferences[CRASH_REPORTING_OPT_OUT] ?: DEFAULT_CRASH_REPORTING_OPT_OUT
+    }
+
+    // Accessibility settings flows
+    val hapticFeedbackEnabled: Flow<Boolean> = dataStore.data.map { preferences ->
+        preferences[HAPTIC_FEEDBACK_ENABLED] ?: DEFAULT_HAPTIC_FEEDBACK_ENABLED
     }
 
     // Setters for general settings
@@ -161,6 +170,13 @@ class SettingsRepository @Inject constructor(
     suspend fun setCrashReportingOptOut(value: Boolean) {
         dataStore.edit { preferences ->
             preferences[CRASH_REPORTING_OPT_OUT] = value
+        }
+    }
+
+    // Setters for accessibility settings
+    suspend fun setHapticFeedbackEnabled(value: Boolean) {
+        dataStore.edit { preferences ->
+            preferences[HAPTIC_FEEDBACK_ENABLED] = value
         }
     }
 

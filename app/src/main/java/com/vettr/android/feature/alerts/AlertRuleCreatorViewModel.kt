@@ -7,6 +7,7 @@ import com.vettr.android.core.data.repository.AuthRepository
 import com.vettr.android.core.data.repository.StockRepository
 import com.vettr.android.core.model.AlertRule
 import com.vettr.android.core.model.Stock
+import com.vettr.android.core.util.HapticService
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -24,7 +25,8 @@ import javax.inject.Inject
 class AlertRuleCreatorViewModel @Inject constructor(
     private val alertRuleRepository: AlertRuleRepository,
     private val stockRepository: StockRepository,
-    private val authRepository: AuthRepository
+    private val authRepository: AuthRepository,
+    val hapticService: HapticService
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow(AlertRuleCreatorUiState())
@@ -163,7 +165,7 @@ class AlertRuleCreatorViewModel @Inject constructor(
     /**
      * Save the alert rule.
      */
-    fun saveRule() {
+    fun saveRule(view: android.view.View?) {
         val state = _uiState.value
         if (!canSaveRule()) return
 
@@ -188,9 +190,13 @@ class AlertRuleCreatorViewModel @Inject constructor(
                     val result = alertRuleRepository.createRule(alertRule)
                     result.onSuccess {
                         _uiState.update { it.copy(saveSuccess = true) }
+                        // Medium haptic for successful alert creation
+                        hapticService.medium(view)
                     }
                     result.onFailure { error ->
                         _uiState.update { it.copy(errorMessage = error.message) }
+                        // Error haptic for failure
+                        hapticService.error(view)
                     }
                 }
             }

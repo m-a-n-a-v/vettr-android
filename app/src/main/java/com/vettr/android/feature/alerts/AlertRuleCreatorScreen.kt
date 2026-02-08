@@ -58,6 +58,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.tooling.preview.Preview
@@ -83,6 +84,7 @@ fun AlertRuleCreatorScreen(
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     val snackbarHostState = remember { SnackbarHostState() }
     val scope = rememberCoroutineScope()
+    val view = LocalView.current
 
     // Show success snackbar and navigate back when save completes
     LaunchedEffect(uiState.saveSuccess) {
@@ -193,7 +195,7 @@ fun AlertRuleCreatorScreen(
                     }
                 } else {
                     Button(
-                        onClick = { viewModel.saveRule() },
+                        onClick = { viewModel.saveRule(view) },
                         enabled = viewModel.canSaveRule()
                     ) {
                         Text("Save Rule")

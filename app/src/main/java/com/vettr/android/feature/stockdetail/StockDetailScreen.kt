@@ -44,6 +44,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -102,6 +103,7 @@ fun StockDetailRoute(
     modifier: Modifier = Modifier
 ) {
     val context = LocalContext.current
+    val view = LocalView.current
     val stock by viewModel.stock.collectAsStateWithLifecycle()
     val filings by viewModel.filings.collectAsStateWithLifecycle()
     val selectedTab by viewModel.selectedTab.collectAsStateWithLifecycle()
@@ -123,7 +125,7 @@ fun StockDetailRoute(
             }
             onShareClick()
         },
-        onFavoriteClick = { viewModel.toggleFavorite() },
+        onFavoriteClick = { viewModel.toggleFavorite(view) },
         onTimeRangeSelected = { viewModel.selectTimeRange(it) },
         onTabSelected = { tabIndex ->
             viewModel.selectTab(
