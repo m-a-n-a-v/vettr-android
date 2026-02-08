@@ -3665,3 +3665,59 @@ Details:
 - Legal documents should include both detailed legal text and TL;DR summaries for user convenience
 - All Play Store assets should be stored in docs/ folder for easy access during submission
 ---
+
+## US-137: Configure Firebase App Distribution for beta testing
+Status: ✅ COMPLETE
+Date: 2026-02-08
+Details:
+- Created comprehensive Firebase App Distribution documentation (docs/FIREBASE_APP_DISTRIBUTION.md)
+- Documented complete Firebase project setup steps:
+  - Firebase Console project creation and Android app linking
+  - google-services.json configuration
+  - Firebase App Distribution Gradle plugin setup
+- Created beta tester group structure:
+  - Internal Team (5-7 testers): Daily builds, rapid iteration
+  - External Beta Testers (10-20 testers): Real-world usage, UX feedback
+  - Device Matrix (5-10 testers): Device/OS compatibility testing
+- Documented beta release notes template with examples:
+  - Beta 1 example (initial release)
+  - Beta 2 example (bug fixes iteration)
+  - User-focused format with "What's New", "Focus Areas", "Known Issues", "Feedback Priorities"
+- Verified build configuration for beta distribution:
+  - Debug build type already configured with .debug suffix
+  - Version naming strategy: MAJOR.MINOR.PATCH-beta.BUILD
+  - APK output location: app/build/outputs/apk/debug/app-debug.apk
+- Documented feedback collection process:
+  - In-app feedback (Profile → Settings → Send Feedback)
+  - Email: beta-feedback@vettr.com
+  - Slack: #vettr-android-beta (internal team)
+  - Firebase Crashlytics: Automatic crash reporting
+  - Feedback tracking spreadsheet template
+- Documented minimum 2-week beta testing timeline:
+  - Week 1: Internal testing and critical bug fixes
+  - Week 2: External beta launch and feedback collection
+  - Week 3: Iteration and fixes based on feedback
+  - Week 4: Final testing and release candidate preparation
+- Included comprehensive testing checklist:
+  - Core flows smoke test (auth, pulse, stock detail, discovery, pedigree, alerts, profile)
+  - Device compatibility testing matrix
+  - Performance verification (startup <2s, screen loads <1s)
+- Documented beta testing success criteria:
+  - At least 10 external beta testers for 2+ weeks
+  - Crash-free rate >98%
+  - All critical bugs fixed
+  - Positive UX feedback
+  - Performance SLAs met
+- Build successful: ./gradlew assembleDebug passes
+**Learnings for future iterations:**
+  - Firebase App Distribution requires comprehensive documentation beyond just the technical setup
+  - Beta testing needs structured tester groups (internal, external, device matrix) with different distribution cadences
+  - Release notes should be user-focused, highlighting what testers should focus on rather than technical details
+  - A minimum 2-week beta period is essential, but 4 weeks is recommended for thorough testing and iteration
+  - Debug builds with applicationIdSuffix allow testers to install beta alongside production releases
+  - Feedback collection should be multi-channel: in-app, email, Slack, and automatic crash reporting
+  - Beta testing checklist should include core flows, device compatibility, and performance verification
+  - Version naming for betas should use -beta.BUILD suffix (e.g., 1.0.0-beta.1, 1.0.0-beta.2)
+  - Firebase Console provides valuable metrics: downloads, adoption rate, crash-free rate, feedback submissions
+  - Success criteria should be clearly defined upfront: >98% crash-free, 10+ testers, 2+ weeks, positive feedback
+---

@@ -1906,7 +1906,7 @@
         "Minimum 2-week beta period before Play Store submission"
       ],
       "priority": 137,
-      "passes": false
+      "passes": true
     },
     {
       "id": "US-138",
