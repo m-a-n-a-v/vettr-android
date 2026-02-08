@@ -102,3 +102,20 @@ Details:
   - Coil 3.0.4 with coil-network-okhttp provides efficient image loading with OkHttp backend
   - AsyncImage is the primary composable for loading images in Jetpack Compose
 ---
+## US-007: Add Google Sign-In dependency
+Status: ✅ COMPLETE
+Date: 2026-02-07
+Details:
+- Added Google Sign-In and Credentials API dependencies to gradle/libs.versions.toml
+- Added play-services-auth version 21.2.0
+- Added googleid version 1.1.1
+- Added androidx.credentials version 1.5.0
+- Added androidx.credentials-play-services-auth version 1.5.0
+- Updated app/build.gradle.kts to include all four dependencies
+- Build successful: ./gradlew assembleDebug passes
+**Learnings for future iterations:**
+  - Google Sign-In now uses Credentials API (androidx.credentials) for modern authentication
+  - Four dependencies required: play-services-auth, googleid, credentials, and credentials-play-services-auth
+  - Google Sign-In One Tap requires both the legacy play-services-auth and new Credentials API libraries
+  - Version catalog pattern in libs.versions.toml allows centralized dependency management
+---
