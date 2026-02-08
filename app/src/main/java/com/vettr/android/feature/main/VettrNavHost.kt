@@ -1,12 +1,9 @@
 package com.vettr.android.feature.main
 
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavHostController
@@ -122,14 +119,7 @@ fun VettrNavHost(
             route = Screen.MainGraph.route
         ) {
             composable(Screen.Main.route) {
-                // TODO: Replace with MainScreen (with bottom navigation) in US-067
-                // For now, show a placeholder
-                Box(
-                    modifier = Modifier.fillMaxSize(),
-                    contentAlignment = Alignment.Center
-                ) {
-                    Text("Main Screen - Coming Soon")
-                }
+                MainScreen(modifier = Modifier.fillMaxSize())
             }
         }
     }
