@@ -1794,7 +1794,7 @@
         "./gradlew connectedDebugAndroidTest passes (or document manual steps)"
       ],
       "priority": 129,
-      "passes": false
+      "passes": true
     },
     {
       "id": "US-130",
