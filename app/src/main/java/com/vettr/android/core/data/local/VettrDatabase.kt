@@ -31,5 +31,5 @@ import com.vettr.android.core.util.Converters
 )
 @TypeConverters(Converters::class)
 abstract class VettrDatabase : RoomDatabase() {
-    // DAOs will be added here as they are created
+    abstract fun stockDao(): StockDao
 }
