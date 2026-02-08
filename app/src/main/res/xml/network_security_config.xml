@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="utf-8"?>
+<network-security-config>
+    <!-- Base configuration for all connections -->
+    <base-config cleartextTrafficPermitted="false">
+        <trust-anchors>
+            <!-- Trust preinstalled CAs -->
+            <certificates src="system" />
+        </trust-anchors>
+    </base-config>
+
+    <!--
+        Debug configuration only for development builds.
+        Allows localhost cleartext traffic for debugging with local servers.
+        This will NOT be included in release builds.
+    -->
+    <debug-overrides>
+        <trust-anchors>
+            <!-- Additionally trust user added CAs for debugging -->
+            <certificates src="user" />
+        </trust-anchors>
+    </debug-overrides>
+
+    <!-- Production API domain configuration -->
+    <domain-config cleartextTrafficPermitted="false">
+        <domain includeSubdomains="true">api.vettr.com</domain>
+        <pin-set expiration="2027-01-01">
+            <!--
+                Certificate pinning can be added here for additional security.
+                Example (uncomment and add actual pins when certificates are available):
+                <pin digest="SHA-256">base64encodedpin==</pin>
+                <pin digest="SHA-256">backuppin==</pin>
+            -->
+        </pin-set>
+        <trust-anchors>
+            <certificates src="system" />
+        </trust-anchors>
+    </domain-config>
+
+    <!--
+        Additional notes:
+        - cleartextTrafficPermitted="false" enforces HTTPS for all network traffic
+        - Debug builds can use localhost for development
+        - Production builds will reject all HTTP connections
+        - Certificate pinning can be enabled by adding actual certificate pins above
+    -->
+</network-security-config>

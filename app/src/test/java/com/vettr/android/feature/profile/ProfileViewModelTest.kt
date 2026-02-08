@@ -5,6 +5,7 @@ import com.vettr.android.core.data.repository.AuthRepository
 import com.vettr.android.core.model.User
 import com.vettr.android.core.model.VettrTier
 import com.vettr.android.core.sync.SyncManager
+import com.vettr.android.core.util.VersionManager
 import io.mockk.coEvery
 import io.mockk.coVerify
 import io.mockk.mockk
@@ -34,6 +35,7 @@ class ProfileViewModelTest {
     private lateinit var authRepository: AuthRepository
     private lateinit var syncManager: SyncManager
     private lateinit var syncHistoryDao: SyncHistoryDao
+    private lateinit var versionManager: VersionManager
 
     private val testDispatcher = StandardTestDispatcher()
 
@@ -43,6 +45,7 @@ class ProfileViewModelTest {
         authRepository = mockk()
         syncManager = mockk(relaxed = true)
         syncHistoryDao = mockk(relaxed = true)
+        versionManager = mockk(relaxed = true)
     }
 
     @After
@@ -69,7 +72,7 @@ class ProfileViewModelTest {
         )
         coEvery { authRepository.signOut() } returns Unit
 
-        viewModel = ProfileViewModel(authRepository, syncManager, syncHistoryDao)
+        viewModel = ProfileViewModel(authRepository, syncManager, syncHistoryDao, versionManager)
         advanceUntilIdle()
 
         // Verify initial state has user
@@ -102,7 +105,7 @@ class ProfileViewModelTest {
         coEvery { authRepository.getCurrentUser() } returns flowOf(mockUser)
 
         // When
-        viewModel = ProfileViewModel(authRepository, syncManager, syncHistoryDao)
+        viewModel = ProfileViewModel(authRepository, syncManager, syncHistoryDao, versionManager)
         advanceUntilIdle()
 
         // Then
@@ -117,7 +120,7 @@ class ProfileViewModelTest {
         coEvery { authRepository.getCurrentUser() } returns flowOf(null)
 
         // When
-        viewModel = ProfileViewModel(authRepository, syncManager, syncHistoryDao)
+        viewModel = ProfileViewModel(authRepository, syncManager, syncHistoryDao, versionManager)
         advanceUntilIdle()
 
         // Then
@@ -141,7 +144,7 @@ class ProfileViewModelTest {
         coEvery { authRepository.getCurrentUser() } returns flowOf(mockUser)
 
         // When
-        viewModel = ProfileViewModel(authRepository, syncManager, syncHistoryDao)
+        viewModel = ProfileViewModel(authRepository, syncManager, syncHistoryDao, versionManager)
         advanceUntilIdle()
 
         // Then
@@ -162,7 +165,7 @@ class ProfileViewModelTest {
         )
 
         coEvery { authRepository.getCurrentUser() } returns flowOf(freeUser)
-        viewModel = ProfileViewModel(authRepository, syncManager, syncHistoryDao)
+        viewModel = ProfileViewModel(authRepository, syncManager, syncHistoryDao, versionManager)
         advanceUntilIdle()
         assertEquals(VettrTier.FREE, viewModel.tier.value)
 
@@ -177,7 +180,7 @@ class ProfileViewModelTest {
         )
 
         coEvery { authRepository.getCurrentUser() } returns flowOf(proUser)
-        viewModel = ProfileViewModel(authRepository, syncManager, syncHistoryDao)
+        viewModel = ProfileViewModel(authRepository, syncManager, syncHistoryDao, versionManager)
         advanceUntilIdle()
         assertEquals(VettrTier.PRO, viewModel.tier.value)
 
@@ -192,7 +195,7 @@ class ProfileViewModelTest {
         )
 
         coEvery { authRepository.getCurrentUser() } returns flowOf(premiumUser)
-        viewModel = ProfileViewModel(authRepository, syncManager, syncHistoryDao)
+        viewModel = ProfileViewModel(authRepository, syncManager, syncHistoryDao, versionManager)
         advanceUntilIdle()
         assertEquals(VettrTier.PREMIUM, viewModel.tier.value)
     }
@@ -215,7 +218,7 @@ class ProfileViewModelTest {
         )
         coEvery { authRepository.signOut() } returns Unit
 
-        viewModel = ProfileViewModel(authRepository, syncManager, syncHistoryDao)
+        viewModel = ProfileViewModel(authRepository, syncManager, syncHistoryDao, versionManager)
         advanceUntilIdle()
 
         // Verify initial loading is false
@@ -248,7 +251,7 @@ class ProfileViewModelTest {
         )
         coEvery { authRepository.signOut() } returns Unit
 
-        viewModel = ProfileViewModel(authRepository, syncManager, syncHistoryDao)
+        viewModel = ProfileViewModel(authRepository, syncManager, syncHistoryDao, versionManager)
         advanceUntilIdle()
 
         // Verify initial premium state
