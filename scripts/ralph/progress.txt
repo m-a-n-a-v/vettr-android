@@ -336,3 +336,27 @@ Files changed:
   - Background circle with gray color (0xFF3A4A5A) provides visual track for progress arc
   - StrokeCap.Round on arc creates polished, modern circular progress appearance
 ---
+## US-019: Create MetricCard composable component
+Status: ✅ COMPLETE
+Date: 2026-02-07
+Details:
+- Created designsystem/component/MetricCard.kt with @Composable function
+- Parameters: title (String), value (String), change (Double?, optional)
+- Displays title with bodyMedium typography in onSurfaceVariant color
+- Displays value with titleLarge typography in onSurface color
+- Optional change indicator shows +/- prefix with color coding (VettrGreen for positive, VettrRed for negative)
+- Uses Modifier.cardStyle() extension for consistent card styling
+- Uses Modifier.vettrPadding() extension with Spacing.md for consistent padding
+- Added 4 @Preview composables: positive change (+5.25%), negative change (-2.15%), no change, and zero change (0.0%)
+- Build successful: ./gradlew assembleDebug passes
+Files changed:
+- app/src/main/java/com/vettr/android/designsystem/component/MetricCard.kt (created)
+**Learnings for future iterations:**
+  - MetricCard provides consistent format for displaying key metrics across the app (market cap, price, volume, etc.)
+  - Change indicator uses color coding for instant visual feedback: green for positive, red for negative
+  - String.format("%.2f", change) formats percentage to 2 decimal places
+  - Zero change (0.0) is treated as positive, displaying "+0.00%" in green
+  - Multiple preview composables help validate component appearance for different data states
+  - Arrangement.spacedBy(Spacing.xs) provides consistent vertical spacing between title, value, and change
+  - Using MaterialTheme.colorScheme colors ensures proper contrast in dark theme
+---
