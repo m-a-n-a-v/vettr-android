@@ -4049,3 +4049,22 @@ Details:
   - For windowSizeClass checks, derivedStateOf is better than direct computation since it memoizes the boolean result
   - Pattern: `val isExpanded by remember { derivedStateOf { windowSizeClass.widthSizeClass == WindowWidthSizeClass.Expanded } }`
 ---
+
+## US-149: Add Room database migration strategy
+Status: ✅ COMPLETE
+Date: 2026-02-08
+Details:
+- Set exportSchema = true in @Database annotation (VettrDatabase.kt:28)
+- Configured room.schemaLocation = "$projectDir/schemas" in build.gradle.kts
+- Created comprehensive MIGRATION_GUIDE.md with migration instructions and examples
+- Added fallbackToDestructiveMigration() for debug builds in DatabaseModule.kt
+- Created Migrations.kt with placeholder MIGRATION_1_2 template
+- Generated schema JSON file: app/schemas/com.vettr.android.core.data.local.VettrDatabase/1.json
+- Build successful: ./gradlew assembleDebug passes
+**Learnings for future iterations:**
+  - Schema export generates JSON files in the configured directory - these should be committed to Git
+  - fallbackToDestructiveMigration() should ONLY be used for debug builds to avoid data loss in production
+  - Migration templates help developers understand the pattern for future schema changes
+  - Room's schema export is critical for tracking database evolution across versions
+  - BuildConfig.DEBUG check allows different behavior in debug vs release builds
+---
