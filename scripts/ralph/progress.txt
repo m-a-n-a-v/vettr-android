@@ -1934,3 +1934,25 @@ Details:
   - Filtered lists should use combine() to merge multiple StateFlows and stateIn() to convert to StateFlow
   - WhileSubscribed(5000) keeps the flow active for 5 seconds after last subscriber, optimizing for config changes
 ---
+
+## US-085: Build StocksScreen with search and list
+Status: ✅ COMPLETE
+Date: 2026-02-07
+Details:
+- Updated StocksScreen to integrate StocksViewModel via hiltViewModel()
+- Added SearchBarView at top of screen with search query state binding
+- Implemented LazyColumn with StockRowView composables for displaying filtered stocks
+- Added navigation to StockDetailScreen via onStockClick callback
+- Implemented EmptyStateView for two scenarios: no search results and no stocks available
+- Added LoadingView during initial data load with "Loading stocks..." message
+- Added HorizontalDivider between stock rows for visual separation
+- Used collectAsStateWithLifecycle() for reactive state collection
+- Build successful: ./gradlew assembleDebug passes
+**Learnings for future iterations:**
+  - StocksViewModel was already complete from US-084, providing filteredStocks, searchQuery, and isLoading state flows
+  - All required design components (SearchBarView, StockRowView, EmptyStateView, LoadingView) were already implemented
+  - Use when expressions to cleanly handle loading/empty/data states in Compose
+  - LazyColumn items() with key parameter ensures efficient recomposition
+  - HorizontalDivider with low alpha creates subtle visual separation between list items
+  - Logo URLs use Clearbit pattern: https://logo.clearbit.com/{ticker}.com
+---
