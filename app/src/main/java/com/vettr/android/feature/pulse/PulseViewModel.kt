@@ -37,6 +37,12 @@ class PulseViewModel @Inject constructor(
     private val _errorMessage = MutableStateFlow<String?>(null)
     val errorMessage: StateFlow<String?> = _errorMessage.asStateFlow()
 
+    private val _lastUpdatedAt = MutableStateFlow<Long?>(null)
+    val lastUpdatedAt: StateFlow<Long?> = _lastUpdatedAt.asStateFlow()
+
+    private var lastRefreshTime: Long = 0
+    private val refreshDebounceMs = 10_000L // 10 seconds
+
     init {
         loadData()
     }
@@ -59,6 +65,7 @@ class PulseViewModel @Inject constructor(
                         }
                         .collect { stockList ->
                             _stocks.value = stockList
+                            _lastUpdatedAt.value = System.currentTimeMillis()
                         }
                 }
 
@@ -80,8 +87,15 @@ class PulseViewModel @Inject constructor(
 
     /**
      * Refresh data by reloading from repositories.
+     * Implements debounce logic to prevent more than 1 refresh per 10 seconds.
      */
     fun refresh() {
+        val currentTime = System.currentTimeMillis()
+        if (currentTime - lastRefreshTime < refreshDebounceMs) {
+            // Skip refresh if within debounce window
+            return
+        }
+        lastRefreshTime = currentTime
         loadData()
     }
 }

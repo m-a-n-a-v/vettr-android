@@ -41,6 +41,7 @@ import androidx.compose.material3.SwitchDefaults
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
+import androidx.compose.material3.pulltorefresh.PullToRefreshBox
 import androidx.compose.material3.rememberSwipeToDismissBoxState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -56,6 +57,8 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.vettr.android.core.model.AlertRule
+import com.vettr.android.designsystem.component.LastUpdatedText
+import com.vettr.android.designsystem.theme.Spacing
 import com.vettr.android.designsystem.theme.VettrTheme
 import java.text.SimpleDateFormat
 import java.util.Date
@@ -101,20 +104,33 @@ fun AlertsScreen(
             }
         }
     ) { paddingValues ->
-        Column(
+        PullToRefreshBox(
+            isRefreshing = uiState.isLoading,
+            onRefresh = { viewModel.refresh() },
             modifier = Modifier
                 .fillMaxSize()
                 .padding(paddingValues)
         ) {
-            // Filter chips
-            FilterSection(
-                selectedFilter = uiState.selectedFilter,
-                onFilterSelected = { viewModel.setFilter(it) },
-                modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp)
-            )
+            Column(
+                modifier = Modifier.fillMaxSize()
+            ) {
+                // Last updated timestamp
+                LastUpdatedText(
+                    lastUpdatedAt = uiState.lastUpdatedAt,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(top = Spacing.sm)
+                )
 
-            // Content
-            if (uiState.isLoading) {
+                // Filter chips
+                FilterSection(
+                    selectedFilter = uiState.selectedFilter,
+                    onFilterSelected = { viewModel.setFilter(it) },
+                    modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp)
+                )
+
+                // Content
+                if (uiState.isLoading && uiState.alertRules.isEmpty()) {
                 Box(
                     modifier = Modifier.fillMaxSize(),
                     contentAlignment = Alignment.Center
@@ -186,6 +202,7 @@ fun AlertsScreen(
                         Spacer(modifier = Modifier.height(80.dp))
                     }
                 }
+            }
             }
         }
     }

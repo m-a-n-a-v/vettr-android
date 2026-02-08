@@ -40,6 +40,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.vettr.android.designsystem.component.EmptyStateView
 import com.vettr.android.designsystem.component.ErrorView
 import com.vettr.android.designsystem.component.EventCard
+import com.vettr.android.designsystem.component.LastUpdatedText
 import com.vettr.android.designsystem.component.LoadingView
 import com.vettr.android.designsystem.component.MetricCard
 import com.vettr.android.designsystem.component.SearchBarView
@@ -65,6 +66,7 @@ fun PulseScreen(
     val filings by viewModel.filings.collectAsStateWithLifecycle()
     val isLoading by viewModel.isLoading.collectAsStateWithLifecycle()
     val errorMessage by viewModel.errorMessage.collectAsStateWithLifecycle()
+    val lastUpdatedAt by viewModel.lastUpdatedAt.collectAsStateWithLifecycle()
 
     var searchQuery by remember { mutableStateOf("") }
 
@@ -117,6 +119,12 @@ fun PulseScreen(
                     .padding(Spacing.md),
                 verticalArrangement = Arrangement.spacedBy(Spacing.lg)
             ) {
+            // Last updated timestamp
+            LastUpdatedText(
+                lastUpdatedAt = lastUpdatedAt,
+                modifier = Modifier.fillMaxWidth()
+            )
+
             // Search bar with notification bell
             Row(
                 modifier = Modifier.fillMaxWidth(),

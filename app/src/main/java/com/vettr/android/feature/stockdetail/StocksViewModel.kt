@@ -36,6 +36,12 @@ class StocksViewModel @Inject constructor(
     private val _isLoading = MutableStateFlow(false)
     val isLoading: StateFlow<Boolean> = _isLoading.asStateFlow()
 
+    private val _lastUpdatedAt = MutableStateFlow<Long?>(null)
+    val lastUpdatedAt: StateFlow<Long?> = _lastUpdatedAt.asStateFlow()
+
+    private var lastRefreshTime: Long = 0
+    private val refreshDebounceMs = 10_000L // 10 seconds
+
     // Pagination state
     private val _paginatedState = MutableStateFlow(PaginatedState<Stock>())
     val paginatedState: StateFlow<PaginatedState<Stock>> = _paginatedState.asStateFlow()
@@ -84,12 +90,27 @@ class StocksViewModel @Inject constructor(
                     }
                     .collect { stockList ->
                         _allStocks.value = stockList
+                        _lastUpdatedAt.value = System.currentTimeMillis()
                         _isLoading.value = false
                     }
             } catch (e: Exception) {
                 _isLoading.value = false
             }
         }
+    }
+
+    /**
+     * Refresh stocks by reloading from repository.
+     * Implements debounce logic to prevent more than 1 refresh per 10 seconds.
+     */
+    fun refresh() {
+        val currentTime = System.currentTimeMillis()
+        if (currentTime - lastRefreshTime < refreshDebounceMs) {
+            // Skip refresh if within debounce window
+            return
+        }
+        lastRefreshTime = currentTime
+        loadStocks()
     }
 
     /**

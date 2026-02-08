@@ -3,6 +3,7 @@ package com.vettr.android.feature.stockdetail
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
@@ -15,6 +16,7 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
+import androidx.compose.material3.pulltorefresh.PullToRefreshBox
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
@@ -22,6 +24,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.vettr.android.designsystem.component.EmptyStateView
+import com.vettr.android.designsystem.component.LastUpdatedText
 import com.vettr.android.designsystem.component.LoadingView
 import com.vettr.android.designsystem.component.SearchBarView
 import com.vettr.android.designsystem.component.StockRowView
@@ -42,6 +45,7 @@ fun StocksScreen(
     val filteredStocks by viewModel.filteredStocks.collectAsStateWithLifecycle()
     val searchQuery by viewModel.searchQuery.collectAsStateWithLifecycle()
     val isLoading by viewModel.isLoading.collectAsStateWithLifecycle()
+    val lastUpdatedAt by viewModel.lastUpdatedAt.collectAsStateWithLifecycle()
 
     Scaffold(
         modifier = modifier,
@@ -60,20 +64,33 @@ fun StocksScreen(
             )
         }
     ) { paddingValues ->
-        Column(
+        PullToRefreshBox(
+            isRefreshing = isLoading,
+            onRefresh = { viewModel.refresh() },
             modifier = Modifier
                 .fillMaxSize()
                 .padding(paddingValues)
         ) {
-            // Search bar
-            SearchBarView(
-                query = searchQuery,
-                onQueryChange = { viewModel.searchStocks(it) },
-                modifier = Modifier.padding(Spacing.md)
-            )
+            Column(
+                modifier = Modifier.fillMaxSize()
+            ) {
+                // Last updated timestamp
+                LastUpdatedText(
+                    lastUpdatedAt = lastUpdatedAt,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(top = Spacing.sm)
+                )
 
-            // Content based on loading/empty/data states
-            when {
+                // Search bar
+                SearchBarView(
+                    query = searchQuery,
+                    onQueryChange = { viewModel.searchStocks(it) },
+                    modifier = Modifier.padding(Spacing.md)
+                )
+
+                // Content based on loading/empty/data states
+                when {
                 isLoading -> {
                     LoadingView(message = "Loading stocks...")
                 }
@@ -115,6 +132,7 @@ fun StocksScreen(
                     }
                 }
             }
+        }
         }
     }
 }

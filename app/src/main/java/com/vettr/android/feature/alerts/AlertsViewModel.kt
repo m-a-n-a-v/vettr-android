@@ -27,6 +27,9 @@ class AlertsViewModel @Inject constructor(
     private val _uiState = MutableStateFlow(AlertsUiState())
     val uiState: StateFlow<AlertsUiState> = _uiState.asStateFlow()
 
+    private var lastRefreshTime: Long = 0
+    private val refreshDebounceMs = 10_000L // 10 seconds
+
     init {
         loadRules()
     }
@@ -54,7 +57,8 @@ class AlertsViewModel @Inject constructor(
                             it.copy(
                                 alertRules = filteredRules,
                                 groupedAlertRules = groupedRules,
-                                isLoading = false
+                                isLoading = false,
+                                lastUpdatedAt = System.currentTimeMillis()
                             )
                         }
                     }
@@ -117,6 +121,20 @@ class AlertsViewModel @Inject constructor(
     }
 
     /**
+     * Refresh alert rules by reloading from repository.
+     * Implements debounce logic to prevent more than 1 refresh per 10 seconds.
+     */
+    fun refresh() {
+        val currentTime = System.currentTimeMillis()
+        if (currentTime - lastRefreshTime < refreshDebounceMs) {
+            // Skip refresh if within debounce window
+            return
+        }
+        lastRefreshTime = currentTime
+        loadRules()
+    }
+
+    /**
      * Group alert rules by stock ticker.
      * @param rules List of alert rules to group
      * @return Map of ticker to list of rules
@@ -134,7 +152,8 @@ data class AlertsUiState(
     val alertRules: List<AlertRule> = emptyList(),
     val groupedAlertRules: Map<String, List<AlertRule>> = emptyMap(),
     val selectedFilter: AlertFilter = AlertFilter.ALL,
-    val isLoading: Boolean = false
+    val isLoading: Boolean = false,
+    val lastUpdatedAt: Long? = null
 )
 
 /**

@@ -22,6 +22,7 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
+import androidx.compose.material3.pulltorefresh.PullToRefreshBox
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
@@ -31,6 +32,7 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.vettr.android.designsystem.component.EventCard
+import com.vettr.android.designsystem.component.LastUpdatedText
 import com.vettr.android.designsystem.component.SectionHeader
 import com.vettr.android.designsystem.component.cardStyle
 import com.vettr.android.designsystem.component.vettrPadding
@@ -52,6 +54,8 @@ fun DiscoveryScreen(
 ) {
     val selectedFilter by viewModel.selectedFilter.collectAsStateWithLifecycle()
     val sectors by viewModel.sectors.collectAsStateWithLifecycle()
+    val isLoading by viewModel.isLoading.collectAsStateWithLifecycle()
+    val lastUpdatedAt by viewModel.lastUpdatedAt.collectAsStateWithLifecycle()
 
     Scaffold(
         modifier = modifier,
@@ -70,13 +74,27 @@ fun DiscoveryScreen(
             )
         }
     ) { paddingValues ->
-        LazyColumn(
+        PullToRefreshBox(
+            isRefreshing = isLoading,
+            onRefresh = { viewModel.refresh() },
             modifier = Modifier
                 .fillMaxSize()
                 .padding(paddingValues)
-                .padding(Spacing.md),
-            verticalArrangement = Arrangement.spacedBy(Spacing.lg)
         ) {
+            LazyColumn(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(Spacing.md),
+                verticalArrangement = Arrangement.spacedBy(Spacing.lg)
+            ) {
+            // Last updated timestamp
+            item {
+                LastUpdatedText(
+                    lastUpdatedAt = lastUpdatedAt,
+                    modifier = Modifier.fillMaxWidth()
+                )
+            }
+
             // Filter Chips Section
             item {
                 Row(
@@ -172,6 +190,7 @@ fun DiscoveryScreen(
                     indicatorColor = event.third,
                     onClick = { /* TODO: Navigate to event/stock detail based on event type */ }
                 )
+            }
             }
         }
     }
