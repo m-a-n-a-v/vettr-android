@@ -24,9 +24,12 @@ import androidx.compose.material.icons.filled.AccountCircle
 import androidx.compose.material.icons.filled.Notifications
 import androidx.compose.material.icons.filled.School
 import androidx.compose.material.icons.filled.Settings
+import androidx.compose.material.icons.filled.Sync
 import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -75,6 +78,8 @@ fun ProfileScreen(
     val user by viewModel.user.collectAsStateWithLifecycle()
     val tier by viewModel.tier.collectAsStateWithLifecycle()
     val isLoading by viewModel.isLoading.collectAsStateWithLifecycle()
+    val lastSyncTime by viewModel.lastSyncTime.collectAsStateWithLifecycle()
+    val isSyncing by viewModel.isSyncing.collectAsStateWithLifecycle()
 
     var showLogoutDialog by remember { mutableStateOf(false) }
 
@@ -82,8 +87,12 @@ fun ProfileScreen(
         user = user,
         tier = tier,
         isLoading = isLoading,
+        lastSyncTime = lastSyncTime,
+        isSyncing = isSyncing,
+        nextSyncEta = viewModel.getNextSyncEta(),
         showLogoutDialog = showLogoutDialog,
         onShowLogoutDialog = { showLogoutDialog = it },
+        onManualSync = { viewModel.triggerManualSync() },
         onLogout = {
             viewModel.logout()
             onLogout()
@@ -97,8 +106,12 @@ private fun ProfileScreenContent(
     user: User?,
     tier: VettrTier,
     isLoading: Boolean,
+    lastSyncTime: Long?,
+    isSyncing: Boolean,
+    nextSyncEta: Long?,
     showLogoutDialog: Boolean,
     onShowLogoutDialog: (Boolean) -> Unit,
+    onManualSync: () -> Unit,
     onLogout: () -> Unit,
     modifier: Modifier = Modifier
 ) {
@@ -114,6 +127,17 @@ private fun ProfileScreenContent(
         ) {
             // Header section
             ProfileHeader(user = user, tier = tier)
+
+            Spacer(modifier = Modifier.height(Spacing.lg))
+
+            // Sync section
+            SyncSection(
+                tier = tier,
+                lastSyncTime = lastSyncTime,
+                isSyncing = isSyncing,
+                nextSyncEta = nextSyncEta,
+                onManualSync = onManualSync
+            )
 
             Spacer(modifier = Modifier.height(Spacing.lg))
 
@@ -253,6 +277,206 @@ private fun ProfileHeader(
             // Tier badge
             TierBadge(tier = tier)
         }
+    }
+}
+
+/**
+ * Sync section showing sync status and manual sync button.
+ */
+@Composable
+private fun SyncSection(
+    tier: VettrTier,
+    lastSyncTime: Long?,
+    isSyncing: Boolean,
+    nextSyncEta: Long?,
+    onManualSync: () -> Unit,
+    modifier: Modifier = Modifier
+) {
+    Card(
+        modifier = modifier.fillMaxWidth(),
+        shape = RoundedCornerShape(12.dp),
+        colors = CardDefaults.cardColors(
+            containerColor = VettrCardBackground
+        )
+    ) {
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(Spacing.md)
+        ) {
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                Icon(
+                    imageVector = Icons.Default.Sync,
+                    contentDescription = null,
+                    tint = VettrAccent,
+                    modifier = Modifier.size(24.dp)
+                )
+
+                Spacer(modifier = Modifier.width(Spacing.md))
+
+                Text(
+                    text = "Sync",
+                    style = MaterialTheme.typography.titleMedium,
+                    color = VettrTextPrimary,
+                    fontWeight = FontWeight.SemiBold
+                )
+            }
+
+            Spacer(modifier = Modifier.height(Spacing.md))
+
+            // Last sync time
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Text(
+                    text = "Last sync",
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = VettrTextSecondary
+                )
+
+                Text(
+                    text = lastSyncTime?.let { formatRelativeTime(it) } ?: "Never",
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = VettrTextPrimary
+                )
+            }
+
+            Spacer(modifier = Modifier.height(Spacing.sm))
+
+            // Next sync ETA
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Text(
+                    text = "Next sync",
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = VettrTextSecondary
+                )
+
+                Text(
+                    text = nextSyncEta?.let { formatNextSync(it) } ?: "Unknown",
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = VettrTextPrimary
+                )
+            }
+
+            Spacer(modifier = Modifier.height(Spacing.sm))
+
+            // Sync frequency based on tier
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Text(
+                    text = "Sync frequency",
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = VettrTextSecondary
+                )
+
+                Text(
+                    text = getSyncFrequencyText(tier),
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = VettrTextPrimary
+                )
+            }
+
+            Spacer(modifier = Modifier.height(Spacing.md))
+
+            // Manual sync button
+            Button(
+                onClick = onManualSync,
+                enabled = !isSyncing,
+                modifier = Modifier.fillMaxWidth(),
+                shape = RoundedCornerShape(8.dp)
+            ) {
+                if (isSyncing) {
+                    CircularProgressIndicator(
+                        modifier = Modifier.size(20.dp),
+                        color = VettrNavy,
+                        strokeWidth = 2.dp
+                    )
+                    Spacer(modifier = Modifier.width(Spacing.sm))
+                    Text(
+                        text = "Syncing...",
+                        style = MaterialTheme.typography.bodyMedium,
+                        fontWeight = FontWeight.SemiBold
+                    )
+                } else {
+                    Icon(
+                        imageVector = Icons.Default.Sync,
+                        contentDescription = null,
+                        modifier = Modifier.size(20.dp)
+                    )
+                    Spacer(modifier = Modifier.width(Spacing.sm))
+                    Text(
+                        text = "Sync Now",
+                        style = MaterialTheme.typography.bodyMedium,
+                        fontWeight = FontWeight.SemiBold
+                    )
+                }
+            }
+        }
+    }
+}
+
+/**
+ * Format timestamp as relative time (e.g., "2 minutes ago").
+ */
+private fun formatRelativeTime(timestamp: Long): String {
+    val now = System.currentTimeMillis()
+    val diff = now - timestamp
+    val seconds = diff / 1000
+    val minutes = seconds / 60
+    val hours = minutes / 60
+    val days = hours / 24
+
+    return when {
+        seconds < 60 -> "Just now"
+        minutes < 60 -> "$minutes minute${if (minutes != 1L) "s" else ""} ago"
+        hours < 24 -> "$hours hour${if (hours != 1L) "s" else ""} ago"
+        days < 7 -> "$days day${if (days != 1L) "s" else ""} ago"
+        else -> "${days / 7} week${if (days / 7 != 1L) "s" else ""} ago"
+    }
+}
+
+/**
+ * Format next sync ETA.
+ */
+private fun formatNextSync(eta: Long): String {
+    val now = System.currentTimeMillis()
+    val diff = eta - now
+
+    if (diff <= 0) {
+        return "Soon"
+    }
+
+    val minutes = diff / (1000 * 60)
+    val hours = minutes / 60
+    val days = hours / 24
+
+    return when {
+        minutes < 60 -> "In $minutes minute${if (minutes != 1L) "s" else ""}"
+        hours < 24 -> "In $hours hour${if (hours != 1L) "s" else ""}"
+        else -> "In $days day${if (days != 1L) "s" else ""}"
+    }
+}
+
+/**
+ * Get sync frequency text based on tier.
+ */
+private fun getSyncFrequencyText(tier: VettrTier): String {
+    return when (tier) {
+        VettrTier.FREE -> "Daily (24h)"
+        VettrTier.PRO -> "Every 12 hours"
+        VettrTier.PREMIUM -> "Every 4 hours"
     }
 }
 
@@ -462,8 +686,12 @@ fun ProfileScreenPreview() {
             ),
             tier = VettrTier.FREE,
             isLoading = false,
+            lastSyncTime = System.currentTimeMillis() - (2 * 60 * 1000), // 2 minutes ago
+            isSyncing = false,
+            nextSyncEta = System.currentTimeMillis() + (23 * 60 * 60 * 1000), // 23 hours from now
             showLogoutDialog = false,
             onShowLogoutDialog = {},
+            onManualSync = {},
             onLogout = {}
         )
     }
@@ -484,8 +712,12 @@ fun ProfileScreenProPreview() {
             ),
             tier = VettrTier.PRO,
             isLoading = false,
+            lastSyncTime = System.currentTimeMillis() - (60 * 60 * 1000), // 1 hour ago
+            isSyncing = true, // Show syncing state
+            nextSyncEta = System.currentTimeMillis() + (11 * 60 * 60 * 1000), // 11 hours from now
             showLogoutDialog = false,
             onShowLogoutDialog = {},
+            onManualSync = {},
             onLogout = {}
         )
     }
