@@ -84,7 +84,6 @@ class SyncWorker @AssistedInject constructor(
 
             android.util.Log.d(TAG, "Sync completed successfully. Items synced: $itemsSynced")
             Result.success()
-
         } catch (e: Exception) {
             // Update sync history with failure
             syncHistoryDao.updateErrors(

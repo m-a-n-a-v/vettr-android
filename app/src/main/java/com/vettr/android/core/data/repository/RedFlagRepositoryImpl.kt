@@ -94,8 +94,8 @@ class RedFlagRepositoryImpl @Inject constructor(
         val previousScore = previousFlags.sumOf { it.score }
 
         val trend = when {
-            currentScore < previousScore * 0.9 -> TrendDirection.IMPROVING  // 10%+ improvement
-            currentScore > previousScore * 1.1 -> TrendDirection.WORSENING  // 10%+ worsening
+            currentScore < previousScore * 0.9 -> TrendDirection.IMPROVING // 10%+ improvement
+            currentScore > previousScore * 1.1 -> TrendDirection.WORSENING // 10%+ worsening
             else -> TrendDirection.STABLE
         }
 

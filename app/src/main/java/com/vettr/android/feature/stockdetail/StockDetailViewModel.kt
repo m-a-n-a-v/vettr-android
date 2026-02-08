@@ -6,12 +6,10 @@ import androidx.lifecycle.viewModelScope
 import com.vettr.android.core.data.VetrScoreResult
 import com.vettr.android.core.data.repository.FilingRepository
 import com.vettr.android.core.data.repository.PeerComparison
-import com.vettr.android.core.data.repository.ScoreTrend
 import com.vettr.android.core.data.repository.StockRepository
 import com.vettr.android.core.data.repository.VetrScoreRepository
 import com.vettr.android.core.model.Filing
 import com.vettr.android.core.model.Stock
-import com.vettr.android.core.model.VetrScoreHistory
 import com.vettr.android.core.util.HapticService
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow

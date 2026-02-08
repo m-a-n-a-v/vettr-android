@@ -66,7 +66,7 @@ data class RedFlagTrend(
  * Direction of red flag trend
  */
 enum class TrendDirection {
-    IMPROVING,   // Flags decreasing or score dropping
-    WORSENING,   // Flags increasing or score rising
-    STABLE       // No significant change
+    IMPROVING, // Flags decreasing or score dropping
+    WORSENING, // Flags increasing or score rising
+    STABLE // No significant change
 }

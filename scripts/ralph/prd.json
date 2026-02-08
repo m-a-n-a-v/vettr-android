@@ -1863,7 +1863,7 @@
         "./gradlew assembleRelease succeeds without ProGuard errors"
       ],
       "priority": 134,
-      "passes": false
+      "passes": true
     },
     {
       "id": "US-135",

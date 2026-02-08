@@ -2,7 +2,6 @@ package com.vettr.android.feature.main
 
 import android.net.Uri
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -17,11 +16,9 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.navigation
 import androidx.navigation.compose.rememberNavController
 import com.vettr.android.core.data.repository.AuthRepository
-import com.vettr.android.feature.auth.AuthViewModel
 import com.vettr.android.feature.auth.LoginScreen
 import com.vettr.android.feature.auth.SignUpScreen
 import com.vettr.android.feature.auth.WelcomeScreen
-import androidx.hilt.navigation.compose.hiltViewModel
 import kotlinx.coroutines.launch
 
 /**

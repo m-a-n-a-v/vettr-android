@@ -136,7 +136,7 @@ class MockErrorReportingService @Inject constructor(
             val width = displayMetrics.widthPixels
             val height = displayMetrics.heightPixels
             val density = displayMetrics.density
-            deviceInfo["Screen Size"] = "${width}x${height} (${density}x)"
+            deviceInfo["Screen Size"] = "${width}x$height (${density}x)"
         } catch (e: Exception) {
             deviceInfo["Screen Size"] = "Unknown"
         }

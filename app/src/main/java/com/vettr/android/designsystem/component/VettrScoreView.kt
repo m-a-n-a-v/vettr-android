@@ -19,7 +19,6 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import com.vettr.android.designsystem.theme.VettrGreen
 import com.vettr.android.designsystem.theme.VettrRed
 import com.vettr.android.designsystem.theme.VettrTheme
@@ -32,7 +31,7 @@ import com.vettr.android.designsystem.theme.VettrYellow
 fun getScoreColor(score: Int): Color {
     val normalizedScore = score.coerceIn(0, 100)
     return when {
-        normalizedScore > 80 -> VettrGreen  // Strong Buy
+        normalizedScore > 80 -> VettrGreen // Strong Buy
         normalizedScore >= 60 -> VettrYellow // Buy
         normalizedScore >= 40 -> Color(0xFFFF9800) // Orange - Hold
         else -> VettrRed // Caution

@@ -3562,3 +3562,27 @@ Details:
 - Semantic versioning helps users understand the impact of updates (breaking vs feature vs bugfix)
 - Always document release procedures before first production release
 ---
+
+## US-134: Configure ProGuard/R8 for release builds
+Status: ✅ COMPLETE
+Date: 2026-02-08
+Details:
+- Verified build.gradle.kts has isMinifyEnabled = true and isShrinkResources = true in release buildType (lines 26-27)
+- Updated proguard-rules.pro with comprehensive keep rules for:
+  - Room entities (@Entity), DAOs (@Dao), Database classes
+  - Retrofit interfaces and models (@SerializedName)
+  - Hilt modules (@Module, @InstallIn), ViewModels (@HiltViewModel)
+  - Gson serialization (TypeAdapterFactory, JsonSerializer, @SerializedName)
+  - Google Sign-In and Credentials API classes
+  - Kotlin data classes and coroutines
+  - AndroidX Security Crypto, Biometric, WorkManager, DataStore, Compose
+  - Coil image loading library
+- Added dontwarn rules for optional dependencies (Coil PlatformContext, Google API client, Joda Time)
+- Build successful: ./gradlew assembleRelease passes without ProGuard errors
+**Learnings for future iterations:**
+  - R8 missing class errors can be resolved with -dontwarn rules for optional dependencies
+  - Google Crypto Tink (used by androidx.security.crypto) has optional dependencies on com.google.api.client and org.joda.time
+  - Coil 3.x has optional PlatformContext class that needs dontwarn rule
+  - Comprehensive keep rules prevent runtime reflection errors for Room, Retrofit, Hilt, and Gson
+  - ProGuard file organized by library sections makes rules easier to maintain
+---

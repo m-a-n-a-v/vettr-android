@@ -12,7 +12,6 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.rememberScrollState
@@ -26,7 +25,6 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.pulltorefresh.PullToRefreshBox
-import androidx.compose.material3.pulltorefresh.rememberPullToRefreshState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -42,7 +40,6 @@ import com.vettr.android.designsystem.component.EmptyStateView
 import com.vettr.android.designsystem.component.ErrorView
 import com.vettr.android.designsystem.component.EventCard
 import com.vettr.android.designsystem.component.LastUpdatedText
-import com.vettr.android.designsystem.component.LoadingView
 import com.vettr.android.designsystem.component.MetricCard
 import com.vettr.android.designsystem.component.SearchBarView
 import com.vettr.android.designsystem.component.SectionHeader

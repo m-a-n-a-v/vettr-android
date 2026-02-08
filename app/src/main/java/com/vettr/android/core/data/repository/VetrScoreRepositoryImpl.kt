@@ -99,9 +99,9 @@ class VetrScoreRepositoryImpl @Inject constructor(
 
         // Determine trend direction
         val direction = when {
-            scoreChange > 5 -> ScoreTrendDirection.IMPROVING      // 5+ point improvement
-            scoreChange < -5 -> ScoreTrendDirection.DECLINING     // 5+ point decline
-            else -> ScoreTrendDirection.STABLE                     // Within 5 points
+            scoreChange > 5 -> ScoreTrendDirection.IMPROVING // 5+ point improvement
+            scoreChange < -5 -> ScoreTrendDirection.DECLINING // 5+ point decline
+            else -> ScoreTrendDirection.STABLE // Within 5 points
         }
 
         return ScoreTrend(

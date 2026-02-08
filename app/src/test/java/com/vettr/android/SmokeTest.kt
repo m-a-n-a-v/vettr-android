@@ -350,11 +350,11 @@ class SmokeTest {
         assertTrue(Validators.isValidPassword("MyP@ssw0rd"))
 
         // Invalid password tests
-        assertFalse(Validators.isValidPassword("short1A"))  // Too short
-        assertFalse(Validators.isValidPassword("nouppercase123"))  // No uppercase
-        assertFalse(Validators.isValidPassword("NOLOWERCASE123"))  // No lowercase
-        assertFalse(Validators.isValidPassword("NoDigitsHere"))  // No digits
-        assertFalse(Validators.isValidPassword(""))  // Empty
+        assertFalse(Validators.isValidPassword("short1A")) // Too short
+        assertFalse(Validators.isValidPassword("nouppercase123")) // No uppercase
+        assertFalse(Validators.isValidPassword("NOLOWERCASE123")) // No lowercase
+        assertFalse(Validators.isValidPassword("NoDigitsHere")) // No digits
+        assertFalse(Validators.isValidPassword("")) // Empty
     }
 
     // ========== Test 10: End-to-End User Journey ==========

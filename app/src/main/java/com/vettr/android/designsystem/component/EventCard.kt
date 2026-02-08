@@ -20,7 +20,6 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.vettr.android.designsystem.theme.Spacing
 import com.vettr.android.designsystem.theme.VettrGreen
-import com.vettr.android.designsystem.theme.VettrNavy
 import com.vettr.android.designsystem.theme.VettrRed
 import com.vettr.android.designsystem.theme.VettrTheme
 import com.vettr.android.designsystem.theme.VettrYellow

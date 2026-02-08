@@ -5,7 +5,6 @@ import com.vettr.android.core.data.repository.FilingRepository
 import com.vettr.android.core.di.DefaultDispatcher
 import com.vettr.android.core.model.Filing
 import kotlinx.coroutines.CoroutineDispatcher
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
@@ -162,7 +161,7 @@ class RedFlagDetector @Inject constructor(
             type = RedFlagType.EXECUTIVE_CHURN,
             ticker = ticker,
             score = score,
-            description = "High executive turnover detected: ${recentHires} of ${executives.size} " +
+            description = "High executive turnover detected: $recentHires of ${executives.size} " +
                     "executives have less than 2 years tenure (${churnRate.toInt()}%). " +
                     "May indicate leadership instability.",
             detectedAt = now
@@ -205,7 +204,7 @@ class RedFlagDetector @Inject constructor(
             type = RedFlagType.DISCLOSURE_GAPS,
             ticker = ticker,
             score = score,
-            description = "Significant filing gap detected: ${maxGapDays} days between disclosures. " +
+            description = "Significant filing gap detected: $maxGapDays days between disclosures. " +
                     "Delays may indicate disclosure issues or operational challenges.",
             detectedAt = now
         )
@@ -245,7 +244,7 @@ class RedFlagDetector @Inject constructor(
             type = RedFlagType.DEBT_TREND,
             ticker = ticker,
             score = score,
-            description = "Increasing debt mentions: ${debtMentions} of ${recentFilings.size} " +
+            description = "Increasing debt mentions: $debtMentions of ${recentFilings.size} " +
                     "recent filings (${debtRate.toInt()}%) reference debt or borrowing. " +
                     "May indicate financial leverage concerns.",
             detectedAt = now
@@ -268,10 +267,10 @@ enum class RedFlagType(val weight: Double) {
  * Severity levels for red flag scores
  */
 enum class RedFlagSeverity {
-    LOW,        // < 30
-    MODERATE,   // 30-60
-    HIGH,       // 60-85
-    CRITICAL    // > 85
+    LOW, // < 30
+    MODERATE, // 30-60
+    HIGH, // 60-85
+    CRITICAL // > 85
 }
 
 /**

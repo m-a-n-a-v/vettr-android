@@ -26,7 +26,6 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.vettr.android.designsystem.component.EmptyStateView
 import com.vettr.android.designsystem.component.LastUpdatedText
-import com.vettr.android.designsystem.component.LoadingView
 import com.vettr.android.designsystem.component.SearchBarView
 import com.vettr.android.designsystem.component.SkeletonStockRow
 import com.vettr.android.designsystem.component.StockRowView

@@ -57,9 +57,9 @@ data class ScoreTrend(
  * Direction of VETR Score trend
  */
 enum class ScoreTrendDirection {
-    IMPROVING,   // Score increasing over time
-    STABLE,      // Score relatively unchanged
-    DECLINING    // Score decreasing over time
+    IMPROVING, // Score increasing over time
+    STABLE, // Score relatively unchanged
+    DECLINING // Score decreasing over time
 }
 
 /**
