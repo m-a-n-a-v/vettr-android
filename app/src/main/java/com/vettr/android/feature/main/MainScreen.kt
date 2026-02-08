@@ -34,6 +34,7 @@ import com.vettr.android.designsystem.theme.VettrAccent
 import com.vettr.android.designsystem.theme.VettrNavy
 import com.vettr.android.designsystem.theme.VettrTextSecondary
 import com.vettr.android.designsystem.theme.VettrTheme
+import com.vettr.android.feature.alerts.AlertRuleCreatorScreen
 import com.vettr.android.feature.alerts.AlertsScreen
 import com.vettr.android.feature.discovery.DiscoveryScreen
 import com.vettr.android.feature.profile.ProfileScreen
@@ -149,7 +150,12 @@ fun MainScreen(
                 )
             }
             composable(BottomNavDestination.Alerts.route) {
-                AlertsScreen(modifier = Modifier.fillMaxSize())
+                AlertsScreen(
+                    modifier = Modifier.fillMaxSize(),
+                    onCreateAlert = {
+                        navController.navigate("alert_rule_creator")
+                    }
+                )
             }
             composable(BottomNavDestination.Profile.route) {
                 ProfileScreen(modifier = Modifier.fillMaxSize())
@@ -162,6 +168,15 @@ fun MainScreen(
             ) {
                 StockDetailRoute(
                     onBackClick = { navController.navigateUp() },
+                    modifier = Modifier.fillMaxSize()
+                )
+            }
+
+            // Alert rule creator screen
+            composable("alert_rule_creator") {
+                AlertRuleCreatorScreen(
+                    onBackClick = { navController.navigateUp() },
+                    onSaveComplete = { navController.navigateUp() },
                     modifier = Modifier.fillMaxSize()
                 )
             }
