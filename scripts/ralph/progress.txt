@@ -3520,3 +3520,45 @@ Files changed:
 - collectAsStateWithLifecycle() is consistently used, preventing memory leaks from uncancelled flows
 - Debug-only logging pattern with BuildConfig.DEBUG prevents performance impact in production
 ---
+
+## US-133: Implement app versioning and build management
+Status: ✅ COMPLETE
+Date: 2026-02-08
+Details:
+- Created VersionManager utility class in core/util/VersionManager.kt
+  - Provides version info access: getVersionName(), getVersionCode(), getFormattedVersion()
+  - Provides build type detection: getBuildType() (Debug/Release)
+  - Includes mock checkForUpdates() method for future update checking
+  - Handles API level differences (Android P+ longVersionCode, legacy versionCode)
+- Added version display to ProfileScreen
+  - Shows "VETTR v1.0.0 (1)" at bottom of screen for all users
+  - Shows build type (Debug or Release)
+  - Integrated VersionManager into ProfileViewModel
+- Enhanced SettingsScreen with About section
+  - Created new "About" section visible to all users (not just debug)
+  - Shows app version and build type
+  - Moved device info and memory usage to debug-only Developer section
+- Created version.properties file in project root
+  - Tracks versionCode and versionName for CI/CD automation
+  - Documented CI usage pattern for auto-increment
+- Created comprehensive documentation at docs/VERSION_RELEASE_PROCEDURE.md
+  - Semantic versioning strategy (MAJOR.MINOR.PATCH)
+  - Complete release checklist (tests, lint, ProGuard)
+  - Google Play submission procedure
+  - Release notes template and best practices
+  - Rollback procedure for critical issues
+  - CI/CD integration guide for future automation
+  - Signing configuration for release builds
+- Verified versionCode = 1 and versionName = "1.0.0" in app/build.gradle.kts (already correct)
+- Build successful: ./gradlew assembleDebug passes
+
+**Learnings for future iterations:**
+- VersionManager should be a @Singleton to avoid repeated PackageInfo lookups
+- Use @ApplicationContext for Context dependency in Hilt singletons
+- BuildConfig provides VERSION_NAME and VERSION_CODE constants for quick access
+- PackageInfo API changed in Android P (API 28): use longVersionCode instead of deprecated versionCode
+- Version info displayed in both ProfileScreen (for all users) and SettingsScreen About section (for all users) + Developer section (debug only)
+- version.properties pattern is standard for CI/CD systems to track and auto-increment versions
+- Semantic versioning helps users understand the impact of updates (breaking vs feature vs bugfix)
+- Always document release procedures before first production release
+---
