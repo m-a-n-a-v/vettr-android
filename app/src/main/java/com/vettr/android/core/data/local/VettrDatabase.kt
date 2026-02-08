@@ -10,6 +10,7 @@ import com.vettr.android.core.model.PlaceholderEntity
 import com.vettr.android.core.model.RedFlagHistory
 import com.vettr.android.core.model.Stock
 import com.vettr.android.core.model.User
+import com.vettr.android.core.model.VetrScoreHistory
 import com.vettr.android.core.util.Converters
 
 @Database(
@@ -20,7 +21,8 @@ import com.vettr.android.core.util.Converters
         Executive::class,
         User::class,
         AlertRule::class,
-        RedFlagHistory::class
+        RedFlagHistory::class,
+        VetrScoreHistory::class
     ],
     version = 1,
     exportSchema = false
