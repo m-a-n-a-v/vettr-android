@@ -4088,3 +4088,37 @@ Details:
   - Cleanup: Provide unregister() method for proper callback cleanup (though singleton lifecycle matches app lifecycle)
   - Alternative: observeConnectivity() Flow method using callbackFlow for one-off observations
 ---
+
+## US-151: Add OkHttp auth interceptor for token refresh
+Status: ✅ COMPLETE
+Date: 2026-02-08
+Details:
+- Created AuthInterceptor.kt implementing OkHttp Interceptor interface
+- Adds "Authorization: Bearer {token}" header to all API requests using TokenManager.getToken()
+- Intercepts 401 Unauthorized responses and attempts token refresh
+- On successful refresh: retries original request with new token
+- On refresh failure: calls authRepository.signOut() to clear tokens and emit unauthorized state
+- Skips auth header for /auth/ endpoints to avoid circular issues
+- Added refreshToken(@Body request: RefreshTokenRequest) endpoint to VettrApi.kt
+- Created RefreshTokenRequest.kt DTO with @SerializedName("refresh_token")
+- Integrated AuthInterceptor into NetworkModule.kt's provideOkHttpClient()
+- Added before logging interceptor to ensure auth headers are added first
+- Build successful: ./gradlew assembleDebug passes
+- Files changed:
+  - app/src/main/java/com/vettr/android/core/data/remote/AuthInterceptor.kt (new)
+  - app/src/main/java/com/vettr/android/core/data/remote/RefreshTokenRequest.kt (new)
+  - app/src/main/java/com/vettr/android/core/data/remote/VettrApi.kt
+  - app/src/main/java/com/vettr/android/core/di/NetworkModule.kt
+
+**Learnings for future iterations:**
+  - OkHttp Interceptor pattern: intercept(chain: Interceptor.Chain) receives and modifies requests/responses
+  - Add interceptors with .addInterceptor() - order matters! Auth should come before logging
+  - Use runBlocking {} in interceptors for suspend functions (token refresh, sign out)
+  - Skip auth headers for auth endpoints by checking url.encodedPath.contains("/auth/")
+  - On 401: close original response, attempt refresh, retry with new token or return 401
+  - TokenManager already has getToken(), getRefreshToken(), saveToken(), clearAll() methods
+  - AuthRepository.signOut() clears tokens and emits null to _currentUser flow (unauthorized state)
+  - Inject dependencies into Interceptor with @Inject constructor and @Singleton annotation
+  - Refresh token endpoint returns AuthResponse (same structure as login)
+  - Placeholder TODO comment for actual refresh implementation when backend is ready
+---
