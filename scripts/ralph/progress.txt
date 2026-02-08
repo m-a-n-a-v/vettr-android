@@ -4122,3 +4122,19 @@ Details:
   - Refresh token endpoint returns AuthResponse (same structure as login)
   - Placeholder TODO comment for actual refresh implementation when backend is ready
 ---
+
+## US-152: Add Timber logging framework
+Status: ✅ COMPLETE
+Date: 2026-02-08
+Details:
+- Added Timber 5.0.1 dependency to gradle/libs.versions.toml and app/build.gradle.kts
+- Initialized Timber.DebugTree() in VettrApp.onCreate() for debug builds only
+- Replaced all Log.d/e/i/w/v calls with Timber.tag(TAG).d/e/i/w/v() throughout codebase
+- Updated 8 files: VettrApp.kt, AppStartupTracker.kt, MockObservabilityService.kt, MemoryMonitor.kt, SyncWorker.kt, SyncManager.kt, MockErrorReportingService.kt, MockAnalyticsService.kt
+- Build verification passed (./gradlew assembleDebug succeeded)
+- **Learnings for future iterations:**
+  - Timber provides a cleaner logging API and allows tags to be specified inline with .tag()
+  - Using Timber.tag(TAG).d() instead of Log.d(TAG, ...) makes the code more consistent
+  - Timber automatically handles throwable exceptions with proper formatting
+  - Debug tree is only planted in debug builds to avoid logging in production
+---
