@@ -3005,3 +3005,65 @@ Details:
 - Settings screens benefit from card-based layouts with dividers between items
 - Reset functionality should show confirmation dialog before destructive actions
 ---
+
+## US-117: Create OnboardingScreen carousel
+Status: ✅ COMPLETE
+Date: 2026-02-08
+Details:
+- Created OnboardingRepository.kt with DataStore for tracking onboarding completion state
+- Created OnboardingScreen.kt with HorizontalPager displaying 5 slides:
+  1. Welcome to VETTR
+  2. Build Your Watchlist
+  3. VETR Score
+  4. Smart Alerts
+  5. Red Flag Detection
+- Implemented Skip/Next/Done buttons with dot page indicator
+- Added onboarding route to MainScreen navigation
+- Added "About" menu item in ProfileScreen that navigates to onboarding (allows replay)
+- Added @Preview composables for both the full screen and individual slides
+- Files created:
+  - app/src/main/java/com/vettr/android/core/data/repository/OnboardingRepository.kt
+  - app/src/main/java/com/vettr/android/feature/onboarding/OnboardingScreen.kt
+  - app/src/main/java/com/vettr/android/feature/onboarding/OnboardingViewModel.kt
+- Files modified:
+  - app/src/main/java/com/vettr/android/feature/main/MainScreen.kt
+  - app/src/main/java/com/vettr/android/feature/profile/ProfileScreen.kt
+- Build verified: ./gradlew assembleDebug passes
+
+**Learnings for future iterations:**
+  - HorizontalPager from Foundation is the recommended way to create swipeable carousels in Compose
+  - Use rememberPagerState(pageCount = { n }) to manage pager state
+  - Dot indicators can be created with Box + CircleShape + varying sizes/opacity based on selection
+  - DataStore pattern: Context extension with preferencesDataStore delegate for clean separation
+  - Navigation from nested screens: add composable routes to NavHost and pass navigation callbacks as parameters
+  - Profile > About is the standard location for replaying onboarding flows
+  - Material Icons provide a good set of icons for onboarding slides (Star, Favorite, CheckCircle, Notifications, Warning)
+---
+
+## US-118: Implement deep linking for URLs and notifications
+Status: ✅ COMPLETE
+Date: 2026-02-08
+Details:
+- Added intent-filter to AndroidManifest.xml for vettr:// scheme and https://vettr.app host
+- Set MainActivity launchMode to singleTop to handle deep links properly
+- Updated MainActivity to handle deep link intents via ACTION_VIEW and pass them to VettrNavHost
+- Implemented deep link handler in VettrNavHost supporting:
+  - vettr://stock/{ticker} and vettr://stock/{ticker}?tab=pedigree
+  - vettr://alert/{alertId} (navigates to alerts screen)
+  - vettr://pedigree/{ticker} (navigates to stock detail with pedigree tab)
+  - https://vettr.app URLs with same paths
+- Added query parameter support in MainScreen navigation route for stock_detail
+- Updated NotificationService to create deep link PendingIntents using vettr://stock/{ticker} URIs
+- Added error fallback: shows Snackbar "Invalid link: Destination not found" for unrecognized deep links
+- Build successful: ./gradlew assembleDebug passes
+
+**Learnings for future iterations:**
+  - Deep links require intent-filter in AndroidManifest with ACTION_VIEW, DEFAULT, and BROWSABLE categories
+  - launchMode="singleTop" prevents creating multiple MainActivity instances on deep link
+  - onNewIntent() must be overridden to handle deep links when activity is already running
+  - Navigation Compose supports optional query parameters: route = "path/{param}?query={value}"
+  - Uri.pathSegments provides easy access to path components for parsing deep links
+  - PendingIntent with ACTION_VIEW and custom URI scheme enables deep linking from notifications
+  - Deep link handling should check authentication state before navigating to protected screens
+  - android:autoVerify="true" enables Android App Links for https:// URLs (requires .well-known/assetlinks.json)
+---
