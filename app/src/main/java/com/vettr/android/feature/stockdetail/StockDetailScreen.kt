@@ -113,8 +113,8 @@ fun StockDetailRoute(
         selectedTimeRange = selectedTimeRange,
         selectedTab = when (selectedTab) {
             StockDetailTab.OVERVIEW -> 0
-            StockDetailTab.ANALYSIS -> 1
-            StockDetailTab.NEWS -> 2
+            StockDetailTab.PEDIGREE -> 1
+            StockDetailTab.RED_FLAGS -> 2
         },
         onBackClick = onBackClick,
         onShareClick = {
@@ -129,8 +129,8 @@ fun StockDetailRoute(
             viewModel.selectTab(
                 when (tabIndex) {
                     0 -> StockDetailTab.OVERVIEW
-                    1 -> StockDetailTab.ANALYSIS
-                    2 -> StockDetailTab.NEWS
+                    1 -> StockDetailTab.PEDIGREE
+                    2 -> StockDetailTab.RED_FLAGS
                     else -> StockDetailTab.OVERVIEW
                 }
             )
@@ -244,8 +244,8 @@ fun StockDetailScreen(
                 // Tab content
                 when (selectedTab) {
                     0 -> OverviewTab(stock = stock)
-                    1 -> AnalysisTab(stock = stock)
-                    2 -> NewsTab(filings = filings)
+                    1 -> PedigreeScreen()
+                    2 -> RedFlagsTab(stock = stock)
                 }
             }
         } else {
@@ -490,7 +490,7 @@ private fun StockDetailTabs(
     onTabSelected: (Int) -> Unit,
     modifier: Modifier = Modifier
 ) {
-    val tabs = listOf("Overview", "Analysis", "News")
+    val tabs = listOf("Overview", "Pedigree", "Red Flags")
 
     TabRow(
         selectedTabIndex = selectedTabIndex,
@@ -751,6 +751,28 @@ private fun FilingCard(
         Text(
             text = filing.summary,
             style = MaterialTheme.typography.bodySmall,
+            color = VettrTextSecondary
+        )
+    }
+}
+
+/**
+ * Red Flags tab content - placeholder for future implementation.
+ */
+@Composable
+private fun RedFlagsTab(
+    stock: Stock,
+    modifier: Modifier = Modifier
+) {
+    Box(
+        modifier = modifier
+            .fillMaxWidth()
+            .height(200.dp),
+        contentAlignment = Alignment.Center
+    ) {
+        Text(
+            text = "Red Flags analysis coming soon",
+            style = MaterialTheme.typography.bodyMedium,
             color = VettrTextSecondary
         )
     }

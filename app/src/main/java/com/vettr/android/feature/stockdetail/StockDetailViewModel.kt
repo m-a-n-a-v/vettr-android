@@ -20,8 +20,8 @@ import javax.inject.Inject
  */
 enum class StockDetailTab {
     OVERVIEW,
-    ANALYSIS,
-    NEWS
+    PEDIGREE,
+    RED_FLAGS
 }
 
 /**
