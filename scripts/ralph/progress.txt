@@ -1154,3 +1154,111 @@ Files changed:
   - Hilt automatically resolves repository implementations when injecting repository interfaces into ViewModels
   - Pattern follows dependency inversion principle: high-level code depends on abstractions (interfaces), not implementations
 ---
+## US-054: Create TokenManager with EncryptedSharedPreferences
+Status: ✅ COMPLETE
+Date: 2026-02-07
+Details:
+- Created core/data/local/TokenManager.kt class with @Inject constructor for Hilt DI
+- Used EncryptedSharedPreferences with MasterKey.Builder and AES256_GCM key scheme
+- Implemented secure token storage methods: saveToken(), getToken(), deleteToken()
+- Implemented refresh token methods: saveRefreshToken(), getRefreshToken()
+- Added clearAll() method for logging out and clearing all tokens
+- Uses PrefKeyEncryptionScheme.AES256_SIV for key encryption and PrefValueEncryptionScheme.AES256_GCM for value encryption
+- SharedPreferences file name: "vettr_secure_prefs"
+- Build successful: ./gradlew assembleDebug passes
+Files changed:
+- app/src/main/java/com/vettr/android/core/data/local/TokenManager.kt (created)
+**Learnings for future iterations:**
+  - TokenManager provides secure storage for OAuth access tokens and refresh tokens using EncryptedSharedPreferences
+  - MasterKey.Builder with AES256_GCM key scheme creates encryption key stored in Android Keystore
+  - EncryptedSharedPreferences requires both key and value encryption schemes (AES256_SIV for keys, AES256_GCM for values)
+  - @Singleton annotation ensures single instance of TokenManager throughout app lifecycle
+  - @ApplicationContext qualifier ensures Application context is injected, not Activity context
+  - clearAll() method enables complete token cleanup during logout flow
+  - TokenManager follows constructor injection pattern for Hilt dependency injection
+  - Encrypted storage protects sensitive authentication tokens from unauthorized access on device
+---
+
+## US-055: Create AuthRepository interface and implementation
+Status: ✅ COMPLETE
+Date: 2026-02-07
+Details:
+- Created core/data/repository/AuthRepository.kt interface with 6 authentication methods
+- Methods: signInWithEmail(), signInWithGoogle(), signUp(), signOut(), getCurrentUser(), isAuthenticated()
+- Created core/data/repository/AuthRepositoryImpl.kt with mock implementation using @Inject constructor
+- Mock implementation stores auth state in-memory using MutableStateFlow<User?>
+- Uses TokenManager for secure token storage with EncryptedSharedPreferences
+- Automatically restores user session on init if token exists
+- All authentication methods return Result<User> for error handling
+- getCurrentUser() and isAuthenticated() return Flow for reactive UI updates
+- Updated core/di/RepositoryModule.kt to bind AuthRepository with @Binds @Singleton
+- Build successful: ./gradlew assembleDebug passes
+Files changed:
+- app/src/main/java/com/vettr/android/core/data/repository/AuthRepository.kt (created)
+- app/src/main/java/com/vettr/android/core/data/repository/AuthRepositoryImpl.kt (created)
+- app/src/main/java/com/vettr/android/core/di/RepositoryModule.kt (updated)
+- scripts/ralph/prd.json (updated passes to true)
+**Learnings for future iterations:**
+  - AuthRepository follows repository pattern: interface with implementation class for testability
+  - Mock implementation enables app development without backend API dependency
+  - MutableStateFlow provides reactive state management for auth status and current user
+  - TokenManager integration enables secure token persistence with EncryptedSharedPreferences
+  - Result<T> type provides type-safe error handling for authentication operations
+  - Flow return types enable reactive UI updates when auth state changes
+  - Mock user creation uses VettrTier.FREE.name for tier field (String type in User entity)
+  - Session restoration on init checks for existing token and recreates mock user
+  - @Singleton scope ensures single AuthRepository instance throughout app lifecycle
+  - Hilt @Binds annotation provides efficient interface-to-implementation binding
+---
+
+## US-056: Create email validation utility
+Status: ✅ COMPLETE
+Date: 2026-02-07
+Details:
+- Created core/util/Validators.kt with email and password validation functions
+- isValidEmail() uses Android's Patterns.EMAIL_ADDRESS with regex fallback for unit tests
+- Added consecutive dots check (..) to reject invalid email formats
+- isValidPassword() validates min 8 chars, 1 uppercase, 1 lowercase, 1 digit
+- Created ValidatorsTest.kt with 11 comprehensive unit tests
+- Tests cover valid/invalid emails, valid/invalid passwords, edge cases, special characters
+- All 11 tests pass successfully
+- Build successful: ./gradlew testDebugUnitTest passes
+Files changed:
+- app/src/main/java/com/vettr/android/core/util/Validators.kt (created)
+- app/src/test/java/com/vettr/android/core/util/ValidatorsTest.kt (created with 11 tests)
+- scripts/ralph/prd.json (updated passes to true)
+**Learnings for future iterations:**
+  - Android Patterns.EMAIL_ADDRESS not available in unit test environment - requires regex fallback with try/catch
+  - Email regex pattern must disallow consecutive dots (..) for RFC-compliant validation
+  - Password validation should require lowercase in addition to uppercase and digit for better security
+  - Simple consecutive dots check (email.contains("..")) is more maintainable than complex regex
+  - Comprehensive test coverage includes edge cases: blank strings, boundary conditions, special characters
+  - Validators object provides reusable validation logic for auth screens and forms throughout the app
+---
+## US-057: Create SeedDataService
+Status: ✅ COMPLETE
+Date: 2026-02-07
+Details:
+- Created core/data/local/SeedDataService.kt with @Inject constructor and @Singleton scope
+- SeedDataService takes StockDao, FilingDao, and ExecutiveDao as dependencies
+- Implemented seedAllData() method - placeholder for actual seed data (to be added in US-058 and US-059)
+- Implemented isSeedComplete() method using DataStore preferences to check seed status
+- Implemented markSeedComplete() method using DataStore preferences to mark seed as complete
+- Used DataStore preferences extension (preferencesDataStore) with "seed_prefs" name
+- Used booleanPreferencesKey "seed_complete" for tracking seed completion status
+- Build successful: ./gradlew assembleDebug passes
+Files changed:
+- app/src/main/java/com/vettr/android/core/data/local/SeedDataService.kt (created)
+- scripts/ralph/prd.json (updated passes to true)
+**Learnings for future iterations:**
+  - DataStore preferences pattern uses Context extension: `private val Context.dataStore by preferencesDataStore(name = "...")`
+  - DataStore preferences accessed via context.dataStore.data flow with map and first() for synchronous reads
+  - DataStore preferences updated via context.dataStore.edit lambda for writes
+  - booleanPreferencesKey creates typed key for Boolean preferences
+  - @ApplicationContext qualifier ensures Application context injection for DataStore (not Activity context)
+  - SeedDataService is @Singleton to ensure consistent seed state throughout app lifecycle
+  - Flow.map() transforms preferences to specific value, Flow.first() suspends and returns first emission
+  - DataStore preferences provide type-safe, asynchronous alternative to SharedPreferences
+  - seedAllData() will be populated with actual stock/filing/executive data in subsequent stories (US-058, US-059)
+---
+
