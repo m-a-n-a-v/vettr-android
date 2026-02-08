@@ -273,3 +273,24 @@ Files changed:
   - Icon sizes follow standard Material guidelines: sm(16dp), md(24dp), lg(32dp)
   - These design tokens should be used throughout the app instead of hardcoding dimension values
 ---
+
+## US-016: Update VettrTheme with complete Material3 theme
+Status: ✅ COMPLETE
+Date: 2026-02-07
+Details:
+- Verified VettrTheme composable already configured with darkColorScheme
+- Verified darkColorScheme uses VettrNavy as background (line 27), VettrAccent as primary (line 13), and VettrCardBackground as surfaceContainerHighest (line 37)
+- Verified dark mode is forced: hardcoded `VettrDarkColorScheme` with no system theme detection (line 50)
+- Added @Preview composable (VettrThemePreview) showing theme applied to sample content with Text and Card components
+- Added required imports for Preview: androidx.compose.ui.tooling.preview.Preview, foundation components
+- Build successful: ./gradlew assembleDebug passes
+Files changed:
+- app/src/main/java/com/vettr/android/designsystem/theme/Theme.kt (added imports and VettrThemePreview)
+**Learnings for future iterations:**
+  - VettrTheme was already fully configured with Material3 darkColorScheme in the initial scaffold
+  - The theme properly maps VETTR brand colors: VettrNavy (background), VettrAccent (primary), VettrCardBackground (surface)
+  - Dark mode is enforced by hardcoding VettrDarkColorScheme without system theme parameter
+  - Preview composables are essential for design system validation in Android Studio
+  - Material3 colorScheme includes comprehensive surface hierarchy: surface, surfaceVariant, surfaceContainer variants for different elevations
+  - SideEffect with WindowCompat sets status bar and navigation bar to dark mode (isAppearanceLightStatusBars = false)
+---
