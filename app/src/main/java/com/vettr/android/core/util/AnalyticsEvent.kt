@@ -136,4 +136,12 @@ sealed class AnalyticsEvent(
         name = "error_occurred",
         params = mapOf("error_type" to errorType, "error_message" to errorMessage)
     )
+
+    // Feedback Events
+    data class FeedbackSubmitted(val category: String, val hasEmail: Boolean, val submissionCount: Int) : AnalyticsEvent(
+        name = "feedback_submitted",
+        params = mapOf("category" to category, "has_email" to hasEmail, "submission_count" to submissionCount)
+    )
+    data object PlayStoreReviewRequested : AnalyticsEvent("play_store_review_requested")
+    data object PlayStoreReviewCompleted : AnalyticsEvent("play_store_review_completed")
 }

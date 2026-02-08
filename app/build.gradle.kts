@@ -104,6 +104,7 @@ dependencies {
     implementation(libs.googleid)
     implementation(libs.androidx.credentials)
     implementation(libs.androidx.credentials.play.services.auth)
+    implementation(libs.play.core)
 
     // Security
     implementation(libs.androidx.security.crypto)
