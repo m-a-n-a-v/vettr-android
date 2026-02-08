@@ -1,6 +1,5 @@
 package com.vettr.android.feature.main
 
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
@@ -21,7 +20,6 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.tooling.preview.Preview
@@ -31,6 +29,11 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import com.vettr.android.designsystem.theme.VettrAccent
 import com.vettr.android.designsystem.theme.VettrTheme
+import com.vettr.android.feature.alerts.AlertsScreen
+import com.vettr.android.feature.discovery.DiscoveryScreen
+import com.vettr.android.feature.profile.ProfileScreen
+import com.vettr.android.feature.pulse.PulseScreen
+import com.vettr.android.feature.stockdetail.StocksScreen
 
 /**
  * Bottom navigation destinations for the main app.
@@ -115,39 +118,21 @@ fun MainScreen(
             modifier = Modifier.padding(paddingValues)
         ) {
             composable(BottomNavDestination.Pulse.route) {
-                PlaceholderScreen(title = "Pulse")
+                PulseScreen(modifier = Modifier.fillMaxSize())
             }
             composable(BottomNavDestination.Discovery.route) {
-                PlaceholderScreen(title = "Discovery")
+                DiscoveryScreen(modifier = Modifier.fillMaxSize())
             }
             composable(BottomNavDestination.Stocks.route) {
-                PlaceholderScreen(title = "Stocks")
+                StocksScreen(modifier = Modifier.fillMaxSize())
             }
             composable(BottomNavDestination.Alerts.route) {
-                PlaceholderScreen(title = "Alerts")
+                AlertsScreen(modifier = Modifier.fillMaxSize())
             }
             composable(BottomNavDestination.Profile.route) {
-                PlaceholderScreen(title = "Profile")
+                ProfileScreen(modifier = Modifier.fillMaxSize())
             }
         }
-    }
-}
-
-/**
- * Placeholder screen for bottom navigation destinations.
- * Will be replaced with actual feature screens in future stories.
- */
-@Composable
-private fun PlaceholderScreen(title: String) {
-    Box(
-        modifier = Modifier.fillMaxSize(),
-        contentAlignment = Alignment.Center
-    ) {
-        Text(
-            text = "$title - Coming Soon",
-            style = MaterialTheme.typography.headlineMedium,
-            color = MaterialTheme.colorScheme.onSurface
-        )
     }
 }
 
