@@ -998,3 +998,61 @@ Files changed:
   - Providing DAOs separately from database enables flexible dependency injection in repositories and ViewModels
   - All 8 entities now have corresponding DAOs available for injection throughout the app
 ---
+
+## US-048: Add model unit tests
+Status: ✅ COMPLETE
+Date: 2026-02-07
+Details:
+- Created app/src/test/java/com/vettr/android/core/model/ModelTest.kt with comprehensive unit tests
+- Implemented 17 test cases covering Stock, VettrTier, and AlertType entities
+- Test Stock entity creation with all properties and default values (UUID generation, isFavorite default)
+- Test VettrTier enum properties for all three tiers (FREE, PRO, PREMIUM)
+- Test AlertType enum properties for all five types (FINANCING, CONSOLIDATION, DRILL_RESULTS, MANAGEMENT_CHANGE, RED_FLAG)
+- Added validation tests: tier boundary enforcement, pulse delay hierarchy, sync interval hierarchy
+- Added uniqueness tests for AlertType displayName and iconName values
+- All 42 unit tests pass successfully: ./gradlew testDebugUnitTest
+Files changed:
+- app/src/test/java/com/vettr/android/core/model/ModelTest.kt (created)
+- scripts/ralph/prd.json (updated passes to true)
+**Learnings for future iterations:**
+  - Unit tests verify model creation and enum properties for business logic validation
+  - Test actual implementation values, not assumed values - VettrTier values were different from initial assumptions
+  - Use descriptive test names with backticks for readability: `VettrTier FREE has correct properties`
+  - Test boundary conditions and hierarchies: tier limits increase with higher tiers, delays decrease with higher tiers
+  - Test uniqueness constraints for enums to ensure no duplicate values
+  - JUnit test structure: Given-When-Then pattern clarifies test intent and improves maintainability
+  - ModelTest provides foundation for testing business logic without UI framework dependencies
+---
+
+## US-049: Create VettrApi interface with endpoints
+Status: ✅ COMPLETE
+Date: 2026-02-07
+Details:
+- Created core/data/remote/VettrApi.kt interface with all required endpoints
+- Implemented GET /stocks endpoint to fetch all stocks (suspend fun getStocks(): List<StockDto>)
+- Implemented GET /stocks/{ticker} endpoint to fetch stock by ticker (suspend fun getStock(@Path ticker: String): StockDto)
+- Implemented GET /filings endpoint with stockId query parameter (suspend fun getFilings(@Query stockId: String): List<FilingDto>)
+- Implemented POST /auth/login endpoint for authentication (suspend fun login(@Body request: LoginRequest): AuthResponse)
+- Created StockDto.kt with all Stock properties mapped to JSON fields using @SerializedName
+- Created FilingDto.kt with all Filing properties mapped to JSON fields using @SerializedName
+- Created LoginRequest.kt with idToken and provider fields for Google Sign-In authentication
+- Created AuthResponse.kt with accessToken, refreshToken, tokenType, expiresIn, and UserDto nested object
+- Created UserDto.kt nested in AuthResponse for user profile information
+- Build successful: ./gradlew assembleDebug passes
+Files changed:
+- app/src/main/java/com/vettr/android/core/data/remote/VettrApi.kt (created)
+- app/src/main/java/com/vettr/android/core/data/remote/StockDto.kt (created)
+- app/src/main/java/com/vettr/android/core/data/remote/FilingDto.kt (created)
+- app/src/main/java/com/vettr/android/core/data/remote/LoginRequest.kt (created)
+- app/src/main/java/com/vettr/android/core/data/remote/AuthResponse.kt (created)
+- scripts/ralph/prd.json (updated passes to true)
+**Learnings for future iterations:**
+  - VettrApi interface defines all REST endpoints using Retrofit annotations (@GET, @POST, @Path, @Query, @Body)
+  - All API methods are suspend functions for asynchronous execution with coroutines
+  - DTOs use @SerializedName annotation to map JSON snake_case fields to Kotlin camelCase properties
+  - LoginRequest uses idToken from Google Sign-In for OAuth authentication flow
+  - AuthResponse includes nested UserDto for user profile information returned after successful login
+  - Retrofit with Gson converter automatically serializes/deserializes between DTOs and JSON
+  - DTOs should mirror Room entity structure but use Gson annotations instead of Room annotations
+  - UserDto in AuthResponse provides user profile data that will be stored in User Room entity
+---
