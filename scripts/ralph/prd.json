@@ -1654,7 +1654,7 @@
         "./gradlew assembleDebug succeeds"
       ],
       "priority": 119,
-      "passes": false
+      "passes": true
     },
     {
       "id": "US-120",

@@ -3067,3 +3067,26 @@ Details:
   - Deep link handling should check authentication state before navigating to protected screens
   - android:autoVerify="true" enables Android App Links for https:// URLs (requires .well-known/assetlinks.json)
 ---
+
+## US-119: Implement pull-to-refresh for all list screens
+Status: ✅ COMPLETE
+Date: 2026-02-08
+Details:
+- Added pull-to-refresh functionality to PulseScreen, DiscoveryScreen, StocksScreen, and AlertsScreen
+- Implemented debounce logic in all ViewModels to prevent more than 1 refresh per 10 seconds
+- Added lastUpdatedAt timestamp tracking in all ViewModels (StateFlow<Long?>)
+- Created reusable LastUpdatedText composable component in designsystem/component/
+- Timestamp displays relative time: "Last updated X minutes ago", "Last updated X hours ago", etc.
+- PulseScreen already had PullToRefreshBox implemented, enhanced with timestamp tracking
+- Added PullToRefreshBox wrapper to DiscoveryScreen, StocksScreen, and AlertsScreen
+- All screens show refresh indicator during data fetch (isLoading state)
+- Build passes with ./gradlew assembleDebug
+**Learnings for future iterations:**
+  - PullToRefreshBox from material3.pulltorefresh should be used for pull-to-refresh
+  - Debounce logic prevents rapid consecutive refreshes by tracking lastRefreshTime
+  - Relative time formatting improves UX by showing "2 minutes ago" instead of timestamps
+  - LastUpdatedText is a reusable component that can be added to any screen with a nullable Long timestamp
+  - For screens with StateFlow properties, add them directly to state (PulseViewModel, DiscoveryViewModel, StocksViewModel)
+  - For screens with UiState data classes, add lastUpdatedAt property to the data class (AlertsViewModel)
+  - Import androidx.compose.foundation.layout.fillMaxWidth when using .fillMaxWidth() modifier
+---
