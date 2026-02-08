@@ -2360,3 +2360,63 @@ Files changed:
   - Repository layer coordinates between detector (business logic) and DAO (persistence)
   - Flow.first() throws if no value emitted, so check for null when Stock might not exist
 ---
+
+## US-101: Build RedFlagScreen in StockDetail tabs
+Status: ✅ COMPLETE
+Date: 2026-02-08
+Details:
+- Created RedFlagViewModel.kt with @HiltViewModel and StateFlow for UI state management
+- Implemented state management for: currentFlags, compositeScore, flagHistory, trend, loading, errors
+- Added methods: acknowledgeAllFlags, acknowledgeFlag, toggleMethodologySheet, toggleFlagExpanded
+- Created RedFlagScreen.kt with comprehensive red flag display functionality
+- Implemented OverallScoreBadge with circular Canvas-based progress indicator (120dp size)
+- Canvas draws background circle and colored arc based on score (0-100) and severity
+- Color coding: LOW (green), MODERATE (yellow), HIGH (orange), CRITICAL (red)
+- Implemented individual flag breakdown with FlagRow composable showing:
+  * Flag icon, name, severity chip, expand/collapse button
+  * LinearProgressIndicator bar showing flag score contribution
+  * Expandable detail section with full description (using AnimatedVisibility)
+- Implemented FlagHistoryItem composable showing 10 most recent historical flags with:
+  * Flag type, detection date, score, acknowledged status
+  * Acknowledge button for unacknowledged flags
+  * Visual distinction for acknowledged items (reduced opacity)
+- Added "Acknowledge All" button that marks all current flags as acknowledged
+- Implemented MethodologyContent BottomSheet explaining detection methodology:
+  * 5 red flag types with weights: Consolidation Velocity (30%), Financing Velocity (25%), Executive Churn (20%), Disclosure Gaps (15%), Debt Trend (10%)
+  * Severity level explanations with color-coded chips: LOW (<30), MODERATE (30-60), HIGH (60-85), CRITICAL (>85)
+  * Methodology description for each flag type
+- Implemented EmptyRedFlagState for stocks with score < 30:
+  * Success icon with green background, "All Clear!" message
+  * Informative text explaining no significant flags detected
+  * "Learn About Red Flags" button to open methodology sheet
+- Integrated RedFlagScreen into StockDetailScreen tabs (replaced placeholder RedFlagsTab)
+- Created DispatchersModule.kt to provide CoroutineDispatcher dependencies for Hilt
+- Added @IoDispatcher, @DefaultDispatcher, @MainDispatcher qualifiers
+- Updated RedFlagDetector to use @DefaultDispatcher for thread-safe operations
+- Used Material 3 components: ModalBottomSheet, Card, LinearProgressIndicator, SuggestionChip
+- Added helper functions: formatFlagName, getSeverityLabel, getFlagColor for consistent display
+- Build successful: ./gradlew assembleDebug passes
+
+Files changed:
+- app/src/main/java/com/vettr/android/feature/stockdetail/RedFlagViewModel.kt (created)
+- app/src/main/java/com/vettr/android/feature/stockdetail/RedFlagScreen.kt (created)
+- app/src/main/java/com/vettr/android/feature/stockdetail/StockDetailScreen.kt (updated RedFlagsTab)
+- app/src/main/java/com/vettr/android/core/di/DispatchersModule.kt (created)
+- app/src/main/java/com/vettr/android/core/data/RedFlagDetector.kt (updated to use @DefaultDispatcher)
+- scripts/ralph/prd.json (updated US-101 passes to true)
+
+**Learnings for future iterations:**
+  - Canvas-based circular progress indicators require calculating arc sweep angle from percentage
+  - Use StrokeCap.Round for smooth circular progress indicator edges
+  - RowScope receiver type required for composables using weight modifier inside Row
+  - ModalBottomSheet requires @OptIn(ExperimentalMaterial3Api::class) annotation
+  - AnimatedVisibility provides smooth expand/collapse transitions for flag details
+  - Use rememberModalBottomSheetState() to manage bottom sheet state
+  - Color.copy(alpha = 0.5f) useful for dimming acknowledged items visually
+  - CoroutineDispatcher must be provided via Hilt module with @Qualifier annotations
+  - Default dispatcher best for CPU-intensive work like red flag detection
+  - LinearProgressIndicator with lambda progress parameter: progress = { value.toFloat() }
+  - Take(10) on Flow ensures history list limited to most recent 10 items
+  - Use formatFlagName to convert enum RedFlagType to user-friendly display names
+  - Severity thresholds for individual flags differ from composite score thresholds
+---

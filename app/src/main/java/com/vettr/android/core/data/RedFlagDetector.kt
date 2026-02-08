@@ -2,6 +2,7 @@ package com.vettr.android.core.data
 
 import com.vettr.android.core.data.repository.ExecutiveRepository
 import com.vettr.android.core.data.repository.FilingRepository
+import com.vettr.android.core.di.DefaultDispatcher
 import com.vettr.android.core.model.Filing
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.Dispatchers
@@ -20,7 +21,7 @@ import javax.inject.Singleton
 class RedFlagDetector @Inject constructor(
     private val filingRepository: FilingRepository,
     private val executiveRepository: ExecutiveRepository,
-    private val dispatcher: CoroutineDispatcher = Dispatchers.Default
+    @DefaultDispatcher private val dispatcher: CoroutineDispatcher
 ) {
     private val mutex = Mutex()
 

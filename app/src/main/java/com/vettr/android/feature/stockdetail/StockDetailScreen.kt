@@ -757,25 +757,17 @@ private fun FilingCard(
 }
 
 /**
- * Red Flags tab content - placeholder for future implementation.
+ * Red Flags tab content showing red flag analysis.
  */
 @Composable
 private fun RedFlagsTab(
     stock: Stock,
     modifier: Modifier = Modifier
 ) {
-    Box(
+    RedFlagScreen(
+        ticker = stock.ticker,
         modifier = modifier
-            .fillMaxWidth()
-            .height(200.dp),
-        contentAlignment = Alignment.Center
-    ) {
-        Text(
-            text = "Red Flags analysis coming soon",
-            style = MaterialTheme.typography.bodyMedium,
-            color = VettrTextSecondary
-        )
-    }
+    )
 }
 
 @Preview(showBackground = true, backgroundColor = 0xFF0D1B2A)
