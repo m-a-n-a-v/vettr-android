@@ -828,3 +828,28 @@ Files changed:
   - getFavorites() queries for is_favorite = 1 (Room uses 1 for true, 0 for false in SQLite)
   - DAO abstract methods must be added to RoomDatabase class to expose database operations
 ---
+## US-041: Create FilingDao interface
+Status: ✅ COMPLETE
+Date: 2026-02-07
+Details:
+- Created core/data/local/FilingDao.kt interface annotated with @Dao
+- Implemented query methods: getByStockId(), getLatest(), getById() with Flow return types
+- All queries use ORDER BY date DESC for chronological ordering
+- Implemented mutation methods: insert(), insertAll(), markAsRead()
+- Used OnConflictStrategy.REPLACE for insert operations (upsert behavior)
+- markAsRead() uses UPDATE query to set is_read = 1 for specific filing ID
+- Added filingDao() abstract method to VettrDatabase class
+- Build successful: ./gradlew assembleDebug passes
+Files changed:
+- app/src/main/java/com/vettr/android/core/data/local/FilingDao.kt (created)
+- app/src/main/java/com/vettr/android/core/data/local/VettrDatabase.kt (updated)
+**Learnings for future iterations:**
+  - FilingDao provides database operations for Filing entities with reactive Flow return types
+  - ORDER BY date DESC ensures filings are returned in reverse chronological order (newest first)
+  - getLatest() method uses LIMIT parameter for fetching N most recent filings across all stocks
+  - getByStockId() filters filings for specific stock, useful for stock detail screen
+  - markAsRead() implements partial update using UPDATE query instead of @Update annotation
+  - Pattern follows established DAO conventions: Flow for queries, suspend for mutations, OnConflictStrategy.REPLACE for upserts
+  - DAO abstract methods must be added to RoomDatabase class to expose database operations
+---
+

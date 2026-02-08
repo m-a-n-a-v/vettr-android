@@ -1153,3 +1153,37 @@ Iteration 39 complete. Continuing...
 ===============================================================
   Ralph Iteration 40 of 158 (claude)
 ===============================================================
+Perfect! I have successfully completed **US-041: Create FilingDao interface**. Here's what was implemented:
+
+## Summary
+
+**Story**: US-041 - Create FilingDao interface
+
+**Files Created**:
+- `app/src/main/java/com/vettr/android/core/data/local/FilingDao.kt` - DAO interface with all required methods
+
+**Files Modified**:
+- `app/src/main/java/com/vettr/android/core/data/local/VettrDatabase.kt` - Added `filingDao()` accessor method
+- `scripts/ralph/prd.json` - Marked US-041 as complete
+- `scripts/ralph/progress.txt` - Appended progress log
+
+**Implementation Details**:
+- Created `@Dao` interface with query methods returning `Flow<T>` for reactive data:
+  - `getByStockId(stockId: String)` - Get all filings for a specific stock
+  - `getLatest(limit: Int)` - Get N most recent filings across all stocks
+  - `getById(id: String)` - Get a specific filing by ID
+- All queries use `ORDER BY date DESC` for chronological ordering (newest first)
+- Mutation methods with `suspend` modifier:
+  - `insert(filing: Filing)` - Insert single filing
+  - `insertAll(filings: List<Filing>)` - Batch insert
+  - `markAsRead(id: String)` - Mark filing as read using UPDATE query
+- Used `OnConflictStrategy.REPLACE` for upsert behavior
+
+**Build Status**: ✅ `./gradlew assembleDebug` passes successfully
+
+The implementation follows the established DAO pattern used in StockDao and provides all the necessary database operations for Filing entities.
+Iteration 40 complete. Continuing...
+
+===============================================================
+  Ralph Iteration 41 of 158 (claude)
+===============================================================
