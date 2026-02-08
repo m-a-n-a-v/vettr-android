@@ -4068,3 +4068,23 @@ Details:
   - Room's schema export is critical for tracking database evolution across versions
   - BuildConfig.DEBUG check allows different behavior in debug vs release builds
 ---
+
+## US-150: Add network connectivity monitoring
+Status: ✅ COMPLETE
+Date: 2026-02-08
+Details:
+- Created core/util/NetworkMonitor.kt using ConnectivityManager.registerDefaultNetworkCallback()
+- Exposes isOnline: StateFlow<Boolean> observable from NetworkMonitor singleton
+- Integrated NetworkMonitor into PulseViewModel with auto-refresh when network returns
+- Added offline banner Snackbar in PulseScreen that displays when network is lost
+- Provided via Hilt as @Singleton with @ApplicationContext injection
+- Build successful: ./gradlew assembleDebug passes
+- Files changed: NetworkMonitor.kt (new), PulseViewModel.kt, PulseScreen.kt
+**Learnings for future iterations:**
+  - NetworkMonitor pattern: Use ConnectivityManager.NetworkCallback with NetworkRequest.Builder() and registerDefaultNetworkCallback() for API 26+
+  - StateFlow pattern: MutableStateFlow internally, expose as StateFlow.asStateFlow() for immutable public API
+  - ViewModel integration: Inject monitor, observe state changes in viewModelScope to trigger actions
+  - UI feedback: LaunchedEffect with isOnline state to show/hide Snackbar for network status
+  - Cleanup: Provide unregister() method for proper callback cleanup (though singleton lifecycle matches app lifecycle)
+  - Alternative: observeConnectivity() Flow method using callbackFlow for one-off observations
+---
