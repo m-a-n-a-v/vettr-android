@@ -3437,3 +3437,29 @@ Details:
   - Build verification with assembleDebug confirms test code compiles correctly
 ---
 
+## US-130: Create smoke tests for release verification
+Status: ✅ COMPLETE
+Date: 2026-02-08
+Details:
+- Created SmokeTest.kt in app/src/test/java/com/vettr/android/ with 10 comprehensive smoke tests
+- Test 1: App initialization and seed data service completion detection
+- Test 2: Complete auth flow (signup, login, logout) with authentication state verification
+- Test 3: Stock data loading with multiple stocks
+- Test 4: Watchlist persistence (add/remove favorites, query favorites)
+- Test 5: Alert CRUD operations (create, read, update, delete with verification)
+- Test 6: VETR score calculation validates 0-100 range for overall and component scores
+- Test 7: Red flag detection for stocks with score validation
+- Test 8: Settings persistence (currency, dark mode, notifications, biometric, reset)
+- Test 9: Input validators (email and password validation with edge cases)
+- Test 10: End-to-end user journey (signup → browse → watchlist → alerts → score → red flags)
+- All tests use MockK with coEvery/coVerify for repository mocking
+- Tests follow existing patterns from CoreWorkflowTest.kt
+- ./gradlew testDebugUnitTest passes (all 10 smoke tests + existing tests)
+- ./gradlew assembleDebug succeeds
+**Learnings for future iterations:**
+  - StockRepository method is `getStocks()` not `getAllStocks()` - check interface before writing tests
+  - Smoke tests should cover critical user journeys end-to-end, not just individual features
+  - Use `atLeast = N` in coVerify when methods are called multiple times in same test
+  - MockK's coEvery/coVerify pattern works well with suspend functions and Flow types
+  - Comprehensive smoke tests should validate ranges (0-100 for VETR scores), edge cases (empty lists), and state transitions
+---

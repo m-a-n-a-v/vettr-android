@@ -1806,7 +1806,7 @@
         "./gradlew testDebugUnitTest passes"
       ],
       "priority": 130,
-      "passes": false
+      "passes": true
     },
     {
       "id": "US-131",
