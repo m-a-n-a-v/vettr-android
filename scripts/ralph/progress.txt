@@ -187,3 +187,26 @@ Files changed:
   - Android projects typically ignore: build artifacts (.gradle/, build/, *.iml), IDE files (.idea/), local config (local.properties), OS files (.DS_Store), native build outputs (.externalNativeBuild/, .cxx/), and profiling data (*.hprof)
 ---
 
+## US-012: Create GitHub Actions workflow for build and test
+Status: ✅ COMPLETE
+Date: 2026-02-07
+Details:
+- Created .github/workflows/build.yml with CI configuration
+- Workflow triggers on push and pull_request to main branch
+- Uses ubuntu-latest runner with JDK 17 (temurin distribution)
+- Includes gradle cache for faster builds
+- Runs ./gradlew assembleDebug to build the app
+- Runs ./gradlew testDebugUnitTest to execute unit tests
+- YAML validation confirmed with Python yaml parser
+- Build successful: ./gradlew assembleDebug passes
+Files changed:
+- .github/workflows/build.yml (created)
+**Learnings for future iterations:**
+  - GitHub Actions uses actions/checkout@v4 for checking out code
+  - actions/setup-java@v4 with 'temurin' distribution provides reliable JDK 17
+  - gradle cache in setup-java action speeds up subsequent workflow runs
+  - chmod +x gradlew step ensures gradlew is executable on CI runners
+  - Workflow YAML syntax can be validated with Python's yaml.safe_load()
+  - CI workflow mirrors local build commands: assembleDebug and testDebugUnitTest
+---
+
