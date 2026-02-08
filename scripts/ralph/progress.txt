@@ -2326,3 +2326,37 @@ Details:
   - Thread safety achieved with Mutex.withLock and single-threaded dispatcher pattern
   - Detector logic uses time-windowed analysis (12 months for velocity, 6 months for debt trend)
 ---
+
+## US-100: Create RedFlagRepository interface and implementation
+Status: ✅ COMPLETE
+Date: 2026-02-08
+Details:
+- Created RedFlagRepository.kt interface with 5 methods: detectFlagsForStock, getFlagHistory, acknowledgeFlag, acknowledgeAllForStock, getFlagTrend
+- Created RedFlagRepositoryImpl.kt with @Inject constructor taking RedFlagHistoryDao, RedFlagDetector, and StockDao
+- Implemented detectFlagsForStock: retrieves stock by ticker, runs RedFlagDetector.detectFlags, persists results to RedFlagHistory table
+- Implemented getFlagHistory: returns Flow<List<RedFlagHistory>> for a ticker from RedFlagHistoryDao
+- Implemented acknowledgeFlag and acknowledgeAllForStock: delegates to RedFlagHistoryDao methods
+- Implemented getFlagTrend: analyzes historical flags in 30-day windows, calculates current vs previous scores, determines TrendDirection (IMPROVING/WORSENING/STABLE) with 10% threshold
+- Created RedFlagTrend data class with ticker, currentScore, previousScore, trend, flagCount, newFlagsCount, resolvedFlagsCount
+- Created TrendDirection enum: IMPROVING, WORSENING, STABLE
+- Bound RedFlagRepository in RepositoryModule.kt with @Binds @Singleton pattern
+- Build successful: ./gradlew assembleDebug passes
+
+Files changed:
+- app/src/main/java/com/vettr/android/core/data/repository/RedFlagRepository.kt (created)
+- app/src/main/java/com/vettr/android/core/data/repository/RedFlagRepositoryImpl.kt (created)
+- app/src/main/java/com/vettr/android/core/di/RepositoryModule.kt (updated)
+- scripts/ralph/prd.json (updated US-100 passes to true)
+
+**Learnings for future iterations:**
+  - Repository pattern requires interface + implementation with @Inject constructor
+  - Use Hilt @Binds in Module to bind interface to implementation (not @Provides)
+  - StockDao.getByTicker() returns Flow<Stock?>, must use .first() in suspend function to get value
+  - When detecting flags, persist to history table for trend analysis over time
+  - Trend analysis uses time-windowed comparison (30-day periods) with percentage thresholds (10%)
+  - Use UUID.randomUUID().toString() for generating IDs when persisting detected flags
+  - DetectedFlag.type is enum RedFlagType, convert to String with .name for database storage
+  - RedFlagDetector.calculateCompositeScore() provides severity calculation for single flags
+  - Repository layer coordinates between detector (business logic) and DAO (persistence)
+  - Flow.first() throws if no value emitted, so check for null when Stock might not exist
+---
