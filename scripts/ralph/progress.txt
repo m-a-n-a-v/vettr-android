@@ -2450,3 +2450,247 @@ Details:
   - VetrScoreResult data class includes components map for UI breakdown display
   - Cache uses ticker as key since it's the primary lookup identifier
 ---
+
+## US-103: Create VetrScoreRepository interface and implementation
+Status: ✅ COMPLETE
+Date: 2026-02-08
+Details:
+- Created `VetrScoreRepository.kt` interface with methods:
+  - `calculateScore(ticker: String): VetrScoreResult`
+  - `getScoreHistory(ticker: String, months: Int): Flow<List<VetrScoreHistory>>`
+  - `getScoreTrend(ticker: String): ScoreTrend`
+  - `compareScores(ticker: String): PeerComparison`
+- Created data classes:
+  - `ScoreTrend`: direction (ScoreTrendDirection enum), momentum, scoreChange
+  - `ScoreTrendDirection`: IMPROVING, STABLE, DECLINING
+  - `PeerComparison`: ticker, score, sectorAverage, percentile, peerScores
+  - `PeerScore`: ticker, name, score
+- Created `VetrScoreRepositoryImpl.kt` with `@Inject` constructor taking:
+  - VetrScoreHistoryDao
+  - VetrScoreCalculator
+  - StockDao
+- Implementation features:
+  - Calculates scores using VetrScoreCalculator and persists to history
+  - Filters score history by time range (months parameter)
+  - Analyzes trends with 30-day lookback and momentum calculation
+  - Compares scores with peers in same sector, calculates percentile and sector average
+- Bound VetrScoreRepository in RepositoryModule with @Binds and @Singleton
+- Build succeeds with `./gradlew assembleDebug`
+
+**Learnings for future iterations:**
+- Enum naming conflicts: Had to rename `TrendDirection` to `ScoreTrendDirection` to avoid collision with existing `TrendDirection` enum in `RedFlagRepository.kt`. Always check for existing enum names before creating new ones.
+- Repository pattern: Repositories inject DAOs and other data sources, perform business logic, and return domain models. Use `@Inject` constructor with all dependencies.
+- Data class organization: Related data classes (ScoreTrend, PeerComparison, etc.) can live in the same file as the repository interface for better organization.
+- Flow usage: Use `Flow` for continuous data streams (like history), use `suspend fun` for one-time operations (like calculate).
+- Time calculations: Use milliseconds for time ranges (e.g., `months * 30L * 24 * 60 * 60 * 1000`).
+---
+
+## US-104: Build VetrScoreDetailScreen with breakdown
+Status: ✅ COMPLETE
+Date: 2026-02-08
+Details:
+- Created VetrScoreDetailScreen.kt with comprehensive BottomSheet modal
+- Implemented large score badge (150dp) using Canvas with:
+  * Background circle track (gray)
+  * Progress arc based on normalized score (0-100)
+  * Large centered score text (48sp, displayLarge)
+  * Score label (Strong Buy/Buy/Hold/Caution) with color coding
+- Created 30-day trend sparkline component:
+  * Background card with trend label and color-coded direction
+  * SparklineChart composable using Canvas Path for line drawing
+  * Draws dots at each data point with circleRadius
+  * Normalizes data to fit chart height
+  * Handles empty state with "No historical data available"
+- Built 5 component score rows with CircularProgressIndicators:
+  * Pedigree (25%), Filing Velocity (20%), Red Flag (25%), Growth (15%), Governance (15%)
+  * Each row shows circular progress, score number, component name, weight
+  * Tap-to-expand detail reveals component description
+  * AnimatedVisibility for smooth expand/collapse transitions
+- Scoring Methodology expandable section:
+  * Full explanation of 5 components with weights
+  * Detailed description of each component calculation
+  * Bonus/penalty adjustments (+5 for audited financials, -10 for overdue filings)
+- Peer Comparison section:
+  * Displays stock score vs sector average
+  * Percentile bar visualization (fillMaxWidth with percentage)
+  * Shows percentile ranking in sector
+- What Could Improve Score section:
+  * Generates 3-5 actionable insights based on lowest scoring components
+  * Provides specific recommendations per component
+  * Uses bullet points with circular accent-colored dots
+- Disclaimers section:
+  * Legal disclaimer about informational purposes
+  * Advises consultation with financial advisors
+  * Notes data source limitations
+- Updated StockDetailViewModel to add state flows:
+  * vetrScoreResult: VetrScoreResult?
+  * scoreHistory: List<Int>
+  * scoreTrend: String (converted from ScoreTrendDirection enum)
+  * peerComparison: PeerComparison?
+  * loadVetrScoreDetails() method to fetch all score data
+- Build successful: ./gradlew assembleDebug passes
+
+Files changed:
+- app/src/main/java/com/vettr/android/feature/stockdetail/VetrScoreDetailScreen.kt (created)
+- app/src/main/java/com/vettr/android/feature/stockdetail/StockDetailViewModel.kt (updated)
+- scripts/ralph/prd.json (updated US-104 passes to true)
+
+**Learnings for future iterations:**
+  - ModalBottomSheet with rememberModalBottomSheetState(skipPartiallyExpanded = true) for full-height sheet
+  - LaunchedEffect(ticker) to trigger data loading when sheet opens
+  - Canvas Path.moveTo() and lineTo() for sparkline chart drawing
+  - drawPath() with Stroke(width, cap = StrokeCap.Round) for smooth lines
+  - Normalizing chart data: (value - minValue).toFloat() / normalizedRange * size.height
+  - CircularProgressIndicator with lambda syntax: progress = { score / 100f }
+  - AnimatedVisibility enter/exit: expandVertically() + fadeIn() / shrinkVertically() + fadeOut()
+  - Box.fillMaxWidth(fraction) for percentage-based width (percentile bar)
+  - Generate insights dynamically based on sortedComponents.take(3)
+  - Use when expression to provide component-specific recommendations
+  - StateFlow.collectAsStateWithLifecycle() for collecting flows in Composables
+  - Import data classes from repository interfaces (PeerComparison, ScoreTrend)
+  - Preview composables should use realistic mock data matching actual data structures
+  - Multiple parallel launches in viewModelScope for concurrent data fetching
+---
+
+## US-105: Create SyncManager with WorkManager
+Status: ✅ COMPLETE
+Date: 2026-02-08
+Details:
+- Created `SyncWorker.kt` with `@HiltWorker` annotation using CoroutineWorker
+  - Injects SyncHistoryDao, StockRepository, FilingRepository, AlertRuleRepository
+  - Uses `@AssistedInject` constructor for Hilt worker factory integration
+  - doWork() method logs sync start/completion to SyncHistory entity
+  - Mock sync implementation for stocks, filings, and alerts (delays with item counts)
+  - Exponential backoff retry on failure (max 3 attempts)
+  - Returns Result.success(), Result.retry(), or Result.failure()
+- Created `SyncManager.kt` @Singleton class for scheduling periodic syncs
+  - Injects UserDao to determine current user's subscription tier
+  - Uses VettrTier.syncIntervalHours for tier-based intervals:
+    - PREMIUM: 4 hours
+    - PRO: 12 hours
+    - FREE: 24 hours (default if no user)
+  - PeriodicWorkRequestBuilder with NetworkType.CONNECTED constraint
+  - BackoffPolicy.EXPONENTIAL with 30-second delay
+  - ExistingPeriodicWorkPolicy.UPDATE to replace existing work
+  - Methods: startPeriodicSync(), stopPeriodicSync(), triggerImmediateSync()
+- Created `WorkManagerModule.kt` Hilt module
+  - Provides WorkManager instance via @ApplicationContext
+  - @InstallIn(SingletonComponent::class) for singleton scope
+- Updated `VettrApp.kt` to implement Configuration.Provider
+  - Injected HiltWorkerFactory for Hilt worker dependency injection
+  - Implemented workManagerConfiguration property with custom factory
+- Updated `AndroidManifest.xml` to disable default WorkManager initializer
+  - Added tools namespace for manifest merging
+  - Added InitializationProvider with WorkManagerInitializer removal
+- Build successful: `./gradlew assembleDebug` passes
+
+Files changed:
+- app/src/main/java/com/vettr/android/core/sync/SyncWorker.kt (created)
+- app/src/main/java/com/vettr/android/core/sync/SyncManager.kt (created)
+- app/src/main/java/com/vettr/android/core/di/WorkManagerModule.kt (created)
+- app/src/main/java/com/vettr/android/VettrApp.kt (updated)
+- app/src/main/AndroidManifest.xml (updated)
+- scripts/ralph/prd.json (updated US-105 passes to true)
+
+**Learnings for future iterations:**
+  - Hilt WorkManager integration requires three components:
+    1. @HiltWorker annotation on Worker class
+    2. @AssistedInject constructor with @Assisted Context and WorkerParameters
+    3. Application implements Configuration.Provider with HiltWorkerFactory injection
+  - Disable default WorkManager initialization in AndroidManifest with tools:node="remove"
+  - UserDao.getAll().firstOrNull()?.firstOrNull() pattern to get current user from Flow<List<User>>
+  - PeriodicWorkRequestBuilder has minimum 15-minute interval (not enforced at compile time)
+  - WorkManager constraints: NetworkType.CONNECTED, setRequiresBatteryNotLow(true)
+  - ExistingPeriodicWorkPolicy.UPDATE replaces existing work with same unique name
+  - SyncHistory entity already existed with proper DAO methods for logging
+  - Log sync metadata: startedAt, completedAt, duration, itemsSynced, errors, status
+  - Mock sync implementation should simulate realistic delays (100ms per operation)
+  - Exponential backoff: runAttemptCount property tracks retry attempts
+  - VettrTier enum has syncIntervalHours property for tier-based scheduling
+  - SyncManager is @Singleton and can be injected anywhere in the app
+  - triggerImmediateSync() can be called from UI for manual refresh
+---
+
+## US-106: Implement conflict resolution for offline-to-online sync
+Status: ✅ COMPLETE
+Date: 2026-02-08
+Details:
+- Created ConflictResolver.kt in core/sync/ with comprehensive conflict resolution strategies
+- Implemented four resolution strategies:
+  - LAST_WRITE_WINS: Chooses data with the most recent timestamp
+  - LOCAL_WINS: Always prefers local data over server data
+  - SERVER_WINS: Always prefers server data over local data  
+  - MANUAL: Returns ManualRequired result for user intervention
+- Created Conflict data class to encapsulate local/server data with timestamps
+- Created ResolutionResult sealed class (Resolved/ManualRequired)
+- Added resolveAll() method for batch conflict resolution
+- Created comprehensive unit tests (ConflictResolverTest.kt) covering:
+  - All four strategies with various scenarios
+  - Null handling for local and server data
+  - Equal timestamp handling
+  - Complex data type support
+  - Batch resolution with resolveAll()
+  - Edge cases (empty lists, error conditions)
+- Fixed StockDetailViewModelTest.kt to include missing vetrScoreRepository parameter
+- All tests pass: ./gradlew testDebugUnitTest succeeds
+- Build passes: ./gradlew assembleDebug succeeds
+**Learnings for future iterations:**
+  - ConflictResolver uses generic types (<T>) for flexibility with any data model
+  - Timestamp-based resolution is ideal for user-generated data (watchlist, alerts)
+  - Sealed classes provide type-safe result handling with when expressions
+  - Testing edge cases (null values, equal timestamps) is critical for conflict resolution
+  - Always update existing test files when adding new constructor parameters to ViewModels
+  - The resolver is @Singleton and uses @Inject for Hilt dependency injection
+---
+
+## US-107: Add sync UI to ProfileScreen
+Status: ✅ COMPLETE
+Date: 2026-02-08
+Details:
+- Added sync section to ProfileScreen showing last sync time, next sync ETA, and sync frequency
+- Implemented manual "Sync Now" button that triggers SyncManager.triggerImmediateSync()
+- Added CircularProgressIndicator during active sync (when isSyncing = true)
+- ProfileViewModel now injects SyncManager and SyncHistoryDao
+- Added state flows for lastSyncTime and isSyncing
+- Created helper functions for formatting relative time and next sync ETA
+- Sync frequency displayed based on tier: Free (24h), Pro (12h), Premium (4h)
+- Files changed:
+  - app/src/main/java/com/vettr/android/feature/profile/ProfileViewModel.kt
+  - app/src/main/java/com/vettr/android/feature/profile/ProfileScreen.kt
+- Build succeeds: ./gradlew assembleDebug ✅
+
+**Learnings for future iterations:**
+- The SyncSection composable follows the same Card pattern as other ProfileScreen sections
+- Used formatRelativeTime() helper to display "Just now", "X minutes ago", etc.
+- The isSyncing state is derived from SyncHistory status = "in_progress"
+- Next sync ETA calculated using tier.syncIntervalHours + lastSyncTime
+- Button shows CircularProgressIndicator + "Syncing..." text when sync is active
+- All sync frequency text corresponds to VettrTier enum values
+---
+
+## US-108: Create NotificationService for local alert notifications
+Status: ✅ COMPLETE
+Date: 2026-02-08
+Details:
+- Created NotificationService.kt in core/util/notification/ with notification channel "vettr_alerts" (high importance)
+- Implemented notification channel creation with vibration and lights enabled
+- Added POST_NOTIFICATIONS permission to AndroidManifest.xml for Android 13+ (API 33)
+- Implemented hasNotificationPermission() check for runtime permission status
+- Created sendAlertNotification() with PendingIntent deep links to StockDetailScreen
+- Added 1-hour duplicate prevention window using lastNotificationTimes map
+- Created NotificationModule.kt in core/di/ for Hilt dependency injection
+- Build passes: ./gradlew assembleDebug succeeds
+Files changed:
+- app/src/main/java/com/vettr/android/core/util/notification/NotificationService.kt
+- app/src/main/java/com/vettr/android/core/di/NotificationModule.kt
+- app/src/main/AndroidManifest.xml
+**Learnings for future iterations:**
+  - NotificationChannel is required for Android O (API 26+) with importance level
+  - POST_NOTIFICATIONS permission is required for Android 13+ (API 33+)
+  - PendingIntent requires FLAG_IMMUTABLE for Android 12+ (API 31+)
+  - Use stockTicker.hashCode() as unique notification ID for per-ticker notifications
+  - Duplicate prevention prevents spam by tracking last notification time per ticker
+  - NotificationService is @Singleton and injected via Hilt for app-wide access
+  - Deep links use Intent extras: "destination", "stock_ticker", "alert_id"
+  - WorkManager integration will be handled by alert rule scheduling (future story)
+---

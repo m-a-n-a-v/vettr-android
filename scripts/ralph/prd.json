@@ -1431,7 +1431,7 @@
         "./gradlew assembleDebug succeeds"
       ],
       "priority": 103,
-      "passes": false
+      "passes": true
     },
     {
       "id": "US-104",
@@ -1444,7 +1444,7 @@
         "./gradlew assembleDebug succeeds"
       ],
       "priority": 104,
-      "passes": false
+      "passes": true
     },
     {
       "id": "US-105",
@@ -1457,7 +1457,7 @@
         "./gradlew assembleDebug succeeds"
       ],
       "priority": 105,
-      "passes": false
+      "passes": true
     },
     {
       "id": "US-106",
@@ -1470,7 +1470,7 @@
         "./gradlew testDebugUnitTest passes"
       ],
       "priority": 106,
-      "passes": false
+      "passes": true
     },
     {
       "id": "US-107",
@@ -1484,7 +1484,7 @@
         "./gradlew assembleDebug succeeds"
       ],
       "priority": 107,
-      "passes": false
+      "passes": true
     },
     {
       "id": "US-108",
@@ -1497,7 +1497,7 @@
         "./gradlew assembleDebug succeeds"
       ],
       "priority": 108,
-      "passes": false
+      "passes": true
     },
     {
       "id": "US-109",
