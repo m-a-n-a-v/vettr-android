@@ -8,6 +8,8 @@ import com.vettr.android.core.data.repository.ExecutiveRepository
 import com.vettr.android.core.data.repository.ExecutiveRepositoryImpl
 import com.vettr.android.core.data.repository.FilingRepository
 import com.vettr.android.core.data.repository.FilingRepositoryImpl
+import com.vettr.android.core.data.repository.RedFlagRepository
+import com.vettr.android.core.data.repository.RedFlagRepositoryImpl
 import com.vettr.android.core.data.repository.StockRepository
 import com.vettr.android.core.data.repository.StockRepositoryImpl
 import dagger.Binds
@@ -49,4 +51,10 @@ abstract class RepositoryModule {
     abstract fun bindAlertRuleRepository(
         alertRuleRepositoryImpl: AlertRuleRepositoryImpl
     ): AlertRuleRepository
+
+    @Binds
+    @Singleton
+    abstract fun bindRedFlagRepository(
+        redFlagRepositoryImpl: RedFlagRepositoryImpl
+    ): RedFlagRepository
 }
