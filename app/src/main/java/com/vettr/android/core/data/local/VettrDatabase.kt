@@ -3,6 +3,7 @@ package com.vettr.android.core.data.local
 import androidx.room.Database
 import androidx.room.RoomDatabase
 import androidx.room.TypeConverters
+import com.vettr.android.core.model.AlertRule
 import com.vettr.android.core.model.Executive
 import com.vettr.android.core.model.Filing
 import com.vettr.android.core.model.PlaceholderEntity
@@ -16,7 +17,8 @@ import com.vettr.android.core.util.Converters
         Stock::class,
         Filing::class,
         Executive::class,
-        User::class
+        User::class,
+        AlertRule::class
     ],
     version = 1,
     exportSchema = false
