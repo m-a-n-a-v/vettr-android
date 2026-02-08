@@ -7,6 +7,7 @@ import com.vettr.android.core.model.Executive
 import com.vettr.android.core.model.Filing
 import com.vettr.android.core.model.PlaceholderEntity
 import com.vettr.android.core.model.Stock
+import com.vettr.android.core.model.User
 import com.vettr.android.core.util.Converters
 
 @Database(
@@ -14,7 +15,8 @@ import com.vettr.android.core.util.Converters
         PlaceholderEntity::class,
         Stock::class,
         Filing::class,
-        Executive::class
+        Executive::class,
+        User::class
     ],
     version = 1,
     exportSchema = false
