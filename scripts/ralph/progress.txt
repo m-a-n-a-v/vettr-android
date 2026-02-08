@@ -4138,3 +4138,43 @@ Details:
   - Timber automatically handles throwable exceptions with proper formatting
   - Debug tree is only planted in debug builds to avoid logging in production
 ---
+
+## US-153: Add Android app icon and splash screen
+Status: ✅ COMPLETE
+Date: 2026-02-08
+Details:
+- Enhanced launcher icon with dog/shield design inside a shield shape
+  - Foreground: Green shield (#00C853) with navy dog silhouette
+  - Background: Navy (#0D1B2A) solid color
+  - Adaptive icon format for Android 8.0+ support
+- Added androidx.core:core-splashscreen dependency (v1.2.0-alpha02)
+  - Updated gradle/libs.versions.toml with splashscreen version
+  - Added library reference in app/build.gradle.kts
+- Configured SplashScreen API in themes.xml
+  - Updated Theme.VETTR to inherit from Theme.SplashScreen
+  - Set windowSplashScreenBackground to VettrNavy (#0D1B2A)
+  - Set windowSplashScreenAnimatedIcon to app launcher icon
+  - Configured 500ms animation duration
+  - Created postSplashScreenTheme for transition after splash
+- Updated MainActivity to handle splash screen lifecycle
+  - Added installSplashScreen() call before super.onCreate()
+  - Implemented setKeepOnScreenCondition to keep splash visible during data init
+  - Added initializeAppData() function for app startup tasks
+  - Splash dismisses automatically when isDataInitialized becomes true
+- Build verification: ./gradlew assembleDebug succeeds with zero errors
+
+Files changed:
+- app/src/main/res/drawable/ic_launcher_foreground.xml
+- app/src/main/res/values/themes.xml
+- app/src/main/java/com/vettr/android/MainActivity.kt
+- gradle/libs.versions.toml
+- app/build.gradle.kts
+
+**Learnings for future iterations:**
+- The SplashScreen API (androidx.core:core-splashscreen) provides a unified splash experience for Android 12+ and back-compat for earlier versions
+- installSplashScreen() must be called BEFORE super.onCreate() to work properly
+- setKeepOnScreenCondition() allows async data loading before dismissing splash
+- Adaptive icons require both foreground and background layers for proper display across all Android launchers
+- The postSplashScreenTheme ensures a smooth transition from splash to the main app theme
+- Vector drawables in res/drawable/ work perfectly for adaptive icon layers, keeping APK size small
+---
