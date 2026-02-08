@@ -1,7 +1,9 @@
 package com.vettr.android
 
 import android.app.Application
+import androidx.hilt.work.HiltWorkerFactory
 import androidx.lifecycle.lifecycleScope
+import androidx.work.Configuration
 import com.vettr.android.core.data.local.SeedDataService
 import dagger.hilt.android.HiltAndroidApp
 import kotlinx.coroutines.CoroutineScope
@@ -11,10 +13,13 @@ import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 @HiltAndroidApp
-class VettrApp : Application() {
+class VettrApp : Application(), Configuration.Provider {
 
     @Inject
     lateinit var seedDataService: SeedDataService
+
+    @Inject
+    lateinit var workerFactory: HiltWorkerFactory
 
     private val applicationScope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
 
@@ -29,4 +34,9 @@ class VettrApp : Application() {
             }
         }
     }
+
+    override val workManagerConfiguration: Configuration
+        get() = Configuration.Builder()
+            .setWorkerFactory(workerFactory)
+            .build()
 }
