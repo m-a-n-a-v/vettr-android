@@ -4016,3 +4016,36 @@ Details:
 - ModalBottomSheet composables don't need navigation transitions - they're modal components, not routes
 - Exit transitions use targetOffsetX = { -it / 4 } for subtle parallax effect on the previous screen
 ---
+## US-148: Optimize Compose recomposition performance
+Status: ✅ COMPLETE
+Date: 2026-02-08
+Details:
+- Added @Immutable annotations to 6 UiState data classes:
+  - AlertsUiState, AlertRuleCreatorUiState, AuthUiState, SettingsUiState (ViewModels)
+  - RedFlagUiState (RedFlagViewModel)
+  - FaqItem and GlossaryTerm (data classes in screens)
+- Added key {} parameters to 12 LazyColumn/LazyRow/LazyVerticalGrid items() calls:
+  - StockDetailScreen: LazyColumn filings list
+  - PulseScreen: 3 skeleton LazyRows, 2 LazyVerticalGrids (events & stocks), 1 LazyRow (stocks)
+  - DiscoveryScreen: 2 LazyVerticalGrids (skeleton & sectors), 1 LazyColumn (skeleton events)
+  - RedFlagScreen: LazyColumn currentFlags list
+  - StocksScreen: LazyColumn skeleton stocks list
+  - GlossaryScreen: LazyColumn filteredTerms list
+  - FaqScreen: LazyColumn categoryItems list
+- Wrapped expensive computations with remember {} and derivedStateOf {}:
+  - PulseScreen: eventCards list, 2 isExpanded derivedStateOf checks
+  - DiscoveryScreen: 2 isExpanded derivedStateOf checks
+  - StockDetailScreen: 1 isExpanded derivedStateOf check
+  - GlossaryScreen: allTerms remember, filteredTerms derivedStateOf
+  - FaqScreen: faqItems and groupedFaqs remember
+- Added derivedStateOf import to PulseScreen, DiscoveryScreen, StockDetailScreen, GlossaryScreen
+
+**Learnings for future iterations:**
+  - @Immutable annotation ensures Compose knows a data class is fully immutable, preventing unnecessary recompositions
+  - key {} parameter in items() enables stable recomposition by identifying items uniquely
+  - derivedStateOf {} is essential for computed values that depend on state - it only recomputes when dependencies change
+  - remember {} should wrap static data that doesn't change across recompositions
+  - Empty lambdas like `onClick = {}` are stable and don't need remember wrapping
+  - For windowSizeClass checks, derivedStateOf is better than direct computation since it memoizes the boolean result
+  - Pattern: `val isExpanded by remember { derivedStateOf { windowSizeClass.widthSizeClass == WindowWidthSizeClass.Expanded } }`
+---
