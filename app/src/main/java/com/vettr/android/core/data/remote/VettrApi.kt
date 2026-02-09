@@ -58,7 +58,7 @@ interface VettrApi {
     @GET("admin/executives")
     suspend fun getExecutives(
         @Header("X-Admin-Secret") adminSecret: String = ADMIN_SECRET,
-        @Query("limit") limit: Int = 200,
+        @Query("limit") limit: Int = 100,
         @Query("offset") offset: Int = 0
     ): AdminListResponse<ExecutiveDto>
 
