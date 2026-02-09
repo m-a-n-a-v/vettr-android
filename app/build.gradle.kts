@@ -29,7 +29,7 @@ android {
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro"
             )
-            buildConfigField("String", "API_BASE_URL", "\"https://api.vettr.com/v1/\"")
+            buildConfigField("String", "API_BASE_URL", "\"https://vettr-backend.vercel.app/v1/\"")
         }
         debug {
             isMinifyEnabled = false
