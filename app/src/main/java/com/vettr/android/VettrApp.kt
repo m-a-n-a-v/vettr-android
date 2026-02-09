@@ -7,22 +7,14 @@ import timber.log.Timber
 import androidx.work.Configuration
 import coil3.ImageLoader
 import coil3.SingletonImageLoader
-import com.vettr.android.core.data.local.SeedDataService
 import com.vettr.android.core.util.AppStartupTracker
 import com.vettr.android.core.util.MemoryMonitor
 import com.vettr.android.core.util.ObservabilityService
 import dagger.hilt.android.HiltAndroidApp
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.SupervisorJob
-import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 @HiltAndroidApp
 class VettrApp : Application(), Configuration.Provider, SingletonImageLoader.Factory {
-
-    @Inject
-    lateinit var seedDataService: SeedDataService
 
     @Inject
     lateinit var workerFactory: HiltWorkerFactory
@@ -35,8 +27,6 @@ class VettrApp : Application(), Configuration.Provider, SingletonImageLoader.Fac
 
     @Inject
     lateinit var observabilityService: ObservabilityService
-
-    private val applicationScope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
 
     override fun onCreate() {
         super.onCreate()
@@ -52,14 +42,6 @@ class VettrApp : Application(), Configuration.Provider, SingletonImageLoader.Fac
 
         // Log initial memory state (debug builds only)
         memoryMonitor.logMemoryStats()
-
-        // Seed data on first launch
-        applicationScope.launch {
-            if (!seedDataService.isSeedComplete()) {
-                seedDataService.seedAllData()
-                seedDataService.markSeedComplete()
-            }
-        }
     }
 
     override val workManagerConfiguration: Configuration

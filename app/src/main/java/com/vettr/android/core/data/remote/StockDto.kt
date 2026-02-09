@@ -3,8 +3,9 @@ package com.vettr.android.core.data.remote
 import com.google.gson.annotations.SerializedName
 
 /**
- * Data Transfer Object for Stock entity from API.
+ * Data Transfer Object for Stock entity from admin API.
  * Maps JSON response fields to Kotlin properties using Gson serialization.
+ * Uses camelCase field names matching the admin endpoint response format.
  */
 data class StockDto(
     @SerializedName("id")
@@ -22,18 +23,15 @@ data class StockDto(
     @SerializedName("sector")
     val sector: String,
 
-    @SerializedName("market_cap")
+    @SerializedName("marketCap")
     val marketCap: Double,
 
     @SerializedName("price")
     val price: Double,
 
-    @SerializedName("price_change")
+    @SerializedName("priceChange")
     val priceChange: Double,
 
-    @SerializedName("vetr_score")
-    val vetrScore: Int,
-
-    @SerializedName("is_favorite")
-    val isFavorite: Boolean = false
+    @SerializedName("vetrScore")
+    val vetrScore: Int
 )
