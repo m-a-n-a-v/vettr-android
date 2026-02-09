@@ -22,12 +22,10 @@ class AuthRepositoryImpl @Inject constructor(
     private val _currentUser = MutableStateFlow<User?>(null)
 
     init {
-        // Restore user session if token exists
-        val existingToken = tokenManager.getToken()
-        if (existingToken != null) {
-            // Create mock user from stored token
-            _currentUser.value = createMockUser("restored@vettr.com")
-        }
+        // Auto-authenticate with a default user for live API mode
+        // Bypasses auth screen so the app goes directly to main content
+        _currentUser.value = createMockUser("demo@vettr.com")
+        tokenManager.saveToken("live_api_token")
     }
 
     override suspend fun signInWithEmail(email: String, password: String): Result<User> {

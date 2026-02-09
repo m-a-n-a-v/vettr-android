@@ -1,6 +1,8 @@
 package com.vettr.android.feature.pulse
 
 import androidx.compose.animation.Crossfade
+import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -11,13 +13,12 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyRow
-import androidx.compose.foundation.lazy.grid.GridCells
-import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
-import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Inbox
@@ -30,6 +31,7 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Snackbar
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
+import androidx.compose.material3.Text
 import androidx.compose.material3.pulltorefresh.PullToRefreshBox
 import androidx.compose.material3.windowsizeclass.ExperimentalMaterial3WindowSizeClassApi
 import androidx.compose.material3.windowsizeclass.WindowSizeClass
@@ -44,6 +46,9 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
@@ -53,20 +58,24 @@ import com.vettr.android.designsystem.component.ErrorView
 import com.vettr.android.designsystem.component.EventCard
 import com.vettr.android.designsystem.component.LastUpdatedText
 import com.vettr.android.designsystem.component.MetricCard
-import com.vettr.android.designsystem.component.SearchBarView
 import com.vettr.android.designsystem.component.SectionHeader
 import com.vettr.android.designsystem.component.SkeletonEventCard
 import com.vettr.android.designsystem.component.SkeletonMetricCard
 import com.vettr.android.designsystem.component.SkeletonStockRow
-import com.vettr.android.designsystem.component.StockRowView
+import com.vettr.android.designsystem.component.VettrScoreView
+import com.vettr.android.designsystem.component.cardStyle
+import com.vettr.android.designsystem.component.vettrPadding
 import com.vettr.android.designsystem.theme.Spacing
+import com.vettr.android.designsystem.theme.VettrAccent
 import com.vettr.android.designsystem.theme.VettrGreen
 import com.vettr.android.designsystem.theme.VettrRed
 import com.vettr.android.designsystem.theme.VettrTheme
 import com.vettr.android.designsystem.theme.VettrYellow
+import com.vettr.android.core.model.Stock
+import kotlin.math.abs
 
 /**
- * Pulse screen - displays market overview and strategic events.
+ * Pulse screen - displays market overview and live data from stocks and filings.
  */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -83,8 +92,50 @@ fun PulseScreen(
     val lastUpdatedAt by viewModel.lastUpdatedAt.collectAsStateWithLifecycle()
     val isOnline by viewModel.isOnline.collectAsStateWithLifecycle()
 
-    var searchQuery by remember { mutableStateOf("") }
     val snackbarHostState = remember { SnackbarHostState() }
+
+    // Compute market overview metrics from live stock data
+    val stocksTracked by remember(stocks) {
+        derivedStateOf { stocks.size }
+    }
+    val avgVetrScore by remember(stocks) {
+        derivedStateOf {
+            if (stocks.isEmpty()) 0.0
+            else stocks.map { it.vetrScore }.average()
+        }
+    }
+    val topGainer by remember(stocks) {
+        derivedStateOf { stocks.maxByOrNull { it.priceChange } }
+    }
+    val topLoser by remember(stocks) {
+        derivedStateOf { stocks.minByOrNull { it.priceChange } }
+    }
+
+    // Recent material filings (up to 5, sorted by date desc)
+    val recentFilings by remember(filings) {
+        derivedStateOf {
+            filings.sortedByDescending { it.date }.take(5)
+        }
+    }
+
+    // Top VETTR Scores (top 5 by vetrScore)
+    val topVetrScores by remember(stocks) {
+        derivedStateOf {
+            stocks.sortedByDescending { it.vetrScore }.take(5)
+        }
+    }
+
+    // Top Movers (top 5 by abs(priceChange))
+    val topMovers by remember(stocks) {
+        derivedStateOf {
+            stocks.sortedByDescending { abs(it.priceChange) }.take(5)
+        }
+    }
+
+    // Build a stock lookup map for filings
+    val stockLookup by remember(stocks) {
+        derivedStateOf { stocks.associateBy { it.id } }
+    }
 
     // Show offline message when network is lost
     LaunchedEffect(isOnline) {
@@ -153,53 +204,59 @@ fun PulseScreen(
                             .padding(Spacing.md),
                         verticalArrangement = Arrangement.spacedBy(Spacing.lg)
                     ) {
-                        // Search bar skeleton
-                        Spacer(modifier = Modifier.height(48.dp))
-
                         // Market Overview Skeleton
                         Column(
                             verticalArrangement = Arrangement.spacedBy(Spacing.md)
                         ) {
                             SectionHeader(title = "Market Overview")
+                            Row(
+                                modifier = Modifier.fillMaxWidth(),
+                                horizontalArrangement = Arrangement.spacedBy(Spacing.md)
+                            ) {
+                                SkeletonMetricCard(modifier = Modifier.weight(1f))
+                                SkeletonMetricCard(modifier = Modifier.weight(1f))
+                            }
+                            Row(
+                                modifier = Modifier.fillMaxWidth(),
+                                horizontalArrangement = Arrangement.spacedBy(Spacing.md)
+                            ) {
+                                SkeletonMetricCard(modifier = Modifier.weight(1f))
+                                SkeletonMetricCard(modifier = Modifier.weight(1f))
+                            }
+                        }
 
+                        // Recent Events Skeleton
+                        Column(
+                            verticalArrangement = Arrangement.spacedBy(Spacing.md)
+                        ) {
+                            SectionHeader(title = "Recent Events")
+                            repeat(3) {
+                                SkeletonEventCard()
+                            }
+                        }
+
+                        // Top VETTR Scores Skeleton
+                        Column(
+                            verticalArrangement = Arrangement.spacedBy(Spacing.md)
+                        ) {
+                            SectionHeader(title = "Top VETTR Scores")
                             LazyRow(
                                 horizontalArrangement = Arrangement.spacedBy(Spacing.md),
                                 contentPadding = PaddingValues(horizontal = 0.dp)
                             ) {
-                                items(3, key = { it }) {
-                                    SkeletonMetricCard(modifier = Modifier.width(150.dp))
+                                items(5, key = { it }) {
+                                    SkeletonMetricCard(modifier = Modifier.width(140.dp))
                                 }
                             }
                         }
 
-                        // Strategic Events Skeleton
+                        // Top Movers Skeleton
                         Column(
                             verticalArrangement = Arrangement.spacedBy(Spacing.md)
                         ) {
-                            SectionHeader(title = "Strategic Events")
-
-                            Column(
-                                verticalArrangement = Arrangement.spacedBy(Spacing.sm)
-                            ) {
-                                repeat(5) {
-                                    SkeletonEventCard()
-                                }
-                            }
-                        }
-
-                        // Trending Stocks Skeleton
-                        Column(
-                            verticalArrangement = Arrangement.spacedBy(Spacing.md)
-                        ) {
-                            SectionHeader(title = "Trending Stocks")
-
-                            LazyRow(
-                                horizontalArrangement = Arrangement.spacedBy(Spacing.md),
-                                contentPadding = PaddingValues(horizontal = 0.dp)
-                            ) {
-                                items(6, key = { it }) {
-                                    SkeletonStockRow(modifier = Modifier.width(280.dp))
-                                }
+                            SectionHeader(title = "Top Movers")
+                            repeat(3) {
+                                SkeletonStockRow()
                             }
                         }
                     }
@@ -218,176 +275,264 @@ fun PulseScreen(
                             modifier = Modifier.fillMaxWidth()
                         )
 
-                        // Search bar with notification bell
-                        Row(
-                            modifier = Modifier.fillMaxWidth(),
-                            horizontalArrangement = Arrangement.spacedBy(Spacing.sm),
-                            verticalAlignment = Alignment.CenterVertically
-                        ) {
-                            SearchBarView(
-                                query = searchQuery,
-                                onQueryChange = { searchQuery = it },
-                                modifier = Modifier.weight(1f)
-                            )
-
-                            IconButton(
-                                onClick = { /* TODO: Navigate to notifications */ }
-                            ) {
-                                Icon(
-                                    imageVector = Icons.Default.Notifications,
-                                    contentDescription = "Notifications",
-                                    tint = MaterialTheme.colorScheme.onSurface
-                                )
-                            }
-                        }
-
-                        // Market Overview Section
+                        // ── Market Overview Section (2x2 grid) ──
                         Column(
                             verticalArrangement = Arrangement.spacedBy(Spacing.md)
                         ) {
                             SectionHeader(title = "Market Overview")
 
-                            LazyRow(
-                                horizontalArrangement = Arrangement.spacedBy(Spacing.md),
-                                contentPadding = PaddingValues(horizontal = 0.dp)
+                            // Row 1: Stocks Tracked + Avg VETTR Score
+                            Row(
+                                modifier = Modifier.fillMaxWidth(),
+                                horizontalArrangement = Arrangement.spacedBy(Spacing.md)
                             ) {
-                                item {
-                                    MetricCard(
-                                        title = "TSX",
-                                        value = "21,543.25",
-                                        change = 1.25,
-                                        modifier = Modifier.width(150.dp)
-                                    )
-                                }
-                                item {
-                                    MetricCard(
-                                        title = "S&P 500",
-                                        value = "4,783.45",
-                                        change = 0.85,
-                                        modifier = Modifier.width(150.dp)
-                                    )
-                                }
-                                item {
-                                    MetricCard(
-                                        title = "NASDAQ",
-                                        value = "15,095.14",
-                                        change = -0.45,
-                                        modifier = Modifier.width(150.dp)
-                                    )
-                                }
-                            }
-                        }
+                                MetricCard(
+                                    title = "Stocks Tracked",
+                                    value = "$stocksTracked",
+                                    modifier = Modifier.weight(1f)
+                                )
 
-                        // Strategic Events Section
-                        Column(
-                            verticalArrangement = Arrangement.spacedBy(Spacing.md)
-                        ) {
-                            SectionHeader(title = "Strategic Events")
-
-                            val eventCards = remember {
-                                listOf(
-                                    Triple("Discovery Drill Hit", "BBB.V - Significant gold discovery announced", VettrGreen) to "2 hours ago",
-                                    Triple("Red Flag Alert", "XYZ.TO - Unusual insider selling detected", VettrRed) to "4 hours ago",
-                                    Triple("New Financing", "ABC.V - $10M private placement completed", VettrYellow) to "1 day ago"
+                                val scoreLabel = if (avgVetrScore >= 60) "Healthy" else "Caution"
+                                MetricCard(
+                                    title = "Avg VETTR Score",
+                                    value = String.format("%.0f", avgVetrScore),
+                                    change = null,
+                                    modifier = Modifier.weight(1f)
                                 )
                             }
 
-                            val isExpanded by remember { derivedStateOf { windowSizeClass.widthSizeClass == WindowWidthSizeClass.Expanded } }
+                            // Row 2: Top Gainer + Top Loser
+                            Row(
+                                modifier = Modifier.fillMaxWidth(),
+                                horizontalArrangement = Arrangement.spacedBy(Spacing.md)
+                            ) {
+                                MetricCard(
+                                    title = "Top Gainer",
+                                    value = topGainer?.ticker ?: "--",
+                                    change = topGainer?.priceChange,
+                                    modifier = Modifier.weight(1f)
+                                )
 
-                            if (isExpanded) {
-                                // 2-column grid layout for expanded screens
-                                LazyVerticalGrid(
-                                    columns = GridCells.Fixed(2),
-                                    horizontalArrangement = Arrangement.spacedBy(Spacing.md),
-                                    verticalArrangement = Arrangement.spacedBy(Spacing.sm),
-                                    modifier = Modifier.height(300.dp) // Fixed height to prevent layout issues
-                                ) {
-                                    items(eventCards, key = { it.first.first }) { (event, date) ->
-                                        val (title, subtitle, color) = event
-                                        EventCard(
-                                            title = title,
-                                            subtitle = subtitle,
-                                            date = date,
-                                            indicatorColor = color,
-                                            onClick = {}
-                                        )
-                                    }
-                                }
-                            } else {
-                                // Single column layout for compact/medium screens
+                                MetricCard(
+                                    title = "Top Loser",
+                                    value = topLoser?.ticker ?: "--",
+                                    change = topLoser?.priceChange,
+                                    modifier = Modifier.weight(1f)
+                                )
+                            }
+                        }
+
+                        // ── Recent Events Section (up to 5 material filings) ──
+                        if (recentFilings.isNotEmpty()) {
+                            Column(
+                                verticalArrangement = Arrangement.spacedBy(Spacing.md)
+                            ) {
+                                SectionHeader(title = "Recent Events")
+
                                 Column(
                                     verticalArrangement = Arrangement.spacedBy(Spacing.sm)
                                 ) {
-                                    eventCards.forEach { (event, date) ->
-                                        val (title, subtitle, color) = event
+                                    recentFilings.forEach { filing ->
+                                        val stock = stockLookup[filing.stockId]
+                                        val tickerLabel = stock?.ticker ?: ""
+
+                                        // Color by filing type
+                                        val indicatorColor = when {
+                                            filing.type.contains("MD&A", ignoreCase = true) -> VettrYellow
+                                            filing.type.contains("Press", ignoreCase = true) -> VettrGreen
+                                            filing.type.contains("Financial", ignoreCase = true) -> VettrAccent
+                                            filing.isMaterial -> VettrRed
+                                            else -> VettrYellow
+                                        }
+
+                                        // Format date as relative time
+                                        val relativeDate = formatFilingDate(filing.date)
+
                                         EventCard(
-                                            title = title,
-                                            subtitle = subtitle,
-                                            date = date,
-                                            indicatorColor = color,
-                                            onClick = {}
+                                            title = filing.title,
+                                            subtitle = if (tickerLabel.isNotEmpty()) "$tickerLabel - ${filing.type}" else filing.type,
+                                            date = relativeDate,
+                                            indicatorColor = indicatorColor,
+                                            onClick = { stock?.let { onStockClick(it.id) } }
                                         )
                                     }
                                 }
                             }
                         }
 
-                        // Trending Stocks Section
-                        Column(
-                            verticalArrangement = Arrangement.spacedBy(Spacing.md)
-                        ) {
-                            SectionHeader(
-                                title = "Trending Stocks",
-                                onSeeAllClick = { /* TODO: Navigate to full stock list */ }
-                            )
+                        // ── Top VETTR Scores Section (horizontal scroll, top 5) ──
+                        if (topVetrScores.isNotEmpty()) {
+                            Column(
+                                verticalArrangement = Arrangement.spacedBy(Spacing.md)
+                            ) {
+                                SectionHeader(title = "Top VETTR Scores")
 
-                            val isExpanded by remember { derivedStateOf { windowSizeClass.widthSizeClass == WindowWidthSizeClass.Expanded } }
-
-                            if (isExpanded) {
-                                // 2-column grid layout for expanded screens
-                                LazyVerticalGrid(
-                                    columns = GridCells.Fixed(2),
-                                    horizontalArrangement = Arrangement.spacedBy(Spacing.md),
-                                    verticalArrangement = Arrangement.spacedBy(Spacing.sm),
-                                    modifier = Modifier.height(400.dp) // Fixed height to prevent layout issues
-                                ) {
-                                    items(stocks.take(6), key = { it.id }) { stock ->
-                                        StockRowView(
-                                            ticker = stock.ticker,
-                                            companyName = stock.name,
-                                            price = stock.price,
-                                            priceChange = stock.priceChange,
-                                            logoUrl = null, // TODO: Add logo URL when available
-                                            onClick = { onStockClick(stock.id) }
-                                        )
-                                    }
-                                }
-                            } else {
-                                // Horizontal scroll layout for compact/medium screens
                                 LazyRow(
                                     horizontalArrangement = Arrangement.spacedBy(Spacing.md),
                                     contentPadding = PaddingValues(horizontal = 0.dp)
                                 ) {
-                                    items(stocks.take(6), key = { it.id }) { stock ->
-                                        StockRowView(
-                                            ticker = stock.ticker,
-                                            companyName = stock.name,
-                                            price = stock.price,
-                                            priceChange = stock.priceChange,
-                                            logoUrl = null, // TODO: Add logo URL when available
-                                            onClick = { onStockClick(stock.id) },
-                                            modifier = Modifier.width(280.dp)
+                                    items(topVetrScores, key = { it.id }) { stock ->
+                                        VetrScoreStockCard(
+                                            stock = stock,
+                                            onClick = { onStockClick(stock.id) }
                                         )
                                     }
                                 }
                             }
                         }
 
-                        // Placeholder for future sections
+                        // ── Top Movers Section (top 5 by abs(priceChange)) ──
+                        if (topMovers.isNotEmpty()) {
+                            Column(
+                                verticalArrangement = Arrangement.spacedBy(Spacing.md)
+                            ) {
+                                SectionHeader(title = "Top Movers")
+
+                                Column(
+                                    verticalArrangement = Arrangement.spacedBy(Spacing.sm)
+                                ) {
+                                    topMovers.forEach { stock ->
+                                        val directionIcon = if (stock.priceChange >= 0) "\u25B2" else "\u25BC"
+                                        val changeColor = if (stock.priceChange >= 0) VettrGreen else VettrRed
+
+                                        Row(
+                                            modifier = Modifier
+                                                .fillMaxWidth()
+                                                .cardStyle()
+                                                .clickable { onStockClick(stock.id) }
+                                                .vettrPadding(),
+                                            horizontalArrangement = Arrangement.spacedBy(Spacing.md),
+                                            verticalAlignment = Alignment.CenterVertically
+                                        ) {
+                                            // Avatar circle with 2-letter abbreviation
+                                            Box(
+                                                modifier = Modifier
+                                                    .size(40.dp)
+                                                    .clip(CircleShape)
+                                                    .background(changeColor.copy(alpha = 0.2f)),
+                                                contentAlignment = Alignment.Center
+                                            ) {
+                                                Text(
+                                                    text = directionIcon,
+                                                    style = MaterialTheme.typography.titleMedium,
+                                                    color = changeColor
+                                                )
+                                            }
+
+                                            // Ticker and company name
+                                            Column(
+                                                modifier = Modifier.weight(1f),
+                                                verticalArrangement = Arrangement.spacedBy(Spacing.xs)
+                                            ) {
+                                                Text(
+                                                    text = stock.ticker,
+                                                    style = MaterialTheme.typography.titleMedium,
+                                                    color = MaterialTheme.colorScheme.onSurface,
+                                                    fontWeight = FontWeight.Bold
+                                                )
+                                                Text(
+                                                    text = stock.name,
+                                                    style = MaterialTheme.typography.bodySmall,
+                                                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                                    maxLines = 1,
+                                                    overflow = TextOverflow.Ellipsis
+                                                )
+                                            }
+
+                                            // Price change percentage
+                                            Column(
+                                                horizontalAlignment = Alignment.End
+                                            ) {
+                                                Text(
+                                                    text = String.format("$%.2f", stock.price),
+                                                    style = MaterialTheme.typography.titleMedium,
+                                                    color = MaterialTheme.colorScheme.onSurface
+                                                )
+                                                Text(
+                                                    text = "${if (stock.priceChange >= 0) "+" else ""}${String.format("%.2f", stock.priceChange)}%",
+                                                    style = MaterialTheme.typography.bodyMedium,
+                                                    color = changeColor,
+                                                    fontWeight = FontWeight.SemiBold
+                                                )
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+
+                        // Bottom spacing
                         Spacer(modifier = Modifier.height(Spacing.md))
                     }
                 }
             }
+        }
+    }
+}
+
+/**
+ * Card displaying a stock with its VETTR score in horizontal scroll.
+ */
+@Composable
+private fun VetrScoreStockCard(
+    stock: Stock,
+    onClick: () -> Unit,
+    modifier: Modifier = Modifier
+) {
+    Column(
+        modifier = modifier
+            .width(140.dp)
+            .cardStyle()
+            .clickable(onClick = onClick)
+            .vettrPadding(Spacing.md),
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.spacedBy(Spacing.sm)
+    ) {
+        VettrScoreView(
+            score = stock.vetrScore,
+            size = 56.dp
+        )
+        Text(
+            text = stock.ticker,
+            style = MaterialTheme.typography.titleSmall,
+            color = MaterialTheme.colorScheme.onSurface,
+            fontWeight = FontWeight.Bold
+        )
+        Text(
+            text = stock.name,
+            style = MaterialTheme.typography.bodySmall,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+            maxLines = 1,
+            overflow = TextOverflow.Ellipsis
+        )
+    }
+}
+
+/**
+ * Format filing date (epoch millis) to relative time string.
+ */
+private fun formatFilingDate(dateMillis: Long): String {
+    val now = System.currentTimeMillis()
+    val diff = now - dateMillis
+
+    return when {
+        diff < 0 -> "just now"
+        diff < 60_000 -> "just now"
+        diff < 3600_000 -> {
+            val minutes = diff / 60_000
+            "$minutes min${if (minutes == 1L) "" else "s"} ago"
+        }
+        diff < 86400_000 -> {
+            val hours = diff / 3600_000
+            "$hours hour${if (hours == 1L) "" else "s"} ago"
+        }
+        diff < 604800_000 -> {
+            val days = diff / 86400_000
+            "$days day${if (days == 1L) "" else "s"} ago"
+        }
+        else -> {
+            val weeks = diff / 604800_000
+            "$weeks week${if (weeks == 1L) "" else "s"} ago"
         }
     }
 }

@@ -1,32 +1,42 @@
 package com.vettr.android.feature.discovery
 
 import androidx.compose.animation.Crossfade
+import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.grid.GridCells
-import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
-import androidx.compose.foundation.lazy.grid.items
+import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Article
+import androidx.compose.material.icons.filled.Description
+import androidx.compose.material.icons.filled.Inbox
+import androidx.compose.material.icons.filled.Newspaper
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FilterChip
 import androidx.compose.material3.FilterChipDefaults
+import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
-import androidx.compose.material3.TopAppBar
-import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.material3.pulltorefresh.PullToRefreshBox
 import androidx.compose.material3.windowsizeclass.ExperimentalMaterial3WindowSizeClassApi
 import androidx.compose.material3.windowsizeclass.WindowSizeClass
-import androidx.compose.material3.windowsizeclass.WindowWidthSizeClass
 import androidx.compose.ui.unit.DpSize
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.derivedStateOf
@@ -34,25 +44,37 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import com.vettr.android.designsystem.component.EventCard
+import com.vettr.android.designsystem.component.EmptyStateView
+import com.vettr.android.designsystem.component.ErrorView
 import com.vettr.android.designsystem.component.LastUpdatedText
+import com.vettr.android.designsystem.component.SearchBarView
 import com.vettr.android.designsystem.component.SectionHeader
+import com.vettr.android.designsystem.component.SectorChip
 import com.vettr.android.designsystem.component.SkeletonEventCard
 import com.vettr.android.designsystem.component.SkeletonMetricCard
+import com.vettr.android.designsystem.component.VettrScoreView
 import com.vettr.android.designsystem.component.cardStyle
 import com.vettr.android.designsystem.component.vettrPadding
 import com.vettr.android.designsystem.theme.Spacing
+import com.vettr.android.designsystem.theme.VettrAccent
 import com.vettr.android.designsystem.theme.VettrGreen
 import com.vettr.android.designsystem.theme.VettrRed
 import com.vettr.android.designsystem.theme.VettrTheme
 import com.vettr.android.designsystem.theme.VettrYellow
+import com.vettr.android.core.model.Filing
+import com.vettr.android.core.model.Stock
 
 /**
- * Discovery screen - displays stock discovery and search features.
+ * Discovery screen - displays stock discovery with search, sector filters,
+ * featured stocks, and recent filings from live API data.
  */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -62,30 +84,39 @@ fun DiscoveryScreen(
     onStockClick: (String) -> Unit = {},
     viewModel: DiscoveryViewModel = hiltViewModel()
 ) {
-    val selectedFilter by viewModel.selectedFilter.collectAsStateWithLifecycle()
+    val stocks by viewModel.stocks.collectAsStateWithLifecycle()
+    val filings by viewModel.filings.collectAsStateWithLifecycle()
     val sectors by viewModel.sectors.collectAsStateWithLifecycle()
+    val selectedSector by viewModel.selectedSector.collectAsStateWithLifecycle()
+    val searchQuery by viewModel.searchQuery.collectAsStateWithLifecycle()
     val isLoading by viewModel.isLoading.collectAsStateWithLifecycle()
+    val errorMessage by viewModel.errorMessage.collectAsStateWithLifecycle()
     val lastUpdatedAt by viewModel.lastUpdatedAt.collectAsStateWithLifecycle()
 
+    // Build stock lookup for filing display
+    val stockLookup by remember(stocks) {
+        derivedStateOf { stocks.associateBy { it.id } }
+    }
+
+    // All stocks for lookup (need unfiltered for filing ticker resolution)
+    // We use the filtered stocks for display, but we need the full stock map for filings.
+    // The viewModel exposes filtered data, so stockLookup from filtered is fine for what's shown.
+
     Scaffold(
-        modifier = modifier,
-        topBar = {
-            TopAppBar(
-                title = {
-                    Text(
-                        text = "Discovery",
-                        style = MaterialTheme.typography.titleLarge
-                    )
-                },
-                colors = TopAppBarDefaults.topAppBarColors(
-                    containerColor = MaterialTheme.colorScheme.surface,
-                    titleContentColor = MaterialTheme.colorScheme.onSurface
-                )
-            )
-        }
+        modifier = modifier
     ) { paddingValues ->
+        // Handle error state
+        if (errorMessage != null && stocks.isEmpty()) {
+            ErrorView(
+                message = errorMessage ?: "An error occurred",
+                onRetry = { viewModel.refresh() },
+                modifier = Modifier.padding(paddingValues)
+            )
+            return@Scaffold
+        }
+
         PullToRefreshBox(
-            isRefreshing = isLoading && sectors.isNotEmpty(),
+            isRefreshing = isLoading && stocks.isNotEmpty(),
             onRefresh = { viewModel.refresh() },
             modifier = Modifier
                 .fillMaxSize()
@@ -93,7 +124,7 @@ fun DiscoveryScreen(
         ) {
             // Use Crossfade to transition between skeleton and content
             Crossfade(
-                targetState = isLoading && sectors.isEmpty(),
+                targetState = isLoading && stocks.isEmpty() && sectors.isEmpty(),
                 label = "discoveryContentCrossfade",
                 modifier = Modifier.fillMaxSize()
             ) { showSkeleton ->
@@ -105,50 +136,53 @@ fun DiscoveryScreen(
                             .padding(Spacing.md),
                         verticalArrangement = Arrangement.spacedBy(Spacing.lg)
                     ) {
-                        // Filter chips skeleton
+                        // Search bar skeleton
+                        item {
+                            SkeletonMetricCard(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .height(56.dp)
+                            )
+                        }
+
+                        // Sector chips skeleton
                         item {
                             Row(
                                 horizontalArrangement = Arrangement.spacedBy(Spacing.sm)
                             ) {
-                                repeat(2) {
+                                repeat(4) {
                                     SkeletonMetricCard(
                                         modifier = Modifier
-                                            .fillMaxWidth(0.35f)
-                                            .height(40.dp)
+                                            .width(80.dp)
+                                            .height(36.dp)
                                     )
                                 }
                             }
                         }
 
-                        // Top Sectors skeleton
+                        // Featured Stocks skeleton
                         item {
-                            val isExpanded by remember { derivedStateOf { windowSizeClass.widthSizeClass == WindowWidthSizeClass.Expanded } }
-
-                            Column(
-                                verticalArrangement = Arrangement.spacedBy(Spacing.md)
-                            ) {
-                                SectionHeader(title = "Top Sectors")
-
-                                LazyVerticalGrid(
-                                    columns = if (isExpanded) GridCells.Fixed(3) else GridCells.Adaptive(minSize = 140.dp),
-                                    modifier = Modifier.height(200.dp),
-                                    horizontalArrangement = Arrangement.spacedBy(Spacing.md),
-                                    verticalArrangement = Arrangement.spacedBy(Spacing.md),
-                                    contentPadding = PaddingValues(0.dp)
+                            Column(verticalArrangement = Arrangement.spacedBy(Spacing.md)) {
+                                SectionHeader(title = "Featured Stocks")
+                                LazyRow(
+                                    horizontalArrangement = Arrangement.spacedBy(Spacing.md)
                                 ) {
                                     items(4, key = { it }) {
-                                        SkeletonMetricCard()
+                                        SkeletonMetricCard(
+                                            modifier = Modifier
+                                                .width(160.dp)
+                                                .height(200.dp)
+                                        )
                                     }
                                 }
                             }
                         }
 
-                        // Recent Updates skeleton
+                        // Recent Filings skeleton
                         item {
-                            SectionHeader(title = "Recent Updates")
+                            SectionHeader(title = "Recent Filings")
                         }
-
-                        items(8, key = { it }) {
+                        items(5, key = { it }) {
                             SkeletonEventCard()
                         }
                     }
@@ -168,103 +202,104 @@ fun DiscoveryScreen(
                             )
                         }
 
-                        // Filter Chips Section
+                        // ── Search Bar ──
                         item {
-                            Row(
-                                horizontalArrangement = Arrangement.spacedBy(Spacing.sm),
-                                verticalAlignment = Alignment.CenterVertically
-                            ) {
-                                FilterChip(
-                                    selected = selectedFilter == DiscoveryFilter.WATCHLIST,
-                                    onClick = { viewModel.toggleFilter() },
-                                    label = {
-                                        Text(
-                                            text = "My Watchlist",
-                                            style = MaterialTheme.typography.labelLarge
-                                        )
-                                    },
-                                    colors = FilterChipDefaults.filterChipColors(
-                                        selectedContainerColor = MaterialTheme.colorScheme.primary,
-                                        selectedLabelColor = MaterialTheme.colorScheme.onPrimary
-                                    )
-                                )
-
-                                FilterChip(
-                                    selected = selectedFilter == DiscoveryFilter.ALERTS,
-                                    onClick = { viewModel.toggleFilter() },
-                                    label = {
-                                        Text(
-                                            text = "Alerts Only",
-                                            style = MaterialTheme.typography.labelLarge
-                                        )
-                                    },
-                                    colors = FilterChipDefaults.filterChipColors(
-                                        selectedContainerColor = MaterialTheme.colorScheme.primary,
-                                        selectedLabelColor = MaterialTheme.colorScheme.onPrimary
-                                    )
-                                )
-                            }
+                            SearchBarView(
+                                query = searchQuery,
+                                onQueryChange = { viewModel.updateSearchQuery(it) },
+                                modifier = Modifier.fillMaxWidth()
+                            )
                         }
 
-                        // Top Sectors Section
-                        item {
-                            val isExpanded by remember { derivedStateOf { windowSizeClass.widthSizeClass == WindowWidthSizeClass.Expanded } }
-
-                            Column(
-                                verticalArrangement = Arrangement.spacedBy(Spacing.md)
-                            ) {
-                                SectionHeader(title = "Top Sectors")
-
-                                LazyVerticalGrid(
-                                    columns = if (isExpanded) GridCells.Fixed(3) else GridCells.Adaptive(minSize = 140.dp),
-                                    modifier = Modifier.height(200.dp),
-                                    horizontalArrangement = Arrangement.spacedBy(Spacing.md),
-                                    verticalArrangement = Arrangement.spacedBy(Spacing.md),
-                                    contentPadding = PaddingValues(0.dp)
+                        // ── Sector Filter Chips ──
+                        if (sectors.isNotEmpty()) {
+                            item {
+                                Row(
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .horizontalScroll(rememberScrollState()),
+                                    horizontalArrangement = Arrangement.spacedBy(Spacing.sm)
                                 ) {
-                                    items(sectors, key = { it }) { sector ->
-                                        SectorCard(
-                                            name = sector,
-                                            percentage = when (sector) {
-                                                "Critical Minerals" -> "+12.5%"
-                                                "AI Technology" -> "+8.3%"
-                                                "Energy Juniors" -> "-3.2%"
-                                                "Clean Tech" -> "+5.7%"
-                                                else -> "+0.0%"
+                                    sectors.forEach { sector ->
+                                        FilterChip(
+                                            selected = selectedSector == sector,
+                                            onClick = { viewModel.selectSector(sector) },
+                                            label = {
+                                                Text(
+                                                    text = sector,
+                                                    style = MaterialTheme.typography.labelLarge
+                                                )
                                             },
-                                            onClick = { /* TODO: Navigate to sector detail */ }
+                                            colors = FilterChipDefaults.filterChipColors(
+                                                selectedContainerColor = MaterialTheme.colorScheme.primary,
+                                                selectedLabelColor = MaterialTheme.colorScheme.onPrimary
+                                            )
                                         )
                                     }
                                 }
                             }
                         }
 
-                        // Recent Updates Section
-                        item {
-                            Column(
-                                verticalArrangement = Arrangement.spacedBy(Spacing.md)
-                            ) {
-                                SectionHeader(title = "Recent Updates")
+                        // ── Featured Stocks Section (horizontal scroll, up to 8) ──
+                        if (stocks.isNotEmpty()) {
+                            item {
+                                Column(
+                                    verticalArrangement = Arrangement.spacedBy(Spacing.md)
+                                ) {
+                                    SectionHeader(title = "Featured Stocks")
+
+                                    LazyRow(
+                                        horizontalArrangement = Arrangement.spacedBy(Spacing.md),
+                                        contentPadding = PaddingValues(horizontal = 0.dp)
+                                    ) {
+                                        items(
+                                            stocks.take(8),
+                                            key = { it.id }
+                                        ) { stock ->
+                                            FeaturedStockCard(
+                                                stock = stock,
+                                                onClick = { onStockClick(stock.id) }
+                                            )
+                                        }
+                                    }
+                                }
                             }
                         }
 
-                        // Recent Updates List
-                        items(5) { index ->
-                            val events = listOf(
-                                Triple("New Drill Results", "CRE.V - High-grade lithium discovery", VettrGreen),
-                                Triple("Insider Selling Alert", "ABC.TO - CEO sold 50,000 shares", VettrRed),
-                                Triple("Earnings Beat", "DEF.TO - Q4 revenue up 45%", VettrGreen),
-                                Triple("Price Target Change", "GHI.V - Downgraded to Hold", VettrYellow),
-                                Triple("M&A Rumor", "JKL.TO - Acquisition talks confirmed", VettrGreen)
-                            )
-                            val event = events[index % events.size]
-                            EventCard(
-                                title = event.first,
-                                subtitle = event.second,
-                                date = "${index + 1} hour${if (index == 0) "" else "s"} ago",
-                                indicatorColor = event.third,
-                                onClick = { /* TODO: Navigate to event/stock detail based on event type */ }
-                            )
+                        // ── Recent Filings Section (up to 10) ──
+                        if (filings.isNotEmpty()) {
+                            item {
+                                SectionHeader(title = "Recent Filings")
+                            }
+
+                            items(
+                                filings,
+                                key = { it.id }
+                            ) { filing ->
+                                FilingRow(
+                                    filing = filing,
+                                    stockTicker = stockLookup[filing.stockId]?.ticker,
+                                    onClick = {
+                                        stockLookup[filing.stockId]?.let { onStockClick(it.id) }
+                                    }
+                                )
+                            }
+                        }
+
+                        // Empty state when filters produce no results
+                        if (stocks.isEmpty() && filings.isEmpty() && !isLoading) {
+                            item {
+                                EmptyStateView(
+                                    icon = Icons.Default.Inbox,
+                                    title = "No Results",
+                                    subtitle = "Try adjusting your search or filters."
+                                )
+                            }
+                        }
+
+                        // Bottom spacing
+                        item {
+                            Spacer(modifier = Modifier.height(Spacing.md))
                         }
                     }
                 }
@@ -274,45 +309,205 @@ fun DiscoveryScreen(
 }
 
 /**
- * Sector card composable displaying sector name and performance percentage.
+ * Featured stock card for horizontal scroll section.
+ * Shows avatar, ticker, company name, price, % change, sector chip, and VETTR score.
  */
 @Composable
-fun SectorCard(
-    name: String,
-    percentage: String,
+private fun FeaturedStockCard(
+    stock: Stock,
     onClick: () -> Unit,
     modifier: Modifier = Modifier
 ) {
     Column(
         modifier = modifier
-            .fillMaxWidth()
+            .width(160.dp)
             .cardStyle()
             .clickable(onClick = onClick)
-            .vettrPadding(),
+            .vettrPadding(Spacing.md),
+        horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.spacedBy(Spacing.sm)
     ) {
+        // Avatar circle with 2-letter abbreviation
+        val initials = stock.ticker.take(2)
+        Box(
+            modifier = Modifier
+                .size(44.dp)
+                .clip(CircleShape)
+                .background(VettrAccent.copy(alpha = 0.2f)),
+            contentAlignment = Alignment.Center
+        ) {
+            Text(
+                text = initials,
+                style = MaterialTheme.typography.titleMedium,
+                color = VettrAccent,
+                fontWeight = FontWeight.Bold
+            )
+        }
+
+        // Ticker
         Text(
-            text = name,
-            style = MaterialTheme.typography.titleMedium,
+            text = stock.ticker,
+            style = MaterialTheme.typography.titleSmall,
+            color = MaterialTheme.colorScheme.onSurface,
+            fontWeight = FontWeight.Bold
+        )
+
+        // Company name
+        Text(
+            text = stock.name,
+            style = MaterialTheme.typography.bodySmall,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+            maxLines = 1,
+            overflow = TextOverflow.Ellipsis
+        )
+
+        // Price
+        Text(
+            text = String.format("$%.2f", stock.price),
+            style = MaterialTheme.typography.titleSmall,
             color = MaterialTheme.colorScheme.onSurface
         )
+
+        // % Change
+        val changeColor = if (stock.priceChange >= 0) VettrGreen else VettrRed
+        val changePrefix = if (stock.priceChange >= 0) "+" else ""
         Text(
-            text = percentage,
-            style = MaterialTheme.typography.bodyLarge,
-            color = if (percentage.startsWith("+")) VettrGreen else VettrRed
+            text = "${changePrefix}${String.format("%.2f", stock.priceChange)}%",
+            style = MaterialTheme.typography.bodySmall,
+            color = changeColor,
+            fontWeight = FontWeight.SemiBold
+        )
+
+        // Sector chip
+        SectorChip(sector = stock.sector)
+
+        // VETTR Score badge
+        VettrScoreView(
+            score = stock.vetrScore,
+            size = 40.dp
         )
     }
 }
 
-@Preview(showBackground = true, backgroundColor = 0xFF0D1B2A)
+/**
+ * Filing row with type icon, title, stock ticker, date, and material flag.
+ */
 @Composable
-fun SectorCardPreview() {
-    VettrTheme {
-        SectorCard(
-            name = "Critical Minerals",
-            percentage = "+12.5%",
-            onClick = {}
-        )
+private fun FilingRow(
+    filing: Filing,
+    stockTicker: String?,
+    onClick: () -> Unit,
+    modifier: Modifier = Modifier
+) {
+    Row(
+        modifier = modifier
+            .fillMaxWidth()
+            .cardStyle()
+            .clickable(onClick = onClick)
+            .vettrPadding(),
+        horizontalArrangement = Arrangement.spacedBy(Spacing.md),
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        // Type icon with colored background
+        val (iconVector, iconBgColor) = when {
+            filing.type.contains("MD&A", ignoreCase = true) -> Icons.Default.Description to VettrYellow
+            filing.type.contains("Press", ignoreCase = true) -> Icons.Default.Newspaper to VettrGreen
+            filing.type.contains("Financial", ignoreCase = true) -> Icons.Default.Article to VettrAccent
+            else -> Icons.Default.Description to VettrYellow
+        }
+
+        Box(
+            modifier = Modifier
+                .size(36.dp)
+                .clip(RoundedCornerShape(8.dp))
+                .background(iconBgColor.copy(alpha = 0.2f)),
+            contentAlignment = Alignment.Center
+        ) {
+            Icon(
+                imageVector = iconVector,
+                contentDescription = filing.type,
+                tint = iconBgColor,
+                modifier = Modifier.size(20.dp)
+            )
+        }
+
+        // Title, ticker, date
+        Column(
+            modifier = Modifier.weight(1f),
+            verticalArrangement = Arrangement.spacedBy(Spacing.xs)
+        ) {
+            Text(
+                text = filing.title,
+                style = MaterialTheme.typography.titleSmall,
+                color = MaterialTheme.colorScheme.onSurface,
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis
+            )
+            Row(
+                horizontalArrangement = Arrangement.spacedBy(Spacing.sm),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                if (stockTicker != null) {
+                    Text(
+                        text = stockTicker,
+                        style = MaterialTheme.typography.labelMedium,
+                        color = VettrAccent,
+                        fontWeight = FontWeight.Bold
+                    )
+                }
+                Text(
+                    text = formatFilingDate(filing.date),
+                    style = MaterialTheme.typography.labelSmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+            }
+        }
+
+        // Material flag
+        if (filing.isMaterial) {
+            Box(
+                modifier = Modifier
+                    .clip(RoundedCornerShape(4.dp))
+                    .background(VettrRed.copy(alpha = 0.2f))
+                    .padding(horizontal = Spacing.sm, vertical = Spacing.xs)
+            ) {
+                Text(
+                    text = "Material",
+                    style = MaterialTheme.typography.labelSmall,
+                    color = VettrRed,
+                    fontWeight = FontWeight.Bold
+                )
+            }
+        }
+    }
+}
+
+/**
+ * Format filing date (epoch millis) to relative time string.
+ */
+private fun formatFilingDate(dateMillis: Long): String {
+    val now = System.currentTimeMillis()
+    val diff = now - dateMillis
+
+    return when {
+        diff < 0 -> "just now"
+        diff < 60_000 -> "just now"
+        diff < 3600_000 -> {
+            val minutes = diff / 60_000
+            "$minutes min${if (minutes == 1L) "" else "s"} ago"
+        }
+        diff < 86400_000 -> {
+            val hours = diff / 3600_000
+            "$hours hour${if (hours == 1L) "" else "s"} ago"
+        }
+        diff < 604800_000 -> {
+            val days = diff / 86400_000
+            "$days day${if (days == 1L) "" else "s"} ago"
+        }
+        else -> {
+            val weeks = diff / 604800_000
+            "$weeks week${if (weeks == 1L) "" else "s"} ago"
+        }
     }
 }
 

@@ -8,10 +8,14 @@ import com.vettr.android.core.model.AlertRule
 import com.vettr.android.core.util.HapticService
 import com.vettr.android.core.util.ObservabilityService
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.flatMapLatest
+import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import javax.inject.Inject
@@ -19,6 +23,7 @@ import javax.inject.Inject
 /**
  * ViewModel for the Alerts screen.
  * Manages alert rules, filtering, and user interactions.
+ * Uses reactive flows from Room database for live data updates.
  */
 @HiltViewModel
 class AlertsViewModel @Inject constructor(
@@ -31,65 +36,74 @@ class AlertsViewModel @Inject constructor(
     private val _uiState = MutableStateFlow(AlertsUiState())
     val uiState: StateFlow<AlertsUiState> = _uiState.asStateFlow()
 
+    private val _selectedFilter = MutableStateFlow(AlertFilter.ALL)
+
     private var lastRefreshTime: Long = 0
     private val refreshDebounceMs = 10_000L // 10 seconds
     private var screenLoadStartTime: Long = 0
+    private var dataCollectionJob: Job? = null
 
     init {
         screenLoadStartTime = System.currentTimeMillis()
-        loadRules()
+        observeAlertRules()
     }
 
     /**
-     * Load alert rules for the current user.
-     * Groups rules by stock ticker and applies the selected filter.
+     * Observe alert rules reactively.
+     * Combines user flow with filter state to produce filtered, grouped rules.
+     * Room database changes automatically propagate to the UI.
      */
-    fun loadRules() {
-        viewModelScope.launch {
+    private fun observeAlertRules() {
+        dataCollectionJob?.cancel()
+        dataCollectionJob = viewModelScope.launch {
             _uiState.update { it.copy(isLoading = true) }
 
-            authRepository.getCurrentUser().collectLatest { user ->
-                if (user != null) {
-                    alertRuleRepository.getRulesForUser(user.id).collectLatest { rules ->
-                        val filteredRules = when (_uiState.value.selectedFilter) {
-                            AlertFilter.ALL -> rules
-                            AlertFilter.ACTIVE -> rules.filter { it.isActive }
-                            AlertFilter.TRIGGERED -> rules.filter { it.lastTriggeredAt != null }
-                        }
-
-                        val groupedRules = groupRulesByTicker(filteredRules)
-
-                        _uiState.update {
-                            it.copy(
-                                alertRules = filteredRules,
-                                groupedAlertRules = groupedRules,
-                                isLoading = false,
-                                lastUpdatedAt = System.currentTimeMillis()
-                            )
-                        }
-
-                        // Track screen load time on first data load
-                        if (screenLoadStartTime > 0) {
-                            val loadTime = System.currentTimeMillis() - screenLoadStartTime
-                            observabilityService.trackScreenLoadTime("Alerts", loadTime)
-                            screenLoadStartTime = 0 // Only track once
-                        }
-                    }
-                } else {
-                    _uiState.update {
-                        it.copy(
-                            alertRules = emptyList(),
-                            groupedAlertRules = emptyMap(),
-                            isLoading = false
-                        )
+            authRepository.getCurrentUser()
+                .flatMapLatest { user ->
+                    if (user != null) {
+                        alertRuleRepository.getRulesForUser(user.id)
+                    } else {
+                        flowOf(emptyList())
                     }
                 }
-            }
+                .combine(_selectedFilter) { rules, filter ->
+                    Pair(rules, filter)
+                }
+                .collectLatest { (rules, filter) ->
+                    val filteredRules = when (filter) {
+                        AlertFilter.ALL -> rules
+                        AlertFilter.ACTIVE -> rules.filter { it.isActive }
+                        AlertFilter.TRIGGERED -> rules.filter { it.lastTriggeredAt != null }
+                    }
+
+                    val groupedRules = groupRulesByTicker(filteredRules)
+
+                    _uiState.update {
+                        it.copy(
+                            alertRules = filteredRules,
+                            groupedAlertRules = groupedRules,
+                            allRulesCount = rules.size,
+                            activeRulesCount = rules.count { r -> r.isActive },
+                            triggeredRulesCount = rules.count { r -> r.lastTriggeredAt != null },
+                            selectedFilter = filter,
+                            isLoading = false,
+                            lastUpdatedAt = System.currentTimeMillis()
+                        )
+                    }
+
+                    // Track screen load time on first data load
+                    if (screenLoadStartTime > 0) {
+                        val loadTime = System.currentTimeMillis() - screenLoadStartTime
+                        observabilityService.trackScreenLoadTime("Alerts", loadTime)
+                        screenLoadStartTime = 0 // Only track once
+                    }
+                }
         }
     }
 
     /**
      * Toggle the active status of an alert rule.
+     * Room Flow will automatically emit updated data to the UI.
      * @param ruleId ID of the rule to toggle
      */
     fun toggleRule(ruleId: String) {
@@ -100,6 +114,7 @@ class AlertsViewModel @Inject constructor(
 
     /**
      * Delete an alert rule.
+     * Room Flow will automatically emit updated data to the UI.
      * @param ruleId ID of the rule to delete
      */
     fun deleteRule(ruleId: String, view: android.view.View?) {
@@ -127,16 +142,16 @@ class AlertsViewModel @Inject constructor(
     }
 
     /**
-     * Update the selected filter and reload rules.
+     * Update the selected filter.
+     * The reactive combine flow will automatically re-filter the rules.
      * @param filter AlertFilter to apply
      */
     fun setFilter(filter: AlertFilter) {
-        _uiState.update { it.copy(selectedFilter = filter) }
-        loadRules()
+        _selectedFilter.value = filter
     }
 
     /**
-     * Refresh alert rules by reloading from repository.
+     * Refresh alert rules by re-observing from repository.
      * Implements debounce logic to prevent more than 1 refresh per 10 seconds.
      */
     fun refresh() {
@@ -146,7 +161,7 @@ class AlertsViewModel @Inject constructor(
             return
         }
         lastRefreshTime = currentTime
-        loadRules()
+        observeAlertRules()
     }
 
     /**
@@ -167,6 +182,9 @@ class AlertsViewModel @Inject constructor(
 data class AlertsUiState(
     val alertRules: List<AlertRule> = emptyList(),
     val groupedAlertRules: Map<String, List<AlertRule>> = emptyMap(),
+    val allRulesCount: Int = 0,
+    val activeRulesCount: Int = 0,
+    val triggeredRulesCount: Int = 0,
     val selectedFilter: AlertFilter = AlertFilter.ALL,
     val isLoading: Boolean = false,
     val lastUpdatedAt: Long? = null

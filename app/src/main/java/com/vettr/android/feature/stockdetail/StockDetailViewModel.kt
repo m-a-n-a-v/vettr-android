@@ -4,10 +4,12 @@ import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.vettr.android.core.data.VetrScoreResult
+import com.vettr.android.core.data.repository.ExecutiveRepository
 import com.vettr.android.core.data.repository.FilingRepository
 import com.vettr.android.core.data.repository.PeerComparison
 import com.vettr.android.core.data.repository.StockRepository
 import com.vettr.android.core.data.repository.VetrScoreRepository
+import com.vettr.android.core.model.Executive
 import com.vettr.android.core.model.Filing
 import com.vettr.android.core.model.Stock
 import com.vettr.android.core.util.HapticService
@@ -46,6 +48,7 @@ enum class TimeRange {
 class StockDetailViewModel @Inject constructor(
     private val stockRepository: StockRepository,
     private val filingRepository: FilingRepository,
+    private val executiveRepository: ExecutiveRepository,
     private val vetrScoreRepository: VetrScoreRepository,
     val hapticService: HapticService,
     savedStateHandle: SavedStateHandle
@@ -58,6 +61,12 @@ class StockDetailViewModel @Inject constructor(
 
     private val _filings = MutableStateFlow<List<Filing>>(emptyList())
     val filings: StateFlow<List<Filing>> = _filings.asStateFlow()
+
+    private val _executives = MutableStateFlow<List<Executive>>(emptyList())
+    val executives: StateFlow<List<Executive>> = _executives.asStateFlow()
+
+    private val _isRefreshing = MutableStateFlow(false)
+    val isRefreshing: StateFlow<Boolean> = _isRefreshing.asStateFlow()
 
     private val _selectedTab = MutableStateFlow(StockDetailTab.OVERVIEW)
     val selectedTab: StateFlow<StockDetailTab> = _selectedTab.asStateFlow()
@@ -122,6 +131,17 @@ class StockDetailViewModel @Inject constructor(
                             _filings.value = filingList
                         }
                 }
+
+                // Load executives for this stock
+                launch {
+                    executiveRepository.getExecutivesForStock(stockId)
+                        .catch { error ->
+                            _errorMessage.value = "Failed to load executives: ${error.message}"
+                        }
+                        .collect { executiveList ->
+                            _executives.value = executiveList
+                        }
+                }
             } finally {
                 _isLoading.value = false
             }
@@ -161,6 +181,17 @@ class StockDetailViewModel @Inject constructor(
      */
     fun selectTimeRange(timeRange: TimeRange) {
         _selectedTimeRange.value = timeRange
+    }
+
+    /**
+     * Refresh all stock detail data (pull-to-refresh).
+     */
+    fun refresh() {
+        viewModelScope.launch {
+            _isRefreshing.value = true
+            loadStock()
+            _isRefreshing.value = false
+        }
     }
 
     /**

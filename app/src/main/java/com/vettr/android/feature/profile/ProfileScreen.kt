@@ -20,16 +20,20 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowForward
 import androidx.compose.material.icons.automirrored.filled.Help
 import androidx.compose.material.icons.automirrored.filled.Logout
-import androidx.compose.material.icons.filled.AccountCircle
+import androidx.compose.material.icons.filled.DeleteOutline
 import androidx.compose.material.icons.filled.Info
 import androidx.compose.material.icons.filled.School
 import androidx.compose.material.icons.filled.Settings
+import androidx.compose.material.icons.filled.Star
+import androidx.compose.material.icons.filled.Storage
 import androidx.compose.material.icons.filled.Sync
+import androidx.compose.material.icons.filled.Verified
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
@@ -45,11 +49,12 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import coil3.compose.AsyncImage
 import com.vettr.android.core.model.User
 import com.vettr.android.core.model.VettrTier
 import com.vettr.android.designsystem.theme.Spacing
@@ -63,10 +68,15 @@ import com.vettr.android.designsystem.theme.VettrTheme
 /**
  * Profile screen - displays user profile information and account settings menu.
  * Features:
- * - User header with avatar, name, email, and tier badge
- * - Account settings menu items
- * - Upgrade to Pro card for free users
+ * - User header with initials avatar, name, email, and tier badge
+ * - Subscription section (plan, watchlist limit, stocks tracked)
+ * - Data Sync section (last sync, sync now button)
+ * - Data & Storage (favorites count, clear cache)
+ * - Help & Learning (Glossary, FAQ)
+ * - About (version, terms, privacy)
  * - Logout with confirmation dialog
+ *
+ * All data is sourced from live repositories.
  */
 @Composable
 fun ProfileScreen(
@@ -83,6 +93,9 @@ fun ProfileScreen(
     val isLoading by viewModel.isLoading.collectAsStateWithLifecycle()
     val lastSyncTime by viewModel.lastSyncTime.collectAsStateWithLifecycle()
     val isSyncing by viewModel.isSyncing.collectAsStateWithLifecycle()
+    val stockCount by viewModel.stockCount.collectAsStateWithLifecycle()
+    val favoritesCount by viewModel.favoritesCount.collectAsStateWithLifecycle()
+    val cacheCleared by viewModel.cacheCleared.collectAsStateWithLifecycle()
 
     var showLogoutDialog by remember { mutableStateOf(false) }
 
@@ -95,9 +108,13 @@ fun ProfileScreen(
         nextSyncEta = viewModel.getNextSyncEta(),
         appVersion = viewModel.getAppVersion(),
         buildType = viewModel.getBuildType(),
+        stockCount = stockCount,
+        favoritesCount = favoritesCount,
+        cacheCleared = cacheCleared,
         showLogoutDialog = showLogoutDialog,
         onShowLogoutDialog = { showLogoutDialog = it },
         onManualSync = { viewModel.triggerManualSync() },
+        onClearCache = { viewModel.clearCache() },
         onNavigateToSettings = onNavigateToSettings,
         onNavigateToAbout = onNavigateToAbout,
         onNavigateToGlossary = onNavigateToGlossary,
@@ -120,9 +137,13 @@ private fun ProfileScreenContent(
     nextSyncEta: Long?,
     appVersion: String,
     buildType: String,
+    stockCount: Int,
+    favoritesCount: Int,
+    cacheCleared: Boolean,
     showLogoutDialog: Boolean,
     onShowLogoutDialog: (Boolean) -> Unit,
     onManualSync: () -> Unit,
+    onClearCache: () -> Unit,
     onNavigateToSettings: () -> Unit,
     onNavigateToAbout: () -> Unit,
     onNavigateToGlossary: () -> Unit,
@@ -140,8 +161,16 @@ private fun ProfileScreenContent(
                 .verticalScroll(rememberScrollState())
                 .padding(Spacing.md)
         ) {
-            // Header section
+            // Profile Header section with initials avatar
             ProfileHeader(user = user, tier = tier)
+
+            Spacer(modifier = Modifier.height(Spacing.lg))
+
+            // Subscription section
+            SubscriptionSection(
+                tier = tier,
+                stockCount = stockCount
+            )
 
             Spacer(modifier = Modifier.height(Spacing.lg))
 
@@ -156,14 +185,23 @@ private fun ProfileScreenContent(
 
             Spacer(modifier = Modifier.height(Spacing.lg))
 
-            // Menu items
+            // Settings
             MenuRow(
                 icon = Icons.Default.Settings,
                 title = "Settings",
                 onClick = onNavigateToSettings
             )
 
-            Spacer(modifier = Modifier.height(Spacing.sm))
+            Spacer(modifier = Modifier.height(Spacing.lg))
+
+            // Data & Storage section
+            DataStorageSection(
+                favoritesCount = favoritesCount,
+                cacheCleared = cacheCleared,
+                onClearCache = onClearCache
+            )
+
+            Spacer(modifier = Modifier.height(Spacing.lg))
 
             // Help & Learning section
             Text(
@@ -171,7 +209,7 @@ private fun ProfileScreenContent(
                 style = MaterialTheme.typography.titleMedium,
                 color = VettrAccent,
                 fontWeight = FontWeight.Bold,
-                modifier = Modifier.padding(top = Spacing.md, bottom = Spacing.sm)
+                modifier = Modifier.padding(bottom = Spacing.sm)
             )
 
             MenuRow(
@@ -196,16 +234,22 @@ private fun ProfileScreenContent(
 
             Spacer(modifier = Modifier.height(Spacing.lg))
 
-            Spacer(modifier = Modifier.height(Spacing.sm))
+            // About section
+            Text(
+                text = "About",
+                style = MaterialTheme.typography.titleMedium,
+                color = VettrAccent,
+                fontWeight = FontWeight.Bold,
+                modifier = Modifier.padding(bottom = Spacing.sm)
+            )
 
-            // About (shows onboarding carousel)
             MenuRow(
                 icon = Icons.Default.Info,
-                title = "About",
+                title = "About VETTR",
                 onClick = onNavigateToAbout
             )
 
-            Spacer(modifier = Modifier.height(Spacing.sm))
+            Spacer(modifier = Modifier.height(Spacing.lg))
 
             // Log Out
             MenuRow(
@@ -251,7 +295,8 @@ private fun ProfileScreenContent(
 }
 
 /**
- * Profile header showing avatar, name, email, and tier badge.
+ * Profile header showing initials avatar, name, email, and tier badge.
+ * Uses the first letters of the display name as the avatar initials (matching iOS).
  */
 @Composable
 private fun ProfileHeader(
@@ -272,31 +317,22 @@ private fun ProfileHeader(
                 .padding(Spacing.md),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            // Avatar
-            if (user?.avatarUrl != null) {
-                AsyncImage(
-                    model = user.avatarUrl,
-                    contentDescription = "Profile avatar",
-                    modifier = Modifier
-                        .size(80.dp)
-                        .clip(CircleShape)
+            // Initials-based avatar (matching iOS)
+            val initials = getInitials(user?.displayName)
+            Box(
+                modifier = Modifier
+                    .size(80.dp)
+                    .clip(CircleShape)
+                    .background(VettrAccent.copy(alpha = 0.2f)),
+                contentAlignment = Alignment.Center
+            ) {
+                Text(
+                    text = initials,
+                    style = MaterialTheme.typography.headlineMedium,
+                    color = VettrAccent,
+                    fontWeight = FontWeight.Bold,
+                    textAlign = TextAlign.Center
                 )
-            } else {
-                // Default avatar icon
-                Box(
-                    modifier = Modifier
-                        .size(80.dp)
-                        .clip(CircleShape)
-                        .background(VettrAccent.copy(alpha = 0.2f)),
-                    contentAlignment = Alignment.Center
-                ) {
-                    Icon(
-                        imageVector = Icons.Default.AccountCircle,
-                        contentDescription = "Default avatar",
-                        tint = VettrAccent,
-                        modifier = Modifier.size(48.dp)
-                    )
-                }
             }
 
             Spacer(modifier = Modifier.height(Spacing.md))
@@ -323,6 +359,231 @@ private fun ProfileHeader(
             // Tier badge
             TierBadge(tier = tier)
         }
+    }
+}
+
+/**
+ * Extract initials from display name.
+ * Takes the first letter of each word (max 2 letters).
+ */
+private fun getInitials(displayName: String?): String {
+    if (displayName.isNullOrBlank()) return "G"
+    val parts = displayName.trim().split(" ").filter { it.isNotBlank() }
+    return when {
+        parts.size >= 2 -> "${parts[0].first().uppercase()}${parts[1].first().uppercase()}"
+        parts.size == 1 -> parts[0].first().uppercase()
+        else -> "G"
+    }
+}
+
+/**
+ * Subscription section showing current plan, watchlist limit, and stocks tracked.
+ * All counts come from live repository data.
+ */
+@Composable
+private fun SubscriptionSection(
+    tier: VettrTier,
+    stockCount: Int,
+    modifier: Modifier = Modifier
+) {
+    Card(
+        modifier = modifier.fillMaxWidth(),
+        shape = RoundedCornerShape(12.dp),
+        colors = CardDefaults.cardColors(
+            containerColor = VettrCardBackground
+        )
+    ) {
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(Spacing.md)
+        ) {
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                Icon(
+                    imageVector = Icons.Default.Verified,
+                    contentDescription = "Subscription",
+                    tint = VettrAccent,
+                    modifier = Modifier.size(24.dp)
+                )
+
+                Spacer(modifier = Modifier.width(Spacing.md))
+
+                Text(
+                    text = "Subscription",
+                    style = MaterialTheme.typography.titleMedium,
+                    color = VettrTextPrimary,
+                    fontWeight = FontWeight.SemiBold
+                )
+            }
+
+            Spacer(modifier = Modifier.height(Spacing.md))
+
+            // Current plan
+            InfoRow(
+                label = "Current Plan",
+                value = when (tier) {
+                    VettrTier.FREE -> "Free"
+                    VettrTier.PRO -> "Pro"
+                    VettrTier.PREMIUM -> "Premium"
+                }
+            )
+
+            Spacer(modifier = Modifier.height(Spacing.sm))
+
+            // Watchlist limit
+            val watchlistLimitText = if (tier.watchlistLimit == Int.MAX_VALUE) {
+                "Unlimited"
+            } else {
+                "${tier.watchlistLimit}"
+            }
+            InfoRow(
+                label = "Watchlist Limit",
+                value = watchlistLimitText
+            )
+
+            Spacer(modifier = Modifier.height(Spacing.sm))
+
+            // Stocks tracked (live from Room)
+            InfoRow(
+                label = "Stocks Tracked",
+                value = "$stockCount"
+            )
+        }
+    }
+}
+
+/**
+ * Data & Storage section showing favorites count and clear cache button.
+ */
+@Composable
+private fun DataStorageSection(
+    favoritesCount: Int,
+    cacheCleared: Boolean,
+    onClearCache: () -> Unit,
+    modifier: Modifier = Modifier
+) {
+    Card(
+        modifier = modifier.fillMaxWidth(),
+        shape = RoundedCornerShape(12.dp),
+        colors = CardDefaults.cardColors(
+            containerColor = VettrCardBackground
+        )
+    ) {
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(Spacing.md)
+        ) {
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                Icon(
+                    imageVector = Icons.Default.Storage,
+                    contentDescription = "Data & Storage",
+                    tint = VettrAccent,
+                    modifier = Modifier.size(24.dp)
+                )
+
+                Spacer(modifier = Modifier.width(Spacing.md))
+
+                Text(
+                    text = "Data & Storage",
+                    style = MaterialTheme.typography.titleMedium,
+                    color = VettrTextPrimary,
+                    fontWeight = FontWeight.SemiBold
+                )
+            }
+
+            Spacer(modifier = Modifier.height(Spacing.md))
+
+            // Favorites count (live from Room)
+            InfoRow(
+                label = "Favorites",
+                value = "$favoritesCount stock${if (favoritesCount != 1) "s" else ""}"
+            )
+
+            Spacer(modifier = Modifier.height(Spacing.md))
+
+            HorizontalDivider(
+                color = VettrTextSecondary.copy(alpha = 0.2f),
+                thickness = 0.5.dp
+            )
+
+            Spacer(modifier = Modifier.height(Spacing.md))
+
+            // Clear cache button
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Row(
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Icon(
+                        imageVector = Icons.Default.DeleteOutline,
+                        contentDescription = "Clear Cache",
+                        tint = VettrTextSecondary,
+                        modifier = Modifier.size(20.dp)
+                    )
+                    Spacer(modifier = Modifier.width(Spacing.sm))
+                    Text(
+                        text = "Clear Cache",
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = VettrTextPrimary
+                    )
+                }
+
+                if (cacheCleared) {
+                    Text(
+                        text = "Cleared",
+                        style = MaterialTheme.typography.bodySmall,
+                        color = VettrAccent,
+                        fontWeight = FontWeight.SemiBold
+                    )
+                } else {
+                    TextButton(onClick = onClearCache) {
+                        Text(
+                            text = "Clear",
+                            color = VettrAccent,
+                            fontWeight = FontWeight.SemiBold
+                        )
+                    }
+                }
+            }
+        }
+    }
+}
+
+/**
+ * Reusable info row for label-value pairs.
+ */
+@Composable
+private fun InfoRow(
+    label: String,
+    value: String,
+    modifier: Modifier = Modifier
+) {
+    Row(
+        modifier = modifier.fillMaxWidth(),
+        horizontalArrangement = Arrangement.SpaceBetween,
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        Text(
+            text = label,
+            style = MaterialTheme.typography.bodyMedium,
+            color = VettrTextSecondary
+        )
+
+        Text(
+            text = value,
+            style = MaterialTheme.typography.bodyMedium,
+            color = VettrTextPrimary
+        )
     }
 }
 
@@ -364,7 +625,7 @@ private fun SyncSection(
                 Spacer(modifier = Modifier.width(Spacing.md))
 
                 Text(
-                    text = "Sync",
+                    text = "Data Sync",
                     style = MaterialTheme.typography.titleMedium,
                     color = VettrTextPrimary,
                     fontWeight = FontWeight.SemiBold
@@ -374,65 +635,26 @@ private fun SyncSection(
             Spacer(modifier = Modifier.height(Spacing.md))
 
             // Last sync time
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                Text(
-                    text = "Last sync",
-                    style = MaterialTheme.typography.bodyMedium,
-                    color = VettrTextSecondary
-                )
-
-                Text(
-                    text = lastSyncTime?.let { formatRelativeTime(it) } ?: "Never",
-                    style = MaterialTheme.typography.bodyMedium,
-                    color = VettrTextPrimary
-                )
-            }
+            InfoRow(
+                label = "Last sync",
+                value = lastSyncTime?.let { formatRelativeTime(it) } ?: "Never"
+            )
 
             Spacer(modifier = Modifier.height(Spacing.sm))
 
             // Next sync ETA
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                Text(
-                    text = "Next sync",
-                    style = MaterialTheme.typography.bodyMedium,
-                    color = VettrTextSecondary
-                )
-
-                Text(
-                    text = nextSyncEta?.let { formatNextSync(it) } ?: "Unknown",
-                    style = MaterialTheme.typography.bodyMedium,
-                    color = VettrTextPrimary
-                )
-            }
+            InfoRow(
+                label = "Next sync",
+                value = nextSyncEta?.let { formatNextSync(it) } ?: "Unknown"
+            )
 
             Spacer(modifier = Modifier.height(Spacing.sm))
 
             // Sync frequency based on tier
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                Text(
-                    text = "Sync frequency",
-                    style = MaterialTheme.typography.bodyMedium,
-                    color = VettrTextSecondary
-                )
-
-                Text(
-                    text = getSyncFrequencyText(tier),
-                    style = MaterialTheme.typography.bodyMedium,
-                    color = VettrTextPrimary
-                )
-            }
+            InfoRow(
+                label = "Sync frequency",
+                value = getSyncFrequencyText(tier)
+            )
 
             Spacer(modifier = Modifier.height(Spacing.md))
 
@@ -724,8 +946,8 @@ fun ProfileScreenPreview() {
         ProfileScreenContent(
             user = User(
                 id = "1",
-                email = "investor@example.com",
-                displayName = "Jane Investor",
+                email = "demo@vettr.com",
+                displayName = "Demo User",
                 avatarUrl = null,
                 tier = "FREE",
                 createdAt = System.currentTimeMillis()
@@ -737,9 +959,13 @@ fun ProfileScreenPreview() {
             nextSyncEta = System.currentTimeMillis() + (23 * 60 * 60 * 1000), // 23 hours from now
             appVersion = "1.0.0 (1)",
             buildType = "Debug",
+            stockCount = 25,
+            favoritesCount = 3,
+            cacheCleared = false,
             showLogoutDialog = false,
             onShowLogoutDialog = {},
             onManualSync = {},
+            onClearCache = {},
             onNavigateToSettings = {},
             onNavigateToAbout = {},
             onNavigateToGlossary = {},
@@ -756,8 +982,8 @@ fun ProfileScreenTabletPreview() {
         ProfileScreenContent(
             user = User(
                 id = "1",
-                email = "investor@example.com",
-                displayName = "Jane Investor",
+                email = "demo@vettr.com",
+                displayName = "Demo User",
                 avatarUrl = null,
                 tier = "FREE",
                 createdAt = System.currentTimeMillis()
@@ -769,9 +995,13 @@ fun ProfileScreenTabletPreview() {
             nextSyncEta = System.currentTimeMillis() + (23 * 60 * 60 * 1000), // 23 hours from now
             appVersion = "1.0.0 (1)",
             buildType = "Debug",
+            stockCount = 25,
+            favoritesCount = 3,
+            cacheCleared = false,
             showLogoutDialog = false,
             onShowLogoutDialog = {},
             onManualSync = {},
+            onClearCache = {},
             onNavigateToSettings = {},
             onNavigateToAbout = {},
             onNavigateToGlossary = {},

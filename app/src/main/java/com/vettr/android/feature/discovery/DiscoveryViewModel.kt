@@ -4,6 +4,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.vettr.android.core.data.repository.FilingRepository
 import com.vettr.android.core.data.repository.StockRepository
+import com.vettr.android.core.model.Filing
 import com.vettr.android.core.model.Stock
 import com.vettr.android.core.util.ObservabilityService
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -11,13 +12,12 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.catch
-import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 /**
  * ViewModel for the Discovery screen.
- * Manages UI state for stock discovery, filtering, and search functionality.
+ * Loads stocks and filings from repositories, supports search and sector filtering.
  */
 @HiltViewModel
 class DiscoveryViewModel @Inject constructor(
@@ -26,21 +26,27 @@ class DiscoveryViewModel @Inject constructor(
     private val observabilityService: ObservabilityService
 ) : ViewModel() {
 
+    // All stocks from API (unfiltered source of truth)
+    private val _allStocks = MutableStateFlow<List<Stock>>(emptyList())
+
+    // All filings from API (unfiltered source of truth)
+    private val _allFilings = MutableStateFlow<List<Filing>>(emptyList())
+
+    // Filtered stocks visible to the UI
     private val _stocks = MutableStateFlow<List<Stock>>(emptyList())
     val stocks: StateFlow<List<Stock>> = _stocks.asStateFlow()
 
-    private val _sectors = MutableStateFlow<List<String>>(
-        listOf(
-            "Critical Minerals",
-            "AI Technology",
-            "Energy Juniors",
-            "Clean Tech"
-        )
-    )
+    // Filtered filings visible to the UI
+    private val _filings = MutableStateFlow<List<Filing>>(emptyList())
+    val filings: StateFlow<List<Filing>> = _filings.asStateFlow()
+
+    // Dynamic sector list extracted from stock data
+    private val _sectors = MutableStateFlow<List<String>>(emptyList())
     val sectors: StateFlow<List<String>> = _sectors.asStateFlow()
 
-    private val _selectedFilter = MutableStateFlow(DiscoveryFilter.WATCHLIST)
-    val selectedFilter: StateFlow<DiscoveryFilter> = _selectedFilter.asStateFlow()
+    // Currently selected sector filter ("All" = no filter)
+    private val _selectedSector = MutableStateFlow("All")
+    val selectedSector: StateFlow<String> = _selectedSector.asStateFlow()
 
     private val _searchQuery = MutableStateFlow("")
     val searchQuery: StateFlow<String> = _searchQuery.asStateFlow()
@@ -64,7 +70,7 @@ class DiscoveryViewModel @Inject constructor(
     }
 
     /**
-     * Load stocks data from repository based on current filter.
+     * Load stocks and filings data from repositories.
      */
     fun loadData() {
         viewModelScope.launch {
@@ -72,43 +78,45 @@ class DiscoveryViewModel @Inject constructor(
             _errorMessage.value = null
 
             try {
-                when (_selectedFilter.value) {
-                    DiscoveryFilter.WATCHLIST -> {
-                        stockRepository.getFavorites()
-                            .catch { error ->
-                                _errorMessage.value = "Failed to load watchlist: ${error.message}"
-                            }
-                            .collect { stockList ->
-                                _stocks.value = stockList
-                                _lastUpdatedAt.value = System.currentTimeMillis()
+                // Collect stocks
+                launch {
+                    stockRepository.getStocks()
+                        .catch { error ->
+                            _errorMessage.value = "Failed to load stocks: ${error.message}"
+                        }
+                        .collect { stockList ->
+                            _allStocks.value = stockList
+                            _lastUpdatedAt.value = System.currentTimeMillis()
 
-                                // Track screen load time on first data load
-                                if (screenLoadStartTime > 0) {
-                                    val loadTime = System.currentTimeMillis() - screenLoadStartTime
-                                    observabilityService.trackScreenLoadTime("Discovery", loadTime)
-                                    screenLoadStartTime = 0 // Only track once
-                                }
-                            }
-                    }
-                    DiscoveryFilter.ALERTS -> {
-                        // For now, just load all stocks
-                        // TODO: Filter by stocks with active alerts when AlertRepository is available
-                        stockRepository.getStocks()
-                            .catch { error ->
-                                _errorMessage.value = "Failed to load alerts: ${error.message}"
-                            }
-                            .collect { stockList ->
-                                _stocks.value = stockList
-                                _lastUpdatedAt.value = System.currentTimeMillis()
+                            // Extract unique sectors dynamically
+                            val uniqueSectors = stockList
+                                .map { it.sector }
+                                .distinct()
+                                .sorted()
+                            _sectors.value = listOf("All") + uniqueSectors
 
-                                // Track screen load time on first data load
-                                if (screenLoadStartTime > 0) {
-                                    val loadTime = System.currentTimeMillis() - screenLoadStartTime
-                                    observabilityService.trackScreenLoadTime("Discovery", loadTime)
-                                    screenLoadStartTime = 0 // Only track once
-                                }
+                            // Apply current filters
+                            applyFilters()
+
+                            // Track screen load time on first data load
+                            if (screenLoadStartTime > 0) {
+                                val loadTime = System.currentTimeMillis() - screenLoadStartTime
+                                observabilityService.trackScreenLoadTime("Discovery", loadTime)
+                                screenLoadStartTime = 0
                             }
-                    }
+                        }
+                }
+
+                // Collect latest filings
+                launch {
+                    filingRepository.getLatestFilings(limit = 20)
+                        .catch { error ->
+                            _errorMessage.value = "Failed to load filings: ${error.message}"
+                        }
+                        .collect { filingList ->
+                            _allFilings.value = filingList
+                            applyFilters()
+                        }
                 }
             } finally {
                 _isLoading.value = false
@@ -117,46 +125,61 @@ class DiscoveryViewModel @Inject constructor(
     }
 
     /**
-     * Toggle between Watchlist and Alerts filters.
+     * Update search query and refilter.
      */
-    fun toggleFilter() {
-        _selectedFilter.update { currentFilter ->
-            when (currentFilter) {
-                DiscoveryFilter.WATCHLIST -> DiscoveryFilter.ALERTS
-                DiscoveryFilter.ALERTS -> DiscoveryFilter.WATCHLIST
-            }
-        }
-        loadData()
+    fun updateSearchQuery(query: String) {
+        _searchQuery.value = query
+        applyFilters()
     }
 
     /**
-     * Search stocks by query string.
-     * @param query Search query (ticker or name)
+     * Select a sector filter chip.
      */
-    fun searchStocks(query: String) {
-        _searchQuery.value = query
+    fun selectSector(sector: String) {
+        _selectedSector.value = sector
+        applyFilters()
+    }
 
-        if (query.isEmpty()) {
-            loadData()
-            return
+    /**
+     * Apply search query and sector filter to stocks and filings.
+     */
+    private fun applyFilters() {
+        val query = _searchQuery.value.lowercase().trim()
+        val sector = _selectedSector.value
+        val allStocks = _allStocks.value
+        val allFilings = _allFilings.value
+
+        // Filter stocks by sector
+        val sectorFiltered = if (sector == "All") allStocks
+        else allStocks.filter { it.sector.equals(sector, ignoreCase = true) }
+
+        // Filter stocks by search query (ticker or name)
+        val filteredStocks = if (query.isEmpty()) sectorFiltered
+        else sectorFiltered.filter {
+            it.ticker.lowercase().contains(query) ||
+                it.name.lowercase().contains(query) ||
+                it.sector.lowercase().contains(query)
         }
 
-        viewModelScope.launch {
-            _isLoading.value = true
-            _errorMessage.value = null
+        _stocks.value = filteredStocks
 
-            try {
-                stockRepository.searchStocks(query)
-                    .catch { error ->
-                        _errorMessage.value = "Search failed: ${error.message}"
-                    }
-                    .collect { searchResults ->
-                        _stocks.value = searchResults
-                    }
-            } finally {
-                _isLoading.value = false
+        // Build a set of stock IDs matching the sector filter
+        val sectorStockIds = sectorFiltered.map { it.id }.toSet()
+
+        // Filter filings: match sector via stockId, and search query in title
+        val filteredFilings = allFilings.filter { filing ->
+            val matchesSector = sector == "All" || filing.stockId in sectorStockIds
+            val matchesQuery = query.isEmpty() || run {
+                val stock = allStocks.find { it.id == filing.stockId }
+                filing.title.lowercase().contains(query) ||
+                    filing.type.lowercase().contains(query) ||
+                    (stock?.ticker?.lowercase()?.contains(query) == true) ||
+                    (stock?.name?.lowercase()?.contains(query) == true)
             }
+            matchesSector && matchesQuery
         }
+
+        _filings.value = filteredFilings.sortedByDescending { it.date }.take(10)
     }
 
     /**
@@ -166,18 +189,9 @@ class DiscoveryViewModel @Inject constructor(
     fun refresh() {
         val currentTime = System.currentTimeMillis()
         if (currentTime - lastRefreshTime < refreshDebounceMs) {
-            // Skip refresh if within debounce window
             return
         }
         lastRefreshTime = currentTime
         loadData()
     }
-}
-
-/**
- * Discovery filter options.
- */
-enum class DiscoveryFilter {
-    WATCHLIST,
-    ALERTS
 }

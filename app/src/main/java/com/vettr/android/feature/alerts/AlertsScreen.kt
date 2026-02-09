@@ -123,10 +123,13 @@ fun AlertsScreen(
                         .padding(top = Spacing.sm)
                 )
 
-                // Filter chips
+                // Filter chips with live counts
                 FilterSection(
                     selectedFilter = uiState.selectedFilter,
                     onFilterSelected = { viewModel.setFilter(it) },
+                    allCount = uiState.allRulesCount,
+                    activeCount = uiState.activeRulesCount,
+                    triggeredCount = uiState.triggeredRulesCount,
                     modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp)
                 )
 
@@ -140,6 +143,7 @@ fun AlertsScreen(
                 }
             } else if (uiState.alertRules.isEmpty()) {
                 EmptyStateView(
+                    onCreateAlert = onCreateAlert,
                     modifier = Modifier.fillMaxSize()
                 )
             } else {
@@ -209,11 +213,15 @@ fun AlertsScreen(
 
 /**
  * Filter section with chips for All, Active, and Triggered alerts.
+ * Shows live counts from the Room database for each filter category.
  */
 @Composable
 private fun FilterSection(
     selectedFilter: AlertFilter,
     onFilterSelected: (AlertFilter) -> Unit,
+    allCount: Int,
+    activeCount: Int,
+    triggeredCount: Int,
     modifier: Modifier = Modifier
 ) {
     Row(
@@ -221,16 +229,23 @@ private fun FilterSection(
         horizontalArrangement = Arrangement.spacedBy(8.dp)
     ) {
         AlertFilter.entries.forEach { filter ->
+            val count = when (filter) {
+                AlertFilter.ALL -> allCount
+                AlertFilter.ACTIVE -> activeCount
+                AlertFilter.TRIGGERED -> triggeredCount
+            }
+            val label = when (filter) {
+                AlertFilter.ALL -> "All"
+                AlertFilter.ACTIVE -> "Active"
+                AlertFilter.TRIGGERED -> "Triggered"
+            }
+
             FilterChip(
                 selected = selectedFilter == filter,
                 onClick = { onFilterSelected(filter) },
                 label = {
                     Text(
-                        text = when (filter) {
-                            AlertFilter.ALL -> "All"
-                            AlertFilter.ACTIVE -> "Active"
-                            AlertFilter.TRIGGERED -> "Triggered"
-                        }
+                        text = if (count > 0) "$label ($count)" else label
                     )
                 },
                 colors = FilterChipDefaults.filterChipColors(
@@ -447,9 +462,11 @@ private fun RecentTriggersSection(
 
 /**
  * Empty state view when no alerts exist.
+ * Includes a "Create Alert" button that navigates to the alert creator.
  */
 @Composable
 private fun EmptyStateView(
+    onCreateAlert: () -> Unit = {},
     modifier: Modifier = Modifier
 ) {
     Box(
@@ -472,10 +489,23 @@ private fun EmptyStateView(
                 color = MaterialTheme.colorScheme.onSurfaceVariant
             )
             Text(
-                text = "Tap the + button to create your first alert",
+                text = "Create an alert to get notified about stock changes",
                 style = MaterialTheme.typography.bodyMedium,
                 color = MaterialTheme.colorScheme.onSurfaceVariant
             )
+            Spacer(modifier = Modifier.height(8.dp))
+            androidx.compose.material3.Button(
+                onClick = onCreateAlert,
+                shape = RoundedCornerShape(8.dp)
+            ) {
+                Icon(
+                    imageVector = Icons.Default.Add,
+                    contentDescription = null,
+                    modifier = Modifier.size(18.dp)
+                )
+                Spacer(modifier = Modifier.size(8.dp))
+                Text("Create Alert")
+            }
         }
     }
 }

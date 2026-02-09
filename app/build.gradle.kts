@@ -35,8 +35,8 @@ android {
             isMinifyEnabled = false
             applicationIdSuffix = ".debug"
             versionNameSuffix = "-debug"
-            // 10.0.2.2 is the host machine's localhost from Android emulator
-            buildConfigField("String", "API_BASE_URL", "\"http://10.0.2.2:3000/v1/\"")
+            // Use production API for live data (was 10.0.2.2 for local Docker)
+            buildConfigField("String", "API_BASE_URL", "\"https://vettr-backend.vercel.app/v1/\"")
         }
     }
 
