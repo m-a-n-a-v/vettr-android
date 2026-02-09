@@ -17,8 +17,10 @@ import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import com.vettr.android.designsystem.theme.VettrGreen
 import com.vettr.android.designsystem.theme.VettrRed
 import com.vettr.android.designsystem.theme.VettrTheme
@@ -112,22 +114,26 @@ fun VettrScoreView(
                 )
             }
 
-            // Score text in center
+            // Score text in center — font scales with circle size
+            val fontSize = with(LocalDensity.current) { (size * 0.35f).toSp() }
             Text(
                 text = normalizedScore.toString(),
-                style = MaterialTheme.typography.displaySmall,
+                fontSize = fontSize,
                 color = Color.White,
-                fontWeight = FontWeight.Bold
+                fontWeight = FontWeight.Bold,
+                lineHeight = fontSize
             )
         }
 
-        // Score label below the circle
-        Text(
-            text = scoreLabel,
-            style = MaterialTheme.typography.bodySmall,
-            color = scoreColor,
-            fontWeight = FontWeight.SemiBold
-        )
+        // Score label below the circle (hidden for small sizes)
+        if (size >= 48.dp) {
+            Text(
+                text = scoreLabel,
+                style = MaterialTheme.typography.bodySmall,
+                color = scoreColor,
+                fontWeight = FontWeight.SemiBold
+            )
+        }
     }
 }
 
