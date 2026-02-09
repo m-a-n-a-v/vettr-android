@@ -310,7 +310,7 @@ fun DiscoveryScreen(
 
 /**
  * Featured stock card for horizontal scroll section.
- * Shows avatar, ticker, company name, price, % change, sector chip, and VETTR score.
+ * Compact layout: ticker + initials row, company name, price + change row, VETTR score.
  */
 @Composable
 private fun FeaturedStockCard(
@@ -320,37 +320,39 @@ private fun FeaturedStockCard(
 ) {
     Column(
         modifier = modifier
-            .width(160.dp)
+            .width(140.dp)
             .cardStyle()
             .clickable(onClick = onClick)
-            .vettrPadding(Spacing.md),
-        horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.spacedBy(Spacing.sm)
+            .vettrPadding(Spacing.sm),
+        verticalArrangement = Arrangement.spacedBy(4.dp)
     ) {
-        // Avatar circle with 2-letter abbreviation
-        val initials = stock.ticker.take(2)
-        Box(
-            modifier = Modifier
-                .size(44.dp)
-                .clip(CircleShape)
-                .background(VettrAccent.copy(alpha = 0.2f)),
-            contentAlignment = Alignment.Center
+        // Top row: initials avatar + ticker
+        Row(
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(Spacing.sm)
         ) {
+            val initials = stock.ticker.take(2)
+            Box(
+                modifier = Modifier
+                    .size(28.dp)
+                    .clip(CircleShape)
+                    .background(VettrAccent.copy(alpha = 0.2f)),
+                contentAlignment = Alignment.Center
+            ) {
+                Text(
+                    text = initials,
+                    style = MaterialTheme.typography.labelSmall,
+                    color = VettrAccent,
+                    fontWeight = FontWeight.Bold
+                )
+            }
             Text(
-                text = initials,
-                style = MaterialTheme.typography.titleMedium,
-                color = VettrAccent,
+                text = stock.ticker,
+                style = MaterialTheme.typography.titleSmall,
+                color = MaterialTheme.colorScheme.onSurface,
                 fontWeight = FontWeight.Bold
             )
         }
-
-        // Ticker
-        Text(
-            text = stock.ticker,
-            style = MaterialTheme.typography.titleSmall,
-            color = MaterialTheme.colorScheme.onSurface,
-            fontWeight = FontWeight.Bold
-        )
 
         // Company name
         Text(
@@ -361,31 +363,41 @@ private fun FeaturedStockCard(
             overflow = TextOverflow.Ellipsis
         )
 
-        // Price
-        Text(
-            text = String.format("$%.2f", stock.price),
-            style = MaterialTheme.typography.titleSmall,
-            color = MaterialTheme.colorScheme.onSurface
-        )
+        // Price + change in one row
+        Row(
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(Spacing.xs)
+        ) {
+            Text(
+                text = String.format("$%.2f", stock.price),
+                style = MaterialTheme.typography.titleSmall,
+                color = MaterialTheme.colorScheme.onSurface
+            )
+            val changeColor = if (stock.priceChange >= 0) VettrGreen else VettrRed
+            val changePrefix = if (stock.priceChange >= 0) "+" else ""
+            Text(
+                text = "${changePrefix}${String.format("%.1f", stock.priceChange)}%",
+                style = MaterialTheme.typography.labelSmall,
+                color = changeColor,
+                fontWeight = FontWeight.SemiBold
+            )
+        }
 
-        // % Change
-        val changeColor = if (stock.priceChange >= 0) VettrGreen else VettrRed
-        val changePrefix = if (stock.priceChange >= 0) "+" else ""
-        Text(
-            text = "${changePrefix}${String.format("%.2f", stock.priceChange)}%",
-            style = MaterialTheme.typography.bodySmall,
-            color = changeColor,
-            fontWeight = FontWeight.SemiBold
-        )
-
-        // Sector chip
-        SectorChip(sector = stock.sector)
-
-        // VETTR Score badge
-        VettrScoreView(
-            score = stock.vetrScore,
-            size = 40.dp
-        )
+        // VETTR Score - small badge
+        Row(
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(Spacing.xs)
+        ) {
+            Text(
+                text = "VETTR",
+                style = MaterialTheme.typography.labelSmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant
+            )
+            VettrScoreView(
+                score = stock.vetrScore,
+                size = 28.dp
+            )
+        }
     }
 }
 

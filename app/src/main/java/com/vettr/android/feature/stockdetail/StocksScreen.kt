@@ -140,7 +140,6 @@ fun StocksScreen(
                                         companyName = stock.name,
                                         price = stock.price,
                                         priceChange = stock.priceChange,
-                                        logoUrl = "https://logo.clearbit.com/${stock.ticker.lowercase()}.com",
                                         onClick = { onStockClick(stock.ticker) }
                                     )
                                     HorizontalDivider(
