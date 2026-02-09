@@ -48,10 +48,10 @@
 -dontwarn retrofit2.KotlinExtensions
 -dontwarn retrofit2.KotlinExtensions$*
 
-# Keep API interfaces and models
+# Keep API interfaces and models (DTOs are in remote package directly, not a model subpackage)
 -keep interface com.vettr.android.core.data.remote.** { *; }
--keep class com.vettr.android.core.data.remote.model.** { *; }
--keepclassmembers class com.vettr.android.core.data.remote.model.** { *; }
+-keep class com.vettr.android.core.data.remote.** { *; }
+-keepclassmembers class com.vettr.android.core.data.remote.** { *; }
 
 # ============================================================================
 # OkHttp
