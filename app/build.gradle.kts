@@ -29,11 +29,14 @@ android {
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro"
             )
+            buildConfigField("String", "API_BASE_URL", "\"https://api.vettr.com/v1/\"")
         }
         debug {
             isMinifyEnabled = false
             applicationIdSuffix = ".debug"
             versionNameSuffix = "-debug"
+            // 10.0.2.2 is the host machine's localhost from Android emulator
+            buildConfigField("String", "API_BASE_URL", "\"http://10.0.2.2:3000/v1/\"")
         }
     }
 
