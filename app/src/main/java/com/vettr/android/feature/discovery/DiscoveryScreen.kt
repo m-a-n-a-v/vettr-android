@@ -310,7 +310,7 @@ fun DiscoveryScreen(
 
 /**
  * Featured stock card for horizontal scroll section.
- * Compact layout: ticker + initials row, company name, price + change row, VETTR score.
+ * VETTR score badge pinned to top-right corner for a clean, compact layout.
  */
 @Composable
 private fun FeaturedStockCard(
@@ -318,61 +318,46 @@ private fun FeaturedStockCard(
     onClick: () -> Unit,
     modifier: Modifier = Modifier
 ) {
-    Column(
+    Box(
         modifier = modifier
             .width(140.dp)
             .cardStyle()
             .clickable(onClick = onClick)
-            .vettrPadding(Spacing.sm),
-        verticalArrangement = Arrangement.spacedBy(4.dp)
     ) {
-        // Top row: initials avatar + ticker
-        Row(
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.spacedBy(Spacing.sm)
+        // Main content column
+        Column(
+            modifier = Modifier
+                .vettrPadding(Spacing.sm)
+                .padding(end = 4.dp),
+            verticalArrangement = Arrangement.spacedBy(4.dp)
         ) {
-            val initials = stock.ticker.take(2)
-            Box(
-                modifier = Modifier
-                    .size(28.dp)
-                    .clip(CircleShape)
-                    .background(VettrAccent.copy(alpha = 0.2f)),
-                contentAlignment = Alignment.Center
-            ) {
-                Text(
-                    text = initials,
-                    style = MaterialTheme.typography.labelSmall,
-                    color = VettrAccent,
-                    fontWeight = FontWeight.Bold
-                )
-            }
+            // Ticker (bold, prominent)
             Text(
                 text = stock.ticker,
-                style = MaterialTheme.typography.titleSmall,
+                style = MaterialTheme.typography.titleMedium,
                 color = MaterialTheme.colorScheme.onSurface,
                 fontWeight = FontWeight.Bold
             )
-        }
 
-        // Company name
-        Text(
-            text = stock.name,
-            style = MaterialTheme.typography.bodySmall,
-            color = MaterialTheme.colorScheme.onSurfaceVariant,
-            maxLines = 1,
-            overflow = TextOverflow.Ellipsis
-        )
+            // Company name
+            Text(
+                text = stock.name,
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis
+            )
 
-        // Price + change in one row
-        Row(
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.spacedBy(Spacing.xs)
-        ) {
+            Spacer(modifier = Modifier.height(2.dp))
+
+            // Price
             Text(
                 text = String.format("$%.2f", stock.price),
                 style = MaterialTheme.typography.titleSmall,
                 color = MaterialTheme.colorScheme.onSurface
             )
+
+            // % Change
             val changeColor = if (stock.priceChange >= 0) VettrGreen else VettrRed
             val changePrefix = if (stock.priceChange >= 0) "+" else ""
             Text(
@@ -383,21 +368,14 @@ private fun FeaturedStockCard(
             )
         }
 
-        // VETTR Score - small badge
-        Row(
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.spacedBy(Spacing.xs)
-        ) {
-            Text(
-                text = "VETTR",
-                style = MaterialTheme.typography.labelSmall,
-                color = MaterialTheme.colorScheme.onSurfaceVariant
-            )
-            VettrScoreView(
-                score = stock.vetrScore,
-                size = 28.dp
-            )
-        }
+        // VETTR Score badge pinned to top-right
+        VettrScoreView(
+            score = stock.vetrScore,
+            size = 28.dp,
+            modifier = Modifier
+                .align(Alignment.TopEnd)
+                .padding(Spacing.xs)
+        )
     }
 }
 
