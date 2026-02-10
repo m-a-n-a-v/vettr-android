@@ -140,7 +140,7 @@ fun StocksScreen(
                                         companyName = stock.name,
                                         price = stock.price,
                                         priceChange = stock.priceChange,
-                                        onClick = { onStockClick(stock.ticker) }
+                                        onClick = { onStockClick(stock.id) }
                                     )
                                     HorizontalDivider(
                                         color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.1f)
