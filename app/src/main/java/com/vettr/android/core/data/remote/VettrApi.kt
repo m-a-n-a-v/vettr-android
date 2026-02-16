@@ -70,6 +70,14 @@ interface VettrApi {
     ): AdminListResponse<ExecutiveDto>
 
     /**
+     * Fetch discovery collections with curated stock lists.
+     * Uses JWT authentication (Authorization: Bearer token) automatically added by AuthInterceptor.
+     * @return Discovery collections response with list of collections
+     */
+    @GET("discovery/collections")
+    suspend fun getDiscoveryCollections(): DiscoveryCollectionsResponse
+
+    /**
      * Authenticate user and obtain access token.
      * @param request Login request containing credentials
      * @return Authentication response with token and user info
