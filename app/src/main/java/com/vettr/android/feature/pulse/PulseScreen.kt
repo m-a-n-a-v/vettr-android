@@ -87,6 +87,9 @@ fun PulseScreen(
     windowSizeClass: WindowSizeClass,
     onStockClick: (String) -> Unit = {},
     onNavigateToStocks: () -> Unit = {},
+    onSeeAllFilings: () -> Unit = {},
+    onSeeAllTopScores: () -> Unit = {},
+    onSeeAllMovers: () -> Unit = {},
     viewModel: PulseViewModel = hiltViewModel()
 ) {
     val stocks by viewModel.stocks.collectAsStateWithLifecycle()
@@ -334,7 +337,10 @@ fun PulseScreen(
                             Column(
                                 verticalArrangement = Arrangement.spacedBy(Spacing.md)
                             ) {
-                                SectionHeader(title = "Recent Events")
+                                SectionHeader(
+                                    title = "Recent Events",
+                                    onSeeAllClick = onSeeAllFilings
+                                )
 
                                 Column(
                                     verticalArrangement = Arrangement.spacedBy(Spacing.sm)
@@ -372,7 +378,10 @@ fun PulseScreen(
                             Column(
                                 verticalArrangement = Arrangement.spacedBy(Spacing.md)
                             ) {
-                                SectionHeader(title = "Top VETTR Scores")
+                                SectionHeader(
+                                    title = "Top VETTR Scores",
+                                    onSeeAllClick = onSeeAllTopScores
+                                )
 
                                 LazyRow(
                                     horizontalArrangement = Arrangement.spacedBy(Spacing.md),
@@ -393,7 +402,10 @@ fun PulseScreen(
                             Column(
                                 verticalArrangement = Arrangement.spacedBy(Spacing.md)
                             ) {
-                                SectionHeader(title = "Top Movers")
+                                SectionHeader(
+                                    title = "Top Movers",
+                                    onSeeAllClick = onSeeAllMovers
+                                )
 
                                 Column(
                                     verticalArrangement = Arrangement.spacedBy(Spacing.sm)

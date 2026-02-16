@@ -150,6 +150,46 @@ fun MainScreen(
                     windowSizeClass = windowSizeClass,
                     onStockClick = { stockId ->
                         navController.navigate("stock_detail/$stockId")
+                    },
+                    onNavigateToStocks = {
+                        selectedItemIndex = BottomNavDestination.items.indexOf(BottomNavDestination.Stocks)
+                        navController.navigate(BottomNavDestination.Stocks.route) {
+                            popUpTo(BottomNavDestination.Pulse.route) {
+                                saveState = true
+                            }
+                            launchSingleTop = true
+                            restoreState = true
+                        }
+                    },
+                    onSeeAllFilings = {
+                        selectedItemIndex = BottomNavDestination.items.indexOf(BottomNavDestination.Stocks)
+                        navController.navigate(BottomNavDestination.Stocks.route) {
+                            popUpTo(BottomNavDestination.Pulse.route) {
+                                saveState = true
+                            }
+                            launchSingleTop = true
+                            restoreState = true
+                        }
+                    },
+                    onSeeAllTopScores = {
+                        selectedItemIndex = BottomNavDestination.items.indexOf(BottomNavDestination.Stocks)
+                        navController.navigate(BottomNavDestination.Stocks.route) {
+                            popUpTo(BottomNavDestination.Pulse.route) {
+                                saveState = true
+                            }
+                            launchSingleTop = true
+                            restoreState = true
+                        }
+                    },
+                    onSeeAllMovers = {
+                        selectedItemIndex = BottomNavDestination.items.indexOf(BottomNavDestination.Stocks)
+                        navController.navigate(BottomNavDestination.Stocks.route) {
+                            popUpTo(BottomNavDestination.Pulse.route) {
+                                saveState = true
+                            }
+                            launchSingleTop = true
+                            restoreState = true
+                        }
                     }
                 )
             }
