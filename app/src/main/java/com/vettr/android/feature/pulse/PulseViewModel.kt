@@ -82,9 +82,9 @@ class PulseViewModel @Inject constructor(
             _errorMessage.value = null
 
             try {
-                // Collect stocks
+                // Collect watchlisted stocks only (favorites)
                 launch {
-                    stockRepository.getStocks()
+                    stockRepository.getFavorites()
                         .catch { error ->
                             _errorMessage.value = "Failed to load stocks: ${error.message}"
                         }
@@ -101,14 +101,16 @@ class PulseViewModel @Inject constructor(
                         }
                 }
 
-                // Collect latest filings
+                // Collect latest filings and filter to watchlist stocks only
                 launch {
                     filingRepository.getLatestFilings(limit = 10)
                         .catch { error ->
                             _errorMessage.value = "Failed to load filings: ${error.message}"
                         }
-                        .collect { filingList ->
-                            _filings.value = filingList
+                        .collect { allFilings ->
+                            // Filter filings to only those matching watchlisted stock IDs
+                            val watchlistedStockIds = _stocks.value.map { it.id }.toSet()
+                            _filings.value = allFilings.filter { it.stockId in watchlistedStockIds }
                         }
                 }
             } finally {

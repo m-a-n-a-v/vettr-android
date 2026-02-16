@@ -23,6 +23,7 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Inbox
 import androidx.compose.material.icons.filled.Notifications
+import androidx.compose.material.icons.filled.Star
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -73,6 +74,8 @@ import com.vettr.android.designsystem.theme.VettrTheme
 import com.vettr.android.designsystem.theme.VettrYellow
 import com.vettr.android.core.model.Stock
 import kotlin.math.abs
+import kotlin.math.roundToInt
+import androidx.compose.foundation.layout.IntrinsicSize
 
 /**
  * Pulse screen - displays market overview and live data from stocks and filings.
@@ -83,6 +86,7 @@ fun PulseScreen(
     modifier: Modifier = Modifier,
     windowSizeClass: WindowSizeClass,
     onStockClick: (String) -> Unit = {},
+    onNavigateToStocks: () -> Unit = {},
     viewModel: PulseViewModel = hiltViewModel()
 ) {
     val stocks by viewModel.stocks.collectAsStateWithLifecycle()
@@ -132,6 +136,19 @@ fun PulseScreen(
         }
     }
 
+    // Risk distribution based on VETR score thresholds
+    val riskDistribution by remember(stocks) {
+        derivedStateOf {
+            if (stocks.isEmpty()) Triple(0, 0, 0)
+            else {
+                val low = stocks.count { it.vetrScore > 60 }
+                val medium = stocks.count { it.vetrScore in 40..60 }
+                val high = stocks.count { it.vetrScore < 40 }
+                Triple(low, medium, high)
+            }
+        }
+    }
+
     // Build a stock lookup map for filings
     val stockLookup by remember(stocks) {
         derivedStateOf { stocks.associateBy { it.id } }
@@ -173,9 +190,11 @@ fun PulseScreen(
         if (!isLoading && stocks.isEmpty()) {
             Box(modifier = Modifier.padding(paddingValues)) {
                 EmptyStateView(
-                    icon = Icons.Default.Inbox,
-                    title = "No Market Data",
-                    subtitle = "Unable to load market data. Pull down to refresh."
+                    icon = Icons.Default.Star,
+                    title = "Your Watchlist is Empty",
+                    subtitle = "Add stocks to your watchlist to see personalized insights",
+                    actionLabel = "Browse Stocks",
+                    onAction = onNavigateToStocks
                 )
             }
             return@Scaffold
@@ -275,33 +294,21 @@ fun PulseScreen(
                             modifier = Modifier.fillMaxWidth()
                         )
 
-                        // ── Market Overview Section (2x2 grid) ──
+                        // ── Market Overview Section ──
                         Column(
                             verticalArrangement = Arrangement.spacedBy(Spacing.md)
                         ) {
                             SectionHeader(title = "Market Overview")
 
-                            // Row 1: Stocks Tracked + Avg VETTR Score
-                            Row(
-                                modifier = Modifier.fillMaxWidth(),
-                                horizontalArrangement = Arrangement.spacedBy(Spacing.md)
-                            ) {
-                                MetricCard(
-                                    title = "Stocks Tracked",
-                                    value = "$stocksTracked",
-                                    modifier = Modifier.weight(1f)
-                                )
+                            // Risk Distribution Bar
+                            RiskDistributionBar(
+                                lowCount = riskDistribution.first,
+                                mediumCount = riskDistribution.second,
+                                highCount = riskDistribution.third,
+                                total = stocksTracked
+                            )
 
-                                val scoreLabel = if (avgVetrScore >= 60) "Healthy" else "Caution"
-                                MetricCard(
-                                    title = "Avg VETTR Score",
-                                    value = String.format("%.0f", avgVetrScore),
-                                    change = null,
-                                    modifier = Modifier.weight(1f)
-                                )
-                            }
-
-                            // Row 2: Top Gainer + Top Loser
+                            // Top Gainer + Top Loser
                             Row(
                                 modifier = Modifier.fillMaxWidth(),
                                 horizontalArrangement = Arrangement.spacedBy(Spacing.md)
@@ -467,6 +474,115 @@ fun PulseScreen(
                 }
             }
         }
+    }
+}
+
+/**
+ * Risk distribution bar showing Low / Medium / High risk breakdown.
+ */
+@Composable
+private fun RiskDistributionBar(
+    lowCount: Int,
+    mediumCount: Int,
+    highCount: Int,
+    total: Int,
+    modifier: Modifier = Modifier
+) {
+    val lowPct = if (total > 0) (lowCount.toFloat() / total * 100).roundToInt() else 0
+    val medPct = if (total > 0) (mediumCount.toFloat() / total * 100).roundToInt() else 0
+    val highPct = if (total > 0) (highCount.toFloat() / total * 100).roundToInt() else 0
+
+    Column(
+        modifier = modifier
+            .fillMaxWidth()
+            .cardStyle()
+            .vettrPadding(),
+        verticalArrangement = Arrangement.spacedBy(Spacing.sm)
+    ) {
+        // Segmented bar
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(28.dp)
+                .clip(androidx.compose.foundation.shape.RoundedCornerShape(6.dp)),
+            horizontalArrangement = Arrangement.spacedBy(2.dp)
+        ) {
+            if (lowCount > 0) {
+                Box(
+                    modifier = Modifier
+                        .weight(lowCount.toFloat())
+                        .height(28.dp)
+                        .clip(androidx.compose.foundation.shape.RoundedCornerShape(6.dp))
+                        .background(VettrGreen)
+                )
+            }
+            if (mediumCount > 0) {
+                Box(
+                    modifier = Modifier
+                        .weight(mediumCount.toFloat())
+                        .height(28.dp)
+                        .clip(androidx.compose.foundation.shape.RoundedCornerShape(6.dp))
+                        .background(VettrYellow)
+                )
+            }
+            if (highCount > 0) {
+                Box(
+                    modifier = Modifier
+                        .weight(highCount.toFloat())
+                        .height(28.dp)
+                        .clip(androidx.compose.foundation.shape.RoundedCornerShape(6.dp))
+                        .background(VettrRed)
+                )
+            }
+        }
+
+        // Legend
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.SpaceBetween
+        ) {
+            RiskLegendItem(color = VettrGreen, label = "Low Risk ($lowPct%)", count = lowCount)
+            RiskLegendItem(color = VettrYellow, label = "Medium Risk ($medPct%)", count = mediumCount)
+            RiskLegendItem(color = VettrRed, label = "High Risk ($highPct%)", count = highCount)
+        }
+    }
+}
+
+/**
+ * Legend item for a risk category.
+ */
+@Composable
+private fun RiskLegendItem(
+    color: androidx.compose.ui.graphics.Color,
+    label: String,
+    count: Int
+) {
+    Column(
+        verticalArrangement = Arrangement.spacedBy(2.dp)
+    ) {
+        Row(
+            horizontalArrangement = Arrangement.spacedBy(6.dp),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Box(
+                modifier = Modifier
+                    .size(10.dp)
+                    .clip(CircleShape)
+                    .background(color)
+            )
+            Text(
+                text = label,
+                style = MaterialTheme.typography.labelSmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant
+            )
+        }
+        Text(
+            text = "$count stocks",
+            style = MaterialTheme.typography.labelSmall,
+            color = MaterialTheme.colorScheme.onSurface,
+            fontWeight = FontWeight.SemiBold,
+            modifier = Modifier.padding(start = 16.dp)
+        )
     }
 }
 
