@@ -2,6 +2,7 @@ package com.vettr.android.feature.stockdetail
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.vettr.android.core.data.repository.AuthRepository
 import com.vettr.android.core.data.repository.StockRepository
 import com.vettr.android.core.model.Stock
 import com.vettr.android.core.util.PaginatedState
@@ -14,6 +15,7 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import javax.inject.Inject
@@ -24,7 +26,8 @@ import javax.inject.Inject
  */
 @HiltViewModel
 class StocksViewModel @Inject constructor(
-    private val stockRepository: StockRepository
+    private val stockRepository: StockRepository,
+    private val authRepository: AuthRepository
 ) : ViewModel() {
 
     private val _allStocks = MutableStateFlow<List<Stock>>(emptyList())
@@ -41,6 +44,47 @@ class StocksViewModel @Inject constructor(
 
     private var lastRefreshTime: Long = 0
     private val refreshDebounceMs = 10_000L // 10 seconds
+
+    /**
+     * Favorite stocks flow from repository.
+     */
+    val favoriteStocks: StateFlow<List<Stock>> = stockRepository.getFavorites()
+        .stateIn(
+            scope = viewModelScope,
+            started = SharingStarted.WhileSubscribed(5000),
+            initialValue = emptyList()
+        )
+
+    /**
+     * Count of favorite stocks.
+     */
+    val favoriteCount: StateFlow<Int> = favoriteStocks
+        .combine(flow { emit(Unit) }) { favorites, _ ->
+            favorites.size
+        }
+        .stateIn(
+            scope = viewModelScope,
+            started = SharingStarted.WhileSubscribed(5000),
+            initialValue = 0
+        )
+
+    /**
+     * Watchlist limit based on user's tier.
+     */
+    val watchlistLimit: StateFlow<Int> = authRepository.getCurrentUser()
+        .combine(flow { emit(Unit) }) { user, _ ->
+            val tierString = user?.tier?.uppercase() ?: "FREE"
+            try {
+                com.vettr.android.core.model.VettrTier.valueOf(tierString).watchlistLimit
+            } catch (e: IllegalArgumentException) {
+                com.vettr.android.core.model.VettrTier.FREE.watchlistLimit
+            }
+        }
+        .stateIn(
+            scope = viewModelScope,
+            started = SharingStarted.WhileSubscribed(5000),
+            initialValue = com.vettr.android.core.model.VettrTier.FREE.watchlistLimit
+        )
 
     // Pagination state
     private val _paginatedState = MutableStateFlow(PaginatedState<Stock>())

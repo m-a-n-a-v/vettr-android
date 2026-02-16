@@ -4,6 +4,7 @@ import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.vettr.android.core.data.VetrScoreResult
+import com.vettr.android.core.data.repository.AuthRepository
 import com.vettr.android.core.data.repository.ExecutiveRepository
 import com.vettr.android.core.data.repository.FilingRepository
 import com.vettr.android.core.data.repository.PeerComparison
@@ -12,12 +13,17 @@ import com.vettr.android.core.data.repository.VetrScoreRepository
 import com.vettr.android.core.model.Executive
 import com.vettr.android.core.model.Filing
 import com.vettr.android.core.model.Stock
+import com.vettr.android.core.model.VettrTier
 import com.vettr.android.core.util.HapticService
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.catch
+import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
@@ -50,6 +56,7 @@ class StockDetailViewModel @Inject constructor(
     private val filingRepository: FilingRepository,
     private val executiveRepository: ExecutiveRepository,
     private val vetrScoreRepository: VetrScoreRepository,
+    private val authRepository: AuthRepository,
     val hapticService: HapticService,
     savedStateHandle: SavedStateHandle
 ) : ViewModel() {
@@ -91,6 +98,37 @@ class StockDetailViewModel @Inject constructor(
 
     private val _peerComparison = MutableStateFlow<PeerComparison?>(null)
     val peerComparison: StateFlow<PeerComparison?> = _peerComparison.asStateFlow()
+
+    /**
+     * Count of favorite stocks for watchlist limit enforcement.
+     */
+    private val favoriteCount: StateFlow<Int> = stockRepository.getFavorites()
+        .combine(kotlinx.coroutines.flow.flow { emit(Unit) }) { favorites, _ ->
+            favorites.size
+        }
+        .stateIn(
+            scope = viewModelScope,
+            started = SharingStarted.WhileSubscribed(5000),
+            initialValue = 0
+        )
+
+    /**
+     * Watchlist limit based on user's tier.
+     */
+    private val watchlistLimit: StateFlow<Int> = authRepository.getCurrentUser()
+        .combine(kotlinx.coroutines.flow.flow { emit(Unit) }) { user, _ ->
+            val tierString = user?.tier?.uppercase() ?: "FREE"
+            try {
+                VettrTier.valueOf(tierString).watchlistLimit
+            } catch (e: IllegalArgumentException) {
+                VettrTier.FREE.watchlistLimit
+            }
+        }
+        .stateIn(
+            scope = viewModelScope,
+            started = SharingStarted.WhileSubscribed(5000),
+            initialValue = VettrTier.FREE.watchlistLimit
+        )
 
     init {
         loadStock()
@@ -150,12 +188,43 @@ class StockDetailViewModel @Inject constructor(
 
     /**
      * Toggle favorite status for the current stock.
+     * Enforces watchlist limit when adding a stock to favorites.
      */
     fun toggleFavorite(view: android.view.View?) {
         if (stockId.isEmpty()) return
 
         viewModelScope.launch {
             try {
+                val currentStock = _stock.value
+                if (currentStock == null) {
+                    _errorMessage.value = "Stock not loaded"
+                    hapticService.error(view)
+                    return@launch
+                }
+
+                // If adding to favorites (currently not favorited), check limit
+                if (!currentStock.isFavorite) {
+                    val currentCount = favoriteCount.value
+                    val limit = watchlistLimit.value
+
+                    if (currentCount >= limit) {
+                        // Determine next tier for upgrade message
+                        val currentUser = authRepository.getCurrentUser().first()
+                        val currentTierString = currentUser?.tier?.uppercase() ?: "FREE"
+                        val nextTier = when {
+                            currentTierString == "FREE" -> "Pro"
+                            currentTierString == "PRO" -> "Premium"
+                            else -> "Premium"
+                        }
+
+                        _errorMessage.value = "Watchlist full. Upgrade to $nextTier for more."
+                        // Error haptic for limit reached
+                        hapticService.error(view)
+                        return@launch
+                    }
+                }
+
+                // Proceed with toggle
                 stockRepository.toggleFavorite(stockId)
                 // Medium haptic for successful favorite toggle
                 hapticService.medium(view)
