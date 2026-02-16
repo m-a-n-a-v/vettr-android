@@ -69,6 +69,7 @@ import com.vettr.android.designsystem.theme.VettrGreen
 import com.vettr.android.designsystem.theme.VettrRed
 import com.vettr.android.designsystem.theme.VettrTheme
 import com.vettr.android.designsystem.theme.VettrYellow
+import com.vettr.android.core.data.remote.DiscoveryCollectionDto
 import com.vettr.android.core.model.Filing
 import com.vettr.android.core.model.Stock
 
@@ -92,6 +93,8 @@ fun DiscoveryScreen(
     val isLoading by viewModel.isLoading.collectAsStateWithLifecycle()
     val errorMessage by viewModel.errorMessage.collectAsStateWithLifecycle()
     val lastUpdatedAt by viewModel.lastUpdatedAt.collectAsStateWithLifecycle()
+    val collections by viewModel.collections.collectAsStateWithLifecycle()
+    val isLoadingCollections by viewModel.isLoadingCollections.collectAsStateWithLifecycle()
 
     // Build stock lookup for filing display
     val stockLookup by remember(stocks) {
@@ -156,6 +159,31 @@ fun DiscoveryScreen(
                                             .width(80.dp)
                                             .height(36.dp)
                                     )
+                                }
+                            }
+                        }
+
+                        // Featured Collections skeleton
+                        item {
+                            Column(verticalArrangement = Arrangement.spacedBy(Spacing.md)) {
+                                SectionHeader(title = "Featured Collections")
+                                // 2x3 grid of skeleton cards
+                                repeat(3) {
+                                    Row(
+                                        horizontalArrangement = Arrangement.spacedBy(Spacing.md),
+                                        modifier = Modifier.fillMaxWidth()
+                                    ) {
+                                        SkeletonMetricCard(
+                                            modifier = Modifier
+                                                .weight(1f)
+                                                .height(140.dp)
+                                        )
+                                        SkeletonMetricCard(
+                                            modifier = Modifier
+                                                .weight(1f)
+                                                .height(140.dp)
+                                        )
+                                    }
                                 }
                             }
                         }
@@ -248,6 +276,56 @@ fun DiscoveryScreen(
                                                 selectedLabelColor = MaterialTheme.colorScheme.onPrimary
                                             )
                                         )
+                                    }
+                                }
+                            }
+                        }
+
+                        // ── Featured Collections Section (2-column grid, 6 cards) ──
+                        if (isLoadingCollections || collections.isNotEmpty()) {
+                            item {
+                                Column(verticalArrangement = Arrangement.spacedBy(Spacing.md)) {
+                                    SectionHeader(title = "Featured Collections")
+
+                                    if (isLoadingCollections) {
+                                        // Show skeleton loading state
+                                        repeat(3) {
+                                            Row(
+                                                horizontalArrangement = Arrangement.spacedBy(Spacing.md),
+                                                modifier = Modifier.fillMaxWidth()
+                                            ) {
+                                                SkeletonMetricCard(
+                                                    modifier = Modifier
+                                                        .weight(1f)
+                                                        .height(140.dp)
+                                                )
+                                                SkeletonMetricCard(
+                                                    modifier = Modifier
+                                                        .weight(1f)
+                                                        .height(140.dp)
+                                                )
+                                            }
+                                        }
+                                    } else {
+                                        // Show actual collection cards in 2-column grid
+                                        collections.take(6).chunked(2).forEach { row ->
+                                            Row(
+                                                horizontalArrangement = Arrangement.spacedBy(Spacing.md),
+                                                modifier = Modifier.fillMaxWidth()
+                                            ) {
+                                                row.forEach { collection ->
+                                                    CollectionCard(
+                                                        collection = collection,
+                                                        onClick = { /* TODO: navigate to detail */ },
+                                                        modifier = Modifier.weight(1f)
+                                                    )
+                                                }
+                                                // Add spacer if odd number
+                                                if (row.size == 1) {
+                                                    Spacer(modifier = Modifier.weight(1f))
+                                                }
+                                            }
+                                        }
                                     }
                                 }
                             }
@@ -395,6 +473,74 @@ private fun FeaturedStockCard(
                 .padding(Spacing.xs)
         )
     }
+}
+
+/**
+ * Collection card for the Featured Collections grid.
+ */
+@Composable
+private fun CollectionCard(
+    collection: DiscoveryCollectionDto,
+    onClick: () -> Unit,
+    modifier: Modifier = Modifier
+) {
+    Column(
+        modifier = modifier
+            .cardStyle()
+            .clickable(onClick = onClick)
+            .vettrPadding(),
+        verticalArrangement = Arrangement.spacedBy(Spacing.sm)
+    ) {
+        // Icon in circle
+        Box(
+            modifier = Modifier
+                .size(36.dp)
+                .clip(CircleShape)
+                .background(VettrAccent.copy(alpha = 0.15f)),
+            contentAlignment = Alignment.Center
+        ) {
+            Text(
+                text = iconToEmoji(collection.icon),
+                style = MaterialTheme.typography.titleMedium
+            )
+        }
+        // Title
+        Text(
+            text = collection.name,
+            style = MaterialTheme.typography.titleSmall,
+            fontWeight = FontWeight.Bold,
+            maxLines = 1,
+            overflow = TextOverflow.Ellipsis
+        )
+        // Tagline
+        Text(
+            text = collection.tagline,
+            style = MaterialTheme.typography.bodySmall,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+            maxLines = 2,
+            overflow = TextOverflow.Ellipsis
+        )
+        // Criteria summary
+        Text(
+            text = collection.criteriaSummary,
+            style = MaterialTheme.typography.labelSmall,
+            color = VettrAccent,
+            fontWeight = FontWeight.Medium
+        )
+    }
+}
+
+/**
+ * Map SF Symbol icon names to emoji equivalents.
+ */
+private fun iconToEmoji(icon: String): String = when (icon) {
+    "checkmark.shield" -> "✅"
+    "banknote" -> "💰"
+    "bolt.fill" -> "⚡"
+    "trophy" -> "🏆"
+    "crown" -> "👑"
+    "person.badge.shield.checkmark" -> "🛡️"
+    else -> "📊"
 }
 
 /**

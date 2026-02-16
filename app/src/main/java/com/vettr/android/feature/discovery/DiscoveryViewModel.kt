@@ -2,6 +2,8 @@ package com.vettr.android.feature.discovery
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.vettr.android.core.data.remote.DiscoveryCollectionDto
+import com.vettr.android.core.data.remote.VettrApi
 import com.vettr.android.core.data.repository.FilingRepository
 import com.vettr.android.core.data.repository.StockRepository
 import com.vettr.android.core.model.Filing
@@ -23,7 +25,8 @@ import javax.inject.Inject
 class DiscoveryViewModel @Inject constructor(
     private val stockRepository: StockRepository,
     private val filingRepository: FilingRepository,
-    private val observabilityService: ObservabilityService
+    private val observabilityService: ObservabilityService,
+    private val api: VettrApi
 ) : ViewModel() {
 
     // All stocks from API (unfiltered source of truth)
@@ -59,6 +62,13 @@ class DiscoveryViewModel @Inject constructor(
 
     private val _lastUpdatedAt = MutableStateFlow<Long?>(null)
     val lastUpdatedAt: StateFlow<Long?> = _lastUpdatedAt.asStateFlow()
+
+    // Discovery collections
+    private val _collections = MutableStateFlow<List<DiscoveryCollectionDto>>(emptyList())
+    val collections: StateFlow<List<DiscoveryCollectionDto>> = _collections.asStateFlow()
+
+    private val _isLoadingCollections = MutableStateFlow(false)
+    val isLoadingCollections: StateFlow<Boolean> = _isLoadingCollections.asStateFlow()
 
     private var lastRefreshTime: Long = 0
     private val refreshDebounceMs = 10_000L // 10 seconds
@@ -117,6 +127,21 @@ class DiscoveryViewModel @Inject constructor(
                             _allFilings.value = filingList
                             applyFilters()
                         }
+                }
+
+                // Fetch discovery collections
+                launch {
+                    try {
+                        _isLoadingCollections.value = true
+                        val response = api.getDiscoveryCollections()
+                        if (response.success) {
+                            _collections.value = response.data.collections
+                        }
+                    } catch (e: Exception) {
+                        // Collections are optional, don't show error
+                    } finally {
+                        _isLoadingCollections.value = false
+                    }
                 }
             } finally {
                 _isLoading.value = false
