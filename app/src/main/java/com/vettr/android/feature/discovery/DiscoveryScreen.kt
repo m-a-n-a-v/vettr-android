@@ -87,7 +87,7 @@ fun DiscoveryScreen(
     val stocks by viewModel.stocks.collectAsStateWithLifecycle()
     val filings by viewModel.filings.collectAsStateWithLifecycle()
     val sectors by viewModel.sectors.collectAsStateWithLifecycle()
-    val selectedSector by viewModel.selectedSector.collectAsStateWithLifecycle()
+    val selectedSectors by viewModel.selectedSectors.collectAsStateWithLifecycle()
     val searchQuery by viewModel.searchQuery.collectAsStateWithLifecycle()
     val isLoading by viewModel.isLoading.collectAsStateWithLifecycle()
     val errorMessage by viewModel.errorMessage.collectAsStateWithLifecycle()
@@ -211,7 +211,7 @@ fun DiscoveryScreen(
                             )
                         }
 
-                        // ── Sector Filter Chips ──
+                        // ── Sector Filter Chips (Multi-select) ──
                         if (sectors.isNotEmpty()) {
                             item {
                                 Row(
@@ -221,9 +221,22 @@ fun DiscoveryScreen(
                                     horizontalArrangement = Arrangement.spacedBy(Spacing.sm)
                                 ) {
                                     sectors.forEach { sector ->
+                                        val isAllChip = sector == "All"
+                                        val isSelected = if (isAllChip) {
+                                            selectedSectors.isEmpty()
+                                        } else {
+                                            sector in selectedSectors
+                                        }
+
                                         FilterChip(
-                                            selected = selectedSector == sector,
-                                            onClick = { viewModel.selectSector(sector) },
+                                            selected = isSelected,
+                                            onClick = {
+                                                if (isAllChip) {
+                                                    viewModel.clearSectors()
+                                                } else {
+                                                    viewModel.toggleSector(sector)
+                                                }
+                                            },
                                             label = {
                                                 Text(
                                                     text = sector,
@@ -289,10 +302,15 @@ fun DiscoveryScreen(
                         // Empty state when filters produce no results
                         if (stocks.isEmpty() && filings.isEmpty() && !isLoading) {
                             item {
+                                val subtitle = if (selectedSectors.isNotEmpty() || searchQuery.isNotEmpty()) {
+                                    "Try adjusting your search or selected sectors."
+                                } else {
+                                    "No stocks or filings available."
+                                }
                                 EmptyStateView(
                                     icon = Icons.Default.Inbox,
                                     title = "No Results",
-                                    subtitle = "Try adjusting your search or filters."
+                                    subtitle = subtitle
                                 )
                             }
                         }

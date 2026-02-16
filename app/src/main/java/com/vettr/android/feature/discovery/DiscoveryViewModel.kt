@@ -44,9 +44,9 @@ class DiscoveryViewModel @Inject constructor(
     private val _sectors = MutableStateFlow<List<String>>(emptyList())
     val sectors: StateFlow<List<String>> = _sectors.asStateFlow()
 
-    // Currently selected sector filter ("All" = no filter)
-    private val _selectedSector = MutableStateFlow("All")
-    val selectedSector: StateFlow<String> = _selectedSector.asStateFlow()
+    // Currently selected sectors (empty set = "All" = no filter)
+    private val _selectedSectors = MutableStateFlow<Set<String>>(emptySet())
+    val selectedSectors: StateFlow<Set<String>> = _selectedSectors.asStateFlow()
 
     private val _searchQuery = MutableStateFlow("")
     val searchQuery: StateFlow<String> = _searchQuery.asStateFlow()
@@ -133,10 +133,22 @@ class DiscoveryViewModel @Inject constructor(
     }
 
     /**
-     * Select a sector filter chip.
+     * Toggle a sector in the multi-select filter.
      */
-    fun selectSector(sector: String) {
-        _selectedSector.value = sector
+    fun toggleSector(sector: String) {
+        _selectedSectors.value = if (sector in _selectedSectors.value) {
+            _selectedSectors.value - sector
+        } else {
+            _selectedSectors.value + sector
+        }
+        applyFilters()
+    }
+
+    /**
+     * Clear all sector selections (equivalent to "All").
+     */
+    fun clearSectors() {
+        _selectedSectors.value = emptySet()
         applyFilters()
     }
 
@@ -145,13 +157,13 @@ class DiscoveryViewModel @Inject constructor(
      */
     private fun applyFilters() {
         val query = _searchQuery.value.lowercase().trim()
-        val sector = _selectedSector.value
+        val sectors = _selectedSectors.value
         val allStocks = _allStocks.value
         val allFilings = _allFilings.value
 
-        // Filter stocks by sector
-        val sectorFiltered = if (sector == "All") allStocks
-        else allStocks.filter { it.sector.equals(sector, ignoreCase = true) }
+        // Filter stocks by multiple sectors
+        val sectorFiltered = if (sectors.isEmpty()) allStocks
+        else allStocks.filter { stock -> stock.sector in sectors }
 
         // Filter stocks by search query (ticker or name)
         val filteredStocks = if (query.isEmpty()) sectorFiltered
@@ -168,7 +180,7 @@ class DiscoveryViewModel @Inject constructor(
 
         // Filter filings: match sector via stockId, and search query in title
         val filteredFilings = allFilings.filter { filing ->
-            val matchesSector = sector == "All" || filing.stockId in sectorStockIds
+            val matchesSector = sectors.isEmpty() || filing.stockId in sectorStockIds
             val matchesQuery = query.isEmpty() || run {
                 val stock = allStocks.find { it.id == filing.stockId }
                 filing.title.lowercase().contains(query) ||
