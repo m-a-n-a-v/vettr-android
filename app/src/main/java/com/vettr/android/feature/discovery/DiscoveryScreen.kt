@@ -41,7 +41,9 @@ import androidx.compose.ui.unit.DpSize
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -104,6 +106,19 @@ fun DiscoveryScreen(
     // All stocks for lookup (need unfiltered for filing ticker resolution)
     // We use the filtered stocks for display, but we need the full stock map for filings.
     // The viewModel exposes filtered data, so stockLookup from filtered is fine for what's shown.
+
+    // State for selected collection (null = show discovery list, non-null = show detail)
+    var selectedCollection by remember { mutableStateOf<DiscoveryCollectionDto?>(null) }
+
+    // If a collection is selected, show the detail screen
+    if (selectedCollection != null) {
+        CollectionDetailScreen(
+            collection = selectedCollection!!,
+            onBackClick = { selectedCollection = null },
+            onStockClick = onStockClick
+        )
+        return
+    }
 
     Scaffold(
         modifier = modifier
@@ -316,7 +331,7 @@ fun DiscoveryScreen(
                                                 row.forEach { collection ->
                                                     CollectionCard(
                                                         collection = collection,
-                                                        onClick = { /* TODO: navigate to detail */ },
+                                                        onClick = { selectedCollection = collection },
                                                         modifier = Modifier.weight(1f)
                                                     )
                                                 }
@@ -533,7 +548,7 @@ private fun CollectionCard(
 /**
  * Map SF Symbol icon names to emoji equivalents.
  */
-private fun iconToEmoji(icon: String): String = when (icon) {
+internal fun iconToEmoji(icon: String): String = when (icon) {
     "checkmark.shield" -> "✅"
     "banknote" -> "💰"
     "bolt.fill" -> "⚡"
