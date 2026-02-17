@@ -3,8 +3,10 @@ package com.vettr.android.feature.pulse
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.vettr.android.core.data.repository.FilingRepository
+import com.vettr.android.core.data.repository.PulseRepository
 import com.vettr.android.core.data.repository.StockRepository
 import com.vettr.android.core.model.Filing
+import com.vettr.android.core.model.PulseSummary
 import com.vettr.android.core.model.Stock
 import com.vettr.android.core.util.NetworkMonitor
 import com.vettr.android.core.util.ObservabilityService
@@ -18,12 +20,14 @@ import javax.inject.Inject
 
 /**
  * ViewModel for the Pulse screen.
- * Manages UI state for market overview, strategic events, and trending stocks.
+ * Manages UI state for market overview, strategic events, trending stocks,
+ * and pulse summary (watchlist health, sector exposure, red flag categories).
  */
 @HiltViewModel
 class PulseViewModel @Inject constructor(
     private val stockRepository: StockRepository,
     private val filingRepository: FilingRepository,
+    private val pulseRepository: PulseRepository,
     private val observabilityService: ObservabilityService,
     private val networkMonitor: NetworkMonitor
 ) : ViewModel() {
@@ -33,6 +37,9 @@ class PulseViewModel @Inject constructor(
 
     private val _filings = MutableStateFlow<List<Filing>>(emptyList())
     val filings: StateFlow<List<Filing>> = _filings.asStateFlow()
+
+    private val _pulseSummary = MutableStateFlow<PulseSummary?>(null)
+    val pulseSummary: StateFlow<PulseSummary?> = _pulseSummary.asStateFlow()
 
     private val _isLoading = MutableStateFlow(false)
     val isLoading: StateFlow<Boolean> = _isLoading.asStateFlow()
@@ -64,7 +71,6 @@ class PulseViewModel @Inject constructor(
         viewModelScope.launch {
             networkMonitor.isOnline.collect { isOnline ->
                 if (isOnline && wasOffline) {
-                    // Network has returned, trigger refresh
                     loadData()
                 }
                 wasOffline = !isOnline
@@ -73,8 +79,7 @@ class PulseViewModel @Inject constructor(
     }
 
     /**
-     * Load stocks and filings data from repositories.
-     * Combines both flows and updates UI state accordingly.
+     * Load stocks, filings, and pulse summary data from repositories.
      */
     fun loadData() {
         viewModelScope.launch {
@@ -92,11 +97,10 @@ class PulseViewModel @Inject constructor(
                             _stocks.value = stockList
                             _lastUpdatedAt.value = System.currentTimeMillis()
 
-                            // Track screen load time on first data load
                             if (screenLoadStartTime > 0) {
                                 val loadTime = System.currentTimeMillis() - screenLoadStartTime
                                 observabilityService.trackScreenLoadTime("Pulse", loadTime)
-                                screenLoadStartTime = 0 // Only track once
+                                screenLoadStartTime = 0
                             }
                         }
                 }
@@ -108,14 +112,31 @@ class PulseViewModel @Inject constructor(
                             _errorMessage.value = "Failed to load filings: ${error.message}"
                         }
                         .collect { allFilings ->
-                            // Filter filings to only those matching watchlisted stock IDs
                             val watchlistedStockIds = _stocks.value.map { it.id }.toSet()
                             _filings.value = allFilings.filter { it.stockId in watchlistedStockIds }
                         }
                 }
+
+                // Fetch pulse summary from backend
+                launch {
+                    loadPulseSummary()
+                }
             } finally {
                 _isLoading.value = false
             }
+        }
+    }
+
+    /**
+     * Load pulse summary data from the backend.
+     * Falls back gracefully to null if the API call fails.
+     */
+    private suspend fun loadPulseSummary() {
+        try {
+            _pulseSummary.value = pulseRepository.getPulseSummary()
+        } catch (_: Exception) {
+            // Pulse summary is non-critical; continue with client-side fallbacks
+            _pulseSummary.value = null
         }
     }
 
@@ -126,7 +147,6 @@ class PulseViewModel @Inject constructor(
     fun refresh() {
         val currentTime = System.currentTimeMillis()
         if (currentTime - lastRefreshTime < refreshDebounceMs) {
-            // Skip refresh if within debounce window
             return
         }
         lastRefreshTime = currentTime

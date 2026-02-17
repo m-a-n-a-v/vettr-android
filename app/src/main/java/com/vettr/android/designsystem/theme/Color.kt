@@ -21,6 +21,13 @@ val VettrSurfaceContainer = Color(0xFF152232)
 val VettrOutline = Color(0xFF2A3A4A)
 val VettrOutlineVariant = Color(0xFF1E2D3D)
 
+// 5-tier watchlist health colors
+val VettrEmerald = Color(0xFF10B981) // Elite (Strong Buy)
+val VettrTeal = Color(0xFF14B8A6)    // Contender (Accumulate)
+val VettrAmber = Color(0xFFF59E0B)   // Watchlist (Hold)
+val VettrOrange = Color(0xFFF97316)  // Speculative (Avoid)
+// VettrRed is used for Toxic (Strong Sell)
+
 // Semantic colors
 val VettrError = Color(0xFFFF5252)
 val VettrSuccess = Color(0xFF00C853)

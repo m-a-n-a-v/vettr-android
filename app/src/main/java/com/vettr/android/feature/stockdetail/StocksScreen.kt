@@ -8,9 +8,11 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
@@ -44,7 +46,9 @@ import com.vettr.android.designsystem.component.SkeletonStockRow
 import com.vettr.android.designsystem.component.StockRowView
 import com.vettr.android.designsystem.component.vettrPadding
 import com.vettr.android.designsystem.theme.Spacing
+import com.vettr.android.designsystem.theme.VettrAccent
 import com.vettr.android.designsystem.theme.VettrTheme
+import com.vettr.android.feature.upgrade.UpgradeDialog
 
 /**
  * Stocks screen - displays stock lists with search functionality.
@@ -65,6 +69,17 @@ fun StocksScreen(
     val favoriteStocks by viewModel.favoriteStocks.collectAsStateWithLifecycle()
     val favoriteCount by viewModel.favoriteCount.collectAsStateWithLifecycle()
     val watchlistLimit by viewModel.watchlistLimit.collectAsStateWithLifecycle()
+    val showUpgradeDialog by viewModel.showUpgradeDialog.collectAsStateWithLifecycle()
+    val currentTierEnum by viewModel.currentTierEnum.collectAsStateWithLifecycle()
+
+    // Upgrade dialog
+    UpgradeDialog(
+        isVisible = showUpgradeDialog,
+        onDismiss = { viewModel.dismissUpgradeDialog() },
+        currentTier = currentTierEnum,
+        currentCount = favoriteCount,
+        currentLimit = watchlistLimit
+    )
 
     Scaffold(
         modifier = modifier,
@@ -122,14 +137,42 @@ fun StocksScreen(
                         modifier = Modifier.padding(bottom = Spacing.xs)
                     )
 
-                    // Watchlist count
-                    val limitText = if (watchlistLimit == Int.MAX_VALUE) "Unlimited" else "$watchlistLimit"
-                    Text(
-                        text = "$favoriteCount / $limitText stocks",
-                        style = MaterialTheme.typography.bodySmall,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant,
-                        modifier = Modifier.padding(bottom = Spacing.sm)
-                    )
+                    // Watchlist count + upgrade button
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(bottom = Spacing.sm),
+                        horizontalArrangement = Arrangement.SpaceBetween,
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        val limitText = if (watchlistLimit == Int.MAX_VALUE) "Unlimited" else "$watchlistLimit"
+                        Text(
+                            text = "$favoriteCount / $limitText stocks",
+                            style = MaterialTheme.typography.bodySmall,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+
+                        // Show upgrade button when at limit (non-premium)
+                        if (watchlistLimit != Int.MAX_VALUE && favoriteCount >= watchlistLimit) {
+                            androidx.compose.material3.TextButton(
+                                onClick = { viewModel.showUpgradeDialog() }
+                            ) {
+                                Icon(
+                                    imageVector = Icons.Default.Star,
+                                    contentDescription = null,
+                                    tint = VettrAccent,
+                                    modifier = Modifier.size(14.dp)
+                                )
+                                Spacer(modifier = Modifier.width(4.dp))
+                                Text(
+                                    text = "Upgrade",
+                                    style = MaterialTheme.typography.labelMedium,
+                                    fontWeight = FontWeight.SemiBold,
+                                    color = VettrAccent
+                                )
+                            }
+                        }
+                    }
 
                     // Watchlist stocks or empty message
                     if (favoriteStocks.isEmpty()) {

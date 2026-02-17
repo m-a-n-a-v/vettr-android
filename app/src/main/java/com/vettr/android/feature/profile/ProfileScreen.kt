@@ -21,9 +21,12 @@ import androidx.compose.material.icons.automirrored.filled.ArrowForward
 import androidx.compose.material.icons.automirrored.filled.Help
 import androidx.compose.material.icons.automirrored.filled.Logout
 import androidx.compose.material.icons.filled.DeleteOutline
+import androidx.compose.material.icons.filled.Description
+import androidx.compose.material.icons.filled.Email
 import androidx.compose.material.icons.filled.Info
 import androidx.compose.material.icons.filled.School
 import androidx.compose.material.icons.filled.Settings
+import androidx.compose.material.icons.filled.Shield
 import androidx.compose.material.icons.filled.Star
 import androidx.compose.material.icons.filled.Storage
 import androidx.compose.material.icons.filled.Sync
@@ -86,6 +89,9 @@ fun ProfileScreen(
     onNavigateToAbout: () -> Unit = {},
     onNavigateToGlossary: () -> Unit = {},
     onNavigateToFaq: () -> Unit = {},
+    onNavigateToTerms: () -> Unit = {},
+    onNavigateToPrivacy: () -> Unit = {},
+    onNavigateToContact: () -> Unit = {},
     modifier: Modifier = Modifier
 ) {
     val user by viewModel.user.collectAsStateWithLifecycle()
@@ -119,6 +125,9 @@ fun ProfileScreen(
         onNavigateToAbout = onNavigateToAbout,
         onNavigateToGlossary = onNavigateToGlossary,
         onNavigateToFaq = onNavigateToFaq,
+        onNavigateToTerms = onNavigateToTerms,
+        onNavigateToPrivacy = onNavigateToPrivacy,
+        onNavigateToContact = onNavigateToContact,
         onLogout = {
             viewModel.logout()
             onLogout()
@@ -148,6 +157,9 @@ private fun ProfileScreenContent(
     onNavigateToAbout: () -> Unit,
     onNavigateToGlossary: () -> Unit,
     onNavigateToFaq: () -> Unit,
+    onNavigateToTerms: () -> Unit,
+    onNavigateToPrivacy: () -> Unit,
+    onNavigateToContact: () -> Unit,
     onLogout: () -> Unit,
     modifier: Modifier = Modifier
 ) {
@@ -224,6 +236,39 @@ private fun ProfileScreenContent(
                 icon = Icons.AutoMirrored.Filled.Help,
                 title = "FAQ",
                 onClick = onNavigateToFaq
+            )
+
+            Spacer(modifier = Modifier.height(Spacing.lg))
+
+            // Legal & Support section
+            Text(
+                text = "Legal & Support",
+                style = MaterialTheme.typography.titleMedium,
+                color = VettrAccent,
+                fontWeight = FontWeight.Bold,
+                modifier = Modifier.padding(bottom = Spacing.sm)
+            )
+
+            MenuRow(
+                icon = Icons.Default.Description,
+                title = "Terms of Service",
+                onClick = onNavigateToTerms
+            )
+
+            Spacer(modifier = Modifier.height(Spacing.sm))
+
+            MenuRow(
+                icon = Icons.Default.Shield,
+                title = "Privacy Policy",
+                onClick = onNavigateToPrivacy
+            )
+
+            Spacer(modifier = Modifier.height(Spacing.sm))
+
+            MenuRow(
+                icon = Icons.Default.Email,
+                title = "Contact Support",
+                onClick = onNavigateToContact
             )
 
             // Upgrade to Pro card (only show for free tier)
@@ -843,7 +888,7 @@ private fun UpgradeToProCard(
     modifier: Modifier = Modifier
 ) {
     Card(
-        onClick = { /* TODO: Navigate to upgrade flow */ },
+        onClick = { /* Upgrade flow handled via in-app dialog */ },
         modifier = modifier.fillMaxWidth(),
         shape = RoundedCornerShape(12.dp),
         colors = CardDefaults.cardColors(
@@ -876,7 +921,7 @@ private fun UpgradeToProCard(
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 Text(
-                    text = "$10.99/month",
+                    text = "Learn More",
                     style = MaterialTheme.typography.titleMedium,
                     color = VettrNavy,
                     fontWeight = FontWeight.Bold
@@ -970,6 +1015,9 @@ fun ProfileScreenPreview() {
             onNavigateToAbout = {},
             onNavigateToGlossary = {},
             onNavigateToFaq = {},
+            onNavigateToTerms = {},
+            onNavigateToPrivacy = {},
+            onNavigateToContact = {},
             onLogout = {}
         )
     }
@@ -1006,6 +1054,9 @@ fun ProfileScreenTabletPreview() {
             onNavigateToAbout = {},
             onNavigateToGlossary = {},
             onNavigateToFaq = {},
+            onNavigateToTerms = {},
+            onNavigateToPrivacy = {},
+            onNavigateToContact = {},
             onLogout = {}
         )
     }

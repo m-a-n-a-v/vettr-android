@@ -45,6 +45,41 @@ class StocksViewModel @Inject constructor(
     private var lastRefreshTime: Long = 0
     private val refreshDebounceMs = 10_000L // 10 seconds
 
+    private val _showUpgradeDialog = MutableStateFlow(false)
+    val showUpgradeDialog: StateFlow<Boolean> = _showUpgradeDialog.asStateFlow()
+
+    /**
+     * Show the upgrade dialog.
+     */
+    fun showUpgradeDialog() {
+        _showUpgradeDialog.value = true
+    }
+
+    /**
+     * Dismiss the upgrade dialog.
+     */
+    fun dismissUpgradeDialog() {
+        _showUpgradeDialog.value = false
+    }
+
+    /**
+     * User's current tier string for upgrade dialog.
+     */
+    val currentTierEnum: StateFlow<com.vettr.android.core.model.VettrTier> = authRepository.getCurrentUser()
+        .combine(flow { emit(Unit) }) { user, _ ->
+            val tierString = user?.tier?.uppercase() ?: "FREE"
+            try {
+                com.vettr.android.core.model.VettrTier.valueOf(tierString)
+            } catch (e: IllegalArgumentException) {
+                com.vettr.android.core.model.VettrTier.FREE
+            }
+        }
+        .stateIn(
+            scope = viewModelScope,
+            started = SharingStarted.WhileSubscribed(5000),
+            initialValue = com.vettr.android.core.model.VettrTier.FREE
+        )
+
     /**
      * Favorite stocks flow from repository.
      */

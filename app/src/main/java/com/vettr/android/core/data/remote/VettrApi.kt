@@ -70,6 +70,14 @@ interface VettrApi {
     ): AdminListResponse<ExecutiveDto>
 
     /**
+     * Fetch pulse summary data for the dashboard.
+     * Uses JWT authentication (Authorization: Bearer token) automatically added by AuthInterceptor.
+     * @return Pulse summary response with watchlist health, sector exposure, and red flags
+     */
+    @GET("pulse/summary")
+    suspend fun getPulseSummary(): PulseSummaryResponse
+
+    /**
      * Fetch discovery collections with curated stock lists.
      * Uses JWT authentication (Authorization: Bearer token) automatically added by AuthInterceptor.
      * @return Discovery collections response with list of collections

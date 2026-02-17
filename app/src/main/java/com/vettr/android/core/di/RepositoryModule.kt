@@ -8,6 +8,8 @@ import com.vettr.android.core.data.repository.ExecutiveRepository
 import com.vettr.android.core.data.repository.ExecutiveRepositoryImpl
 import com.vettr.android.core.data.repository.FilingRepository
 import com.vettr.android.core.data.repository.FilingRepositoryImpl
+import com.vettr.android.core.data.repository.PulseRepository
+import com.vettr.android.core.data.repository.PulseRepositoryImpl
 import com.vettr.android.core.data.repository.RedFlagRepository
 import com.vettr.android.core.data.repository.RedFlagRepositoryImpl
 import com.vettr.android.core.data.repository.StockRepository
@@ -65,4 +67,10 @@ abstract class RepositoryModule {
     abstract fun bindVetrScoreRepository(
         vetrScoreRepositoryImpl: VetrScoreRepositoryImpl
     ): VetrScoreRepository
+
+    @Binds
+    @Singleton
+    abstract fun bindPulseRepository(
+        pulseRepositoryImpl: PulseRepositoryImpl
+    ): PulseRepository
 }

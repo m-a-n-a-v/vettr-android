@@ -256,6 +256,15 @@ fun MainScreen(
                     },
                     onNavigateToFaq = {
                         navController.navigate("faq")
+                    },
+                    onNavigateToTerms = {
+                        navController.navigate("terms")
+                    },
+                    onNavigateToPrivacy = {
+                        navController.navigate("privacy")
+                    },
+                    onNavigateToContact = {
+                        navController.navigate("contact")
                     }
                 )
             }
@@ -388,6 +397,105 @@ fun MainScreen(
                 }
             ) {
                 com.vettr.android.feature.profile.FaqScreen(
+                    onBackClick = { navController.navigateUp() },
+                    modifier = Modifier.fillMaxSize()
+                )
+            }
+
+            composable(
+                route = "terms",
+                enterTransition = {
+                    slideInHorizontally(
+                        initialOffsetX = { it },
+                        animationSpec = tween(300)
+                    ) + fadeIn(animationSpec = tween(300))
+                },
+                exitTransition = {
+                    slideOutHorizontally(
+                        targetOffsetX = { -it / 4 },
+                        animationSpec = tween(300)
+                    ) + fadeOut(animationSpec = tween(300))
+                },
+                popEnterTransition = {
+                    slideInHorizontally(
+                        initialOffsetX = { -it / 4 },
+                        animationSpec = tween(300)
+                    ) + fadeIn(animationSpec = tween(300))
+                },
+                popExitTransition = {
+                    slideOutHorizontally(
+                        targetOffsetX = { it },
+                        animationSpec = tween(300)
+                    ) + fadeOut(animationSpec = tween(300))
+                }
+            ) {
+                com.vettr.android.feature.profile.TermsScreen(
+                    onBackClick = { navController.navigateUp() },
+                    modifier = Modifier.fillMaxSize()
+                )
+            }
+
+            composable(
+                route = "privacy",
+                enterTransition = {
+                    slideInHorizontally(
+                        initialOffsetX = { it },
+                        animationSpec = tween(300)
+                    ) + fadeIn(animationSpec = tween(300))
+                },
+                exitTransition = {
+                    slideOutHorizontally(
+                        targetOffsetX = { -it / 4 },
+                        animationSpec = tween(300)
+                    ) + fadeOut(animationSpec = tween(300))
+                },
+                popEnterTransition = {
+                    slideInHorizontally(
+                        initialOffsetX = { -it / 4 },
+                        animationSpec = tween(300)
+                    ) + fadeIn(animationSpec = tween(300))
+                },
+                popExitTransition = {
+                    slideOutHorizontally(
+                        targetOffsetX = { it },
+                        animationSpec = tween(300)
+                    ) + fadeOut(animationSpec = tween(300))
+                }
+            ) {
+                com.vettr.android.feature.profile.PrivacyScreen(
+                    onBackClick = { navController.navigateUp() },
+                    modifier = Modifier.fillMaxSize()
+                )
+            }
+
+            composable(
+                route = "contact",
+                enterTransition = {
+                    slideInHorizontally(
+                        initialOffsetX = { it },
+                        animationSpec = tween(300)
+                    ) + fadeIn(animationSpec = tween(300))
+                },
+                exitTransition = {
+                    slideOutHorizontally(
+                        targetOffsetX = { -it / 4 },
+                        animationSpec = tween(300)
+                    ) + fadeOut(animationSpec = tween(300))
+                },
+                popEnterTransition = {
+                    slideInHorizontally(
+                        initialOffsetX = { -it / 4 },
+                        animationSpec = tween(300)
+                    ) + fadeIn(animationSpec = tween(300))
+                },
+                popExitTransition = {
+                    slideOutHorizontally(
+                        targetOffsetX = { it },
+                        animationSpec = tween(300)
+                    ) + fadeOut(animationSpec = tween(300))
+                }
+            ) {
+                com.vettr.android.feature.profile.ContactScreen(
                     onBackClick = { navController.navigateUp() },
                     modifier = Modifier.fillMaxSize()
                 )

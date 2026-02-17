@@ -87,6 +87,13 @@ class StockDetailViewModel @Inject constructor(
     private val _errorMessage = MutableStateFlow<String?>(null)
     val errorMessage: StateFlow<String?> = _errorMessage.asStateFlow()
 
+    private val _showUpgradeDialog = MutableStateFlow(false)
+    val showUpgradeDialog: StateFlow<Boolean> = _showUpgradeDialog.asStateFlow()
+
+    fun dismissUpgradeDialog() {
+        _showUpgradeDialog.value = false
+    }
+
     private val _vetrScoreResult = MutableStateFlow<VetrScoreResult?>(null)
     val vetrScoreResult: StateFlow<VetrScoreResult?> = _vetrScoreResult.asStateFlow()
 
@@ -208,16 +215,8 @@ class StockDetailViewModel @Inject constructor(
                     val limit = watchlistLimit.value
 
                     if (currentCount >= limit) {
-                        // Determine next tier for upgrade message
-                        val currentUser = authRepository.getCurrentUser().first()
-                        val currentTierString = currentUser?.tier?.uppercase() ?: "FREE"
-                        val nextTier = when {
-                            currentTierString == "FREE" -> "Pro"
-                            currentTierString == "PRO" -> "Premium"
-                            else -> "Premium"
-                        }
-
-                        _errorMessage.value = "Watchlist full. Upgrade to $nextTier for more."
+                        // Show upgrade dialog instead of just an error message
+                        _showUpgradeDialog.value = true
                         // Error haptic for limit reached
                         hapticService.error(view)
                         return@launch

@@ -28,6 +28,7 @@ import androidx.compose.material.icons.filled.Star
 import androidx.compose.material.icons.filled.StarBorder
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -54,6 +55,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.text.font.FontWeight
@@ -75,6 +77,8 @@ import com.vettr.android.designsystem.theme.VettrRed
 import com.vettr.android.designsystem.theme.VettrTextSecondary
 import com.vettr.android.designsystem.theme.VettrTheme
 import com.vettr.android.designsystem.theme.VettrYellow
+import com.vettr.android.feature.upgrade.UpgradeDialog
+import com.vettr.android.core.model.VettrTier
 import java.text.NumberFormat
 import java.text.SimpleDateFormat
 import java.util.Date
@@ -146,6 +150,19 @@ private fun getFilingTypeColor(type: String): Color {
 }
 
 /**
+ * Get dynamic color for a red flag score value.
+ * >= 80: Red, >= 60: Orange, >= 40: Yellow, < 40: Green
+ */
+private fun getRedFlagScoreColor(score: Int): Color {
+    return when {
+        score >= 80 -> VettrRed
+        score >= 60 -> Color(0xFFFF9800) // Orange
+        score >= 40 -> VettrYellow
+        else -> VettrGreen
+    }
+}
+
+/**
  * Stock Detail screen wrapper that connects to ViewModel.
  */
 @Composable
@@ -163,6 +180,16 @@ fun StockDetailRoute(
     val executives by viewModel.executives.collectAsStateWithLifecycle()
     val selectedTab by viewModel.selectedTab.collectAsStateWithLifecycle()
     val isRefreshing by viewModel.isRefreshing.collectAsStateWithLifecycle()
+    val showUpgradeDialog by viewModel.showUpgradeDialog.collectAsStateWithLifecycle()
+
+    // Upgrade dialog
+    UpgradeDialog(
+        isVisible = showUpgradeDialog,
+        onDismiss = { viewModel.dismissUpgradeDialog() },
+        currentTier = VettrTier.FREE, // Will be derived from user's actual tier
+        currentCount = 5,
+        currentLimit = VettrTier.FREE.watchlistLimit
+    )
 
     StockDetailScreen(
         stock = stock,
@@ -871,32 +898,34 @@ private fun ExecutiveRow(
                 }
             }
 
-            Spacer(modifier = Modifier.width(Spacing.sm))
+            // Right: Tenure + risk badge (hidden when tenure is 0 or negligible)
+            if (executive.yearsAtCompany > 0.0) {
+                Spacer(modifier = Modifier.width(Spacing.sm))
 
-            // Right: Tenure + risk badge
-            Column(
-                horizontalAlignment = Alignment.End,
-                verticalArrangement = Arrangement.spacedBy(Spacing.xs)
-            ) {
-                Text(
-                    text = "${String.format("%.1f", executive.yearsAtCompany)} yrs",
-                    style = MaterialTheme.typography.titleSmall,
-                    fontWeight = FontWeight.Medium,
-                    color = MaterialTheme.colorScheme.onSurface
-                )
-
-                // Tenure risk badge
-                Box(
-                    modifier = Modifier
-                        .background(tenureRisk.color.copy(alpha = 0.15f), RoundedCornerShape(4.dp))
-                        .padding(horizontal = Spacing.sm, vertical = 2.dp)
+                Column(
+                    horizontalAlignment = Alignment.End,
+                    verticalArrangement = Arrangement.spacedBy(Spacing.xs)
                 ) {
                     Text(
-                        text = tenureRisk.label,
-                        style = MaterialTheme.typography.labelSmall,
-                        fontWeight = FontWeight.Bold,
-                        color = tenureRisk.color
+                        text = "${String.format("%.1f", executive.yearsAtCompany)} yrs",
+                        style = MaterialTheme.typography.titleSmall,
+                        fontWeight = FontWeight.Medium,
+                        color = MaterialTheme.colorScheme.onSurface
                     )
+
+                    // Tenure risk badge
+                    Box(
+                        modifier = Modifier
+                            .background(tenureRisk.color.copy(alpha = 0.15f), RoundedCornerShape(4.dp))
+                            .padding(horizontal = Spacing.sm, vertical = 2.dp)
+                    ) {
+                        Text(
+                            text = tenureRisk.label,
+                            style = MaterialTheme.typography.labelSmall,
+                            fontWeight = FontWeight.Bold,
+                            color = tenureRisk.color
+                        )
+                    }
                 }
             }
         }
@@ -979,30 +1008,31 @@ private fun RedFlagsTabContent(
 
         // Red flag score derived from vetrScore (placeholder)
         val redFlagScore = maxOf(0, 100 - stock.vetrScore)
+        val overallColor = getRedFlagScoreColor(redFlagScore)
 
         Column(
             modifier = Modifier.fillMaxWidth(),
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.spacedBy(Spacing.md)
         ) {
-            // Overall red flag score badge
+            // Overall red flag score badge with dynamic color
             Box(
                 modifier = Modifier
                     .size(100.dp)
                     .clip(CircleShape)
-                    .background(VettrGreen.copy(alpha = 0.15f)),
+                    .background(overallColor.copy(alpha = 0.15f)),
                 contentAlignment = Alignment.Center
             ) {
-                Icon(
-                    imageVector = Icons.Default.CheckCircle,
-                    contentDescription = "All Clear",
-                    tint = VettrGreen,
-                    modifier = Modifier.size(60.dp)
+                Text(
+                    text = "$redFlagScore",
+                    style = MaterialTheme.typography.headlineLarge,
+                    fontWeight = FontWeight.Bold,
+                    color = overallColor
                 )
             }
 
             Text(
-                text = "No Red Flags Detected",
+                text = if (redFlagScore < 40) "No Red Flags Detected" else "Risk Indicators Found",
                 style = MaterialTheme.typography.headlineSmall,
                 fontWeight = FontWeight.Bold,
                 color = MaterialTheme.colorScheme.onSurface
@@ -1015,13 +1045,55 @@ private fun RedFlagsTabContent(
             )
 
             Text(
-                text = "This stock shows no significant red flags in our analysis. Continue monitoring for any changes.",
+                text = if (redFlagScore < 40) {
+                    "This stock shows no significant red flags in our analysis. Continue monitoring for any changes."
+                } else {
+                    "Some risk indicators were detected. Review the breakdown below for details."
+                },
                 style = MaterialTheme.typography.bodyMedium,
                 color = VettrTextSecondary,
                 modifier = Modifier.padding(horizontal = Spacing.md)
             )
 
-            Spacer(modifier = Modifier.height(Spacing.md))
+            Spacer(modifier = Modifier.height(Spacing.sm))
+
+            // Risk breakdown bars with dynamic colors
+            Card(
+                modifier = Modifier.fillMaxWidth(),
+                colors = CardDefaults.cardColors(
+                    containerColor = VettrCardBackground
+                ),
+                shape = RoundedCornerShape(12.dp)
+            ) {
+                Column(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(Spacing.md),
+                    verticalArrangement = Arrangement.spacedBy(Spacing.md)
+                ) {
+                    Text(
+                        text = "Risk Breakdown",
+                        style = MaterialTheme.typography.titleSmall,
+                        fontWeight = FontWeight.Bold,
+                        color = MaterialTheme.colorScheme.onSurface
+                    )
+
+                    // Placeholder breakdown scores derived from redFlagScore
+                    val consolidationScore = minOf(100, (redFlagScore * 1.2).toInt())
+                    val financingScore = minOf(100, (redFlagScore * 0.8).toInt())
+                    val executiveChurnScore = minOf(100, (redFlagScore * 1.0).toInt())
+                    val disclosureScore = minOf(100, (redFlagScore * 0.6).toInt())
+                    val debtScore = minOf(100, (redFlagScore * 0.9).toInt())
+
+                    RedFlagBreakdownBar(label = "Consolidation Velocity", score = consolidationScore)
+                    RedFlagBreakdownBar(label = "Financing Velocity", score = financingScore)
+                    RedFlagBreakdownBar(label = "Executive Churn", score = executiveChurnScore)
+                    RedFlagBreakdownBar(label = "Disclosure Gaps", score = disclosureScore)
+                    RedFlagBreakdownBar(label = "Debt Trend", score = debtScore)
+                }
+            }
+
+            Spacer(modifier = Modifier.height(Spacing.sm))
 
             // Methodology section
             Card(
@@ -1061,6 +1133,51 @@ private fun RedFlagsTabContent(
                 }
             }
         }
+    }
+}
+
+/**
+ * A single red flag breakdown bar with label, score, and dynamic color.
+ * Color logic: >= 80 Red, >= 60 Orange, >= 40 Yellow, < 40 Green.
+ */
+@Composable
+private fun RedFlagBreakdownBar(
+    label: String,
+    score: Int,
+    modifier: Modifier = Modifier
+) {
+    val barColor = getRedFlagScoreColor(score)
+
+    Column(
+        modifier = modifier.fillMaxWidth(),
+        verticalArrangement = Arrangement.spacedBy(4.dp)
+    ) {
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.SpaceBetween
+        ) {
+            Text(
+                text = label,
+                style = MaterialTheme.typography.bodySmall,
+                color = VettrTextSecondary
+            )
+            Text(
+                text = "$score/100",
+                style = MaterialTheme.typography.bodySmall,
+                fontWeight = FontWeight.SemiBold,
+                color = barColor
+            )
+        }
+        LinearProgressIndicator(
+            progress = { score / 100f },
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(6.dp)
+                .clip(RoundedCornerShape(3.dp)),
+            color = barColor,
+            trackColor = barColor.copy(alpha = 0.15f),
+            strokeCap = StrokeCap.Round,
+        )
     }
 }
 
