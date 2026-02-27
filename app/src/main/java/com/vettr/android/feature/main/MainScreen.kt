@@ -49,6 +49,7 @@ import com.vettr.android.feature.alerts.AlertsScreen
 import com.vettr.android.feature.discovery.DiscoveryScreen
 import com.vettr.android.feature.news.NewsScreen
 import com.vettr.android.feature.onboarding.OnboardingScreen
+import com.vettr.android.feature.portfolio.PortfolioManagerScreen
 import com.vettr.android.feature.profile.ProfileScreen
 import com.vettr.android.feature.pulse.PulseScreen
 import com.vettr.android.feature.stockdetail.StockDetailRoute
@@ -260,6 +261,12 @@ fun MainScreen(
                     },
                     onNavigateToContact = {
                         navController.navigate("contact")
+                    },
+                    onNavigateToPortfolios = {
+                        navController.navigate("portfolio_manager")
+                    },
+                    onNavigateToChangePassword = {
+                        navController.navigate("change_password")
                     }
                 )
             }
@@ -534,6 +541,46 @@ fun MainScreen(
                 StockDetailRoute(
                     onBackClick = { navController.navigateUp() },
                     windowSizeClass = windowSizeClass,
+                    modifier = Modifier.fillMaxSize()
+                )
+            }
+
+            // Portfolio manager screen
+            composable(
+                route = "portfolio_manager",
+                enterTransition = {
+                    slideInHorizontally(
+                        initialOffsetX = { it },
+                        animationSpec = tween(300)
+                    ) + fadeIn(animationSpec = tween(300))
+                },
+                exitTransition = {
+                    slideOutHorizontally(
+                        targetOffsetX = { -it / 4 },
+                        animationSpec = tween(300)
+                    ) + fadeOut(animationSpec = tween(300))
+                },
+                popEnterTransition = {
+                    slideInHorizontally(
+                        initialOffsetX = { -it / 4 },
+                        animationSpec = tween(300)
+                    ) + fadeIn(animationSpec = tween(300))
+                },
+                popExitTransition = {
+                    slideOutHorizontally(
+                        targetOffsetX = { it },
+                        animationSpec = tween(300)
+                    ) + fadeOut(animationSpec = tween(300))
+                }
+            ) {
+                PortfolioManagerScreen(
+                    onBackClick = { navController.navigateUp() },
+                    onPortfolioClick = { portfolioId ->
+                        navController.navigate("portfolio_holdings/$portfolioId")
+                    },
+                    onCreatePortfolio = {
+                        navController.navigate("create_portfolio")
+                    },
                     modifier = Modifier.fillMaxSize()
                 )
             }

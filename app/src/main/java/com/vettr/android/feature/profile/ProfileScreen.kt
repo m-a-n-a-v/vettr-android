@@ -92,6 +92,8 @@ fun ProfileScreen(
     onNavigateToTerms: () -> Unit = {},
     onNavigateToPrivacy: () -> Unit = {},
     onNavigateToContact: () -> Unit = {},
+    onNavigateToPortfolios: () -> Unit = {},
+    onNavigateToChangePassword: () -> Unit = {},
     modifier: Modifier = Modifier
 ) {
     val user by viewModel.user.collectAsStateWithLifecycle()
@@ -128,6 +130,8 @@ fun ProfileScreen(
         onNavigateToTerms = onNavigateToTerms,
         onNavigateToPrivacy = onNavigateToPrivacy,
         onNavigateToContact = onNavigateToContact,
+        onNavigateToPortfolios = onNavigateToPortfolios,
+        onNavigateToChangePassword = onNavigateToChangePassword,
         onLogout = {
             viewModel.logout()
             onLogout()
@@ -160,6 +164,8 @@ private fun ProfileScreenContent(
     onNavigateToTerms: () -> Unit,
     onNavigateToPrivacy: () -> Unit,
     onNavigateToContact: () -> Unit,
+    onNavigateToPortfolios: () -> Unit,
+    onNavigateToChangePassword: () -> Unit,
     onLogout: () -> Unit,
     modifier: Modifier = Modifier
 ) {
@@ -175,6 +181,24 @@ private fun ProfileScreenContent(
         ) {
             // Profile Header section with initials avatar
             ProfileHeader(user = user, tier = tier)
+
+            Spacer(modifier = Modifier.height(Spacing.lg))
+
+            // My Portfolios row
+            ProfileMenuRow(
+                icon = Icons.Default.Storage,
+                label = "My Portfolios",
+                onClick = onNavigateToPortfolios
+            )
+
+            Spacer(modifier = Modifier.height(Spacing.sm))
+
+            // Change Password row
+            ProfileMenuRow(
+                icon = Icons.Default.Shield,
+                label = "Change Password",
+                onClick = onNavigateToChangePassword
+            )
 
             Spacer(modifier = Modifier.height(Spacing.lg))
 
@@ -984,6 +1008,56 @@ private fun LogoutConfirmationDialog(
     )
 }
 
+/**
+ * Reusable profile menu row with icon, label, and forward arrow.
+ */
+@Composable
+private fun ProfileMenuRow(
+    icon: ImageVector,
+    label: String,
+    onClick: () -> Unit,
+    modifier: Modifier = Modifier
+) {
+    Card(
+        modifier = modifier.fillMaxWidth(),
+        colors = CardDefaults.cardColors(containerColor = VettrCardBackground),
+        shape = RoundedCornerShape(12.dp),
+        onClick = onClick
+    ) {
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(Spacing.md),
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Row(
+                horizontalArrangement = Arrangement.spacedBy(Spacing.md),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Icon(
+                    imageVector = icon,
+                    contentDescription = label,
+                    tint = VettrAccent,
+                    modifier = Modifier.size(24.dp)
+                )
+                Text(
+                    text = label,
+                    style = MaterialTheme.typography.titleMedium,
+                    color = VettrTextPrimary,
+                    fontWeight = FontWeight.Medium
+                )
+            }
+            Icon(
+                imageVector = Icons.AutoMirrored.Filled.ArrowForward,
+                contentDescription = "Navigate",
+                tint = VettrTextSecondary,
+                modifier = Modifier.size(20.dp)
+            )
+        }
+    }
+}
+
 @Preview(name = "Phone", showBackground = true, backgroundColor = 0xFF0D1B2A)
 @Composable
 fun ProfileScreenPreview() {
@@ -1018,6 +1092,8 @@ fun ProfileScreenPreview() {
             onNavigateToTerms = {},
             onNavigateToPrivacy = {},
             onNavigateToContact = {},
+            onNavigateToPortfolios = {},
+            onNavigateToChangePassword = {},
             onLogout = {}
         )
     }
@@ -1057,6 +1133,8 @@ fun ProfileScreenTabletPreview() {
             onNavigateToTerms = {},
             onNavigateToPrivacy = {},
             onNavigateToContact = {},
+            onNavigateToPortfolios = {},
+            onNavigateToChangePassword = {},
             onLogout = {}
         )
     }
