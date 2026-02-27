@@ -236,16 +236,25 @@ private suspend fun handleDeepLink(
                 }
                 true
             }
-            "alert" -> {
-                if (pathSegments.size < 2) return false
-                val alertId = pathSegments[1]
-
-                // Navigate to alerts screen
+            "news" -> {
                 navController.navigate(Screen.MainGraph.route) {
                     popUpTo(Screen.AuthGraph.route) { inclusive = true }
                 }
-                // Navigate to alerts tab (alert detail screen not implemented yet)
-                // For now, just go to alerts screen
+                true
+            }
+            "ai" -> {
+                navController.navigate(Screen.MainGraph.route) {
+                    popUpTo(Screen.AuthGraph.route) { inclusive = true }
+                }
+                true
+            }
+            "portfolio" -> {
+                if (pathSegments.size < 2) return false
+                val portfolioId = pathSegments[1]
+                navController.navigate(Screen.MainGraph.route) {
+                    popUpTo(Screen.AuthGraph.route) { inclusive = true }
+                }
+                navController.navigate("portfolio_holdings/$portfolioId")
                 true
             }
             "pedigree" -> {

@@ -15,9 +15,9 @@ import androidx.compose.ui.unit.DpSize
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.List
 import androidx.compose.material.icons.automirrored.filled.TrendingUp
-import androidx.compose.material.icons.filled.Explore
-import androidx.compose.material.icons.filled.Notifications
+import androidx.compose.material.icons.filled.Newspaper
 import androidx.compose.material.icons.filled.Person
+import androidx.compose.material.icons.filled.SmartToy
 import androidx.compose.material3.Icon
 import androidx.compose.material3.NavigationBar
 import androidx.compose.material3.NavigationBarItem
@@ -43,9 +43,11 @@ import com.vettr.android.designsystem.theme.VettrAccent
 import com.vettr.android.designsystem.theme.VettrNavy
 import com.vettr.android.designsystem.theme.VettrTextSecondary
 import com.vettr.android.designsystem.theme.VettrTheme
+import com.vettr.android.feature.ai.AiAgentScreen
 import com.vettr.android.feature.alerts.AlertRuleCreatorScreen
 import com.vettr.android.feature.alerts.AlertsScreen
 import com.vettr.android.feature.discovery.DiscoveryScreen
+import com.vettr.android.feature.news.NewsScreen
 import com.vettr.android.feature.onboarding.OnboardingScreen
 import com.vettr.android.feature.profile.ProfileScreen
 import com.vettr.android.feature.pulse.PulseScreen
@@ -61,13 +63,13 @@ sealed class BottomNavDestination(
     val label: String
 ) {
     data object Pulse : BottomNavDestination("pulse", Icons.AutoMirrored.Filled.TrendingUp, "Pulse")
-    data object Discovery : BottomNavDestination("discovery", Icons.Default.Explore, "Discovery")
+    data object News : BottomNavDestination("news", Icons.Default.Newspaper, "News")
     data object Stocks : BottomNavDestination("stocks", Icons.AutoMirrored.Filled.List, "Stocks")
-    data object Alerts : BottomNavDestination("alerts", Icons.Default.Notifications, "Alerts")
+    data object Ai : BottomNavDestination("ai", Icons.Default.SmartToy, "AI")
     data object Profile : BottomNavDestination("profile", Icons.Default.Person, "Profile")
 
     companion object {
-        val items = listOf(Pulse, Discovery, Stocks, Alerts, Profile)
+        val items = listOf(Pulse, News, Stocks, Ai, Profile)
     }
 }
 
@@ -194,18 +196,14 @@ fun MainScreen(
                 )
             }
             composable(
-                route = BottomNavDestination.Discovery.route,
+                route = BottomNavDestination.News.route,
                 enterTransition = { fadeIn(animationSpec = tween(300)) },
                 exitTransition = { fadeOut(animationSpec = tween(300)) },
                 popEnterTransition = { fadeIn(animationSpec = tween(300)) },
                 popExitTransition = { fadeOut(animationSpec = tween(300)) }
             ) {
-                DiscoveryScreen(
-                    modifier = Modifier.fillMaxSize(),
-                    windowSizeClass = windowSizeClass,
-                    onStockClick = { stockId ->
-                        navController.navigate("stock_detail/$stockId")
-                    }
+                NewsScreen(
+                    modifier = Modifier.fillMaxSize()
                 )
             }
             composable(
@@ -223,17 +221,14 @@ fun MainScreen(
                 )
             }
             composable(
-                route = BottomNavDestination.Alerts.route,
+                route = BottomNavDestination.Ai.route,
                 enterTransition = { fadeIn(animationSpec = tween(300)) },
                 exitTransition = { fadeOut(animationSpec = tween(300)) },
                 popEnterTransition = { fadeIn(animationSpec = tween(300)) },
                 popExitTransition = { fadeOut(animationSpec = tween(300)) }
             ) {
-                AlertsScreen(
-                    modifier = Modifier.fillMaxSize(),
-                    onCreateAlert = {
-                        navController.navigate("alert_rule_creator")
-                    }
+                AiAgentScreen(
+                    modifier = Modifier.fillMaxSize()
                 )
             }
             composable(
