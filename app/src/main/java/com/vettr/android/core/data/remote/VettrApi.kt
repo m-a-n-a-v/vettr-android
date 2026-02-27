@@ -1,9 +1,12 @@
 package com.vettr.android.core.data.remote
 
+import retrofit2.Response
 import retrofit2.http.Body
+import retrofit2.http.DELETE
 import retrofit2.http.GET
 import retrofit2.http.Header
 import retrofit2.http.POST
+import retrofit2.http.PUT
 import retrofit2.http.Path
 import retrofit2.http.Query
 
@@ -100,6 +103,45 @@ interface VettrApi {
      */
     @POST("auth/refresh")
     suspend fun refreshToken(@Body request: RefreshTokenRequest): AuthResponse
+
+    // ═══════ Portfolio Endpoints (JWT auth via AuthInterceptor) ═══════
+
+    @GET("portfolio")
+    suspend fun listPortfolios(): Response<List<PortfolioResponse>>
+
+    @POST("portfolio")
+    suspend fun createPortfolio(@Body request: CreatePortfolioRequest): Response<PortfolioResponse>
+
+    @GET("portfolio/{id}")
+    suspend fun getPortfolio(@Path("id") id: String): Response<PortfolioResponse>
+
+    @DELETE("portfolio/{id}")
+    suspend fun deletePortfolio(@Path("id") id: String): Response<Unit>
+
+    @GET("portfolio/{id}/holdings")
+    suspend fun listHoldings(@Path("id") portfolioId: String): Response<List<HoldingResponse>>
+
+    @POST("portfolio/{id}/holdings")
+    suspend fun addHolding(
+        @Path("id") portfolioId: String,
+        @Body request: AddHoldingRequest
+    ): Response<HoldingResponse>
+
+    @PUT("portfolio/{id}/holdings/{holdingId}")
+    suspend fun updateHolding(
+        @Path("id") portfolioId: String,
+        @Path("holdingId") holdingId: String,
+        @Body request: UpdateHoldingRequest
+    ): Response<HoldingResponse>
+
+    @DELETE("portfolio/{id}/holdings/{holdingId}")
+    suspend fun deleteHolding(
+        @Path("id") portfolioId: String,
+        @Path("holdingId") holdingId: String
+    ): Response<Unit>
+
+    @GET("portfolio/summary")
+    suspend fun getPortfolioSummary(): Response<PortfolioSummaryResponse>
 
     companion object {
         const val ADMIN_SECRET = "vettr-admin-fd885f9b154cc74249c566e4cf66b4dd"
