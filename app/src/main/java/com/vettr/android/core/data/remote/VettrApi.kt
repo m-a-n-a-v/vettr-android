@@ -189,6 +189,19 @@ interface VettrApi {
     @GET("ai-agent/usage")
     suspend fun getAiAgentUsage(): Response<AiAgentUsageResponse>
 
+    // ═══════ Fundamentals & Score Comparison (JWT auth) ═══════
+
+    @GET("stocks/{ticker}/fundamentals")
+    suspend fun getFundamentals(@Path("ticker") ticker: String): Response<FundamentalsResponse>
+
+    @GET("stocks/{ticker}/vetr-score/compare")
+    suspend fun getScoreComparison(@Path("ticker") ticker: String): Response<ScoreComparisonResponse>
+
+    @GET("red-flags/trend")
+    suspend fun getRedFlagTrends(
+        @Query("period") period: String? = null
+    ): Response<RedFlagTrendResponse>
+
     companion object {
         const val ADMIN_SECRET = "vettr-admin-fd885f9b154cc74249c566e4cf66b4dd"
     }
