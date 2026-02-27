@@ -165,6 +165,19 @@ interface VettrApi {
     @POST("portfolio-insights/{id}/dismiss")
     suspend fun dismissInsight(@Path("id") id: String): Response<Unit>
 
+    // ═══════ Sample Portfolios (No Auth) ═══════
+
+    @GET("sample-portfolios")
+    suspend fun getSamplePortfolios(): Response<List<SamplePortfolioResponse>>
+
+    // ═══════ News (No Auth) ═══════
+
+    @GET("news")
+    suspend fun getNews(
+        @Query("source") source: String? = null,
+        @Query("limit") limit: Int? = null
+    ): Response<List<NewsArticleResponse>>
+
     companion object {
         const val ADMIN_SECRET = "vettr-admin-fd885f9b154cc74249c566e4cf66b4dd"
     }
