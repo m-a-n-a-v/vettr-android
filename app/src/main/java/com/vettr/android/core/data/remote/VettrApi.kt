@@ -202,6 +202,24 @@ interface VettrApi {
         @Query("period") period: String? = null
     ): Response<RedFlagTrendResponse>
 
+    // ═══════ Password Reset (No Auth) ═══════
+
+    @POST("auth/forgot-password")
+    suspend fun forgotPassword(@Body request: ForgotPasswordRequest): Response<Unit>
+
+    @POST("auth/reset-password")
+    suspend fun resetPassword(@Body request: ResetPasswordRequest): Response<Unit>
+
+    // ═══════ Password Change (JWT auth) ═══════
+
+    @POST("auth/change-password")
+    suspend fun changePassword(@Body request: ChangePasswordRequest): Response<Unit>
+
+    // ═══════ Google Sign-In (No Auth) ═══════
+
+    @POST("auth/google")
+    suspend fun googleSignIn(@Body request: LoginRequest): AuthResponse
+
     companion object {
         const val ADMIN_SECRET = "vettr-admin-fd885f9b154cc74249c566e4cf66b4dd"
     }
