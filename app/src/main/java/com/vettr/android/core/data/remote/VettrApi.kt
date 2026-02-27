@@ -178,6 +178,17 @@ interface VettrApi {
         @Query("limit") limit: Int? = null
     ): Response<List<NewsArticleResponse>>
 
+    // ═══════ AI Agent Endpoints (JWT auth via AuthInterceptor) ═══════
+
+    @POST("ai-agent/ask")
+    suspend fun askAiAgent(@Body request: AiAgentRequest): Response<AiAgentResponse>
+
+    @GET("ai-agent/questions")
+    suspend fun getAiAgentQuestions(): Response<List<AiAgentQuestionResponse>>
+
+    @GET("ai-agent/usage")
+    suspend fun getAiAgentUsage(): Response<AiAgentUsageResponse>
+
     companion object {
         const val ADMIN_SECRET = "vettr-admin-fd885f9b154cc74249c566e4cf66b4dd"
     }
