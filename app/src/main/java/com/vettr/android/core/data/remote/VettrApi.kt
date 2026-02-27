@@ -143,6 +143,28 @@ interface VettrApi {
     @GET("portfolio/summary")
     suspend fun getPortfolioSummary(): Response<PortfolioSummaryResponse>
 
+    // ═══════ Portfolio Alerts Endpoints (JWT auth via AuthInterceptor) ═══════
+
+    @GET("portfolio-alerts")
+    suspend fun getPortfolioAlerts(): Response<List<PortfolioAlertResponse>>
+
+    @GET("portfolio-alerts/unread-count")
+    suspend fun getPortfolioAlertUnreadCount(): Response<UnreadCountResponse>
+
+    @POST("portfolio-alerts/{id}/read")
+    suspend fun markPortfolioAlertRead(@Path("id") id: String): Response<Unit>
+
+    @POST("portfolio-alerts/read-all")
+    suspend fun markAllPortfolioAlertsRead(): Response<Unit>
+
+    // ═══════ Portfolio Insights Endpoints (JWT auth via AuthInterceptor) ═══════
+
+    @GET("portfolio-insights")
+    suspend fun getPortfolioInsights(): Response<List<PortfolioInsightResponse>>
+
+    @POST("portfolio-insights/{id}/dismiss")
+    suspend fun dismissInsight(@Path("id") id: String): Response<Unit>
+
     companion object {
         const val ADMIN_SECRET = "vettr-admin-fd885f9b154cc74249c566e4cf66b4dd"
     }
