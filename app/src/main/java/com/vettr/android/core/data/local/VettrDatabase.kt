@@ -6,6 +6,10 @@ import androidx.room.TypeConverters
 import com.vettr.android.core.model.AlertRule
 import com.vettr.android.core.model.Executive
 import com.vettr.android.core.model.Filing
+import com.vettr.android.core.model.Portfolio
+import com.vettr.android.core.model.PortfolioAlert
+import com.vettr.android.core.model.PortfolioHolding
+import com.vettr.android.core.model.PortfolioInsight
 import com.vettr.android.core.model.RedFlagHistory
 import com.vettr.android.core.model.Stock
 import com.vettr.android.core.model.SyncHistory
@@ -22,9 +26,13 @@ import com.vettr.android.core.util.Converters
         AlertRule::class,
         RedFlagHistory::class,
         VetrScoreHistory::class,
-        SyncHistory::class
+        SyncHistory::class,
+        Portfolio::class,
+        PortfolioHolding::class,
+        PortfolioAlert::class,
+        PortfolioInsight::class
     ],
-    version = 1,
+    version = 2,
     exportSchema = true
 )
 @TypeConverters(Converters::class)
@@ -37,4 +45,8 @@ abstract class VettrDatabase : RoomDatabase() {
     abstract fun redFlagHistoryDao(): RedFlagHistoryDao
     abstract fun vetrScoreHistoryDao(): VetrScoreHistoryDao
     abstract fun syncHistoryDao(): SyncHistoryDao
+    abstract fun portfolioDao(): PortfolioDao
+    abstract fun portfolioHoldingDao(): PortfolioHoldingDao
+    abstract fun portfolioAlertDao(): PortfolioAlertDao
+    abstract fun portfolioInsightDao(): PortfolioInsightDao
 }

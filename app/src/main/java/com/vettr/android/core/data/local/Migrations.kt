@@ -16,52 +16,75 @@ import androidx.sqlite.db.SupportSQLiteDatabase
 /**
  * Migration from version 1 to version 2.
  *
- * Template for future migrations. Replace this with actual schema changes when needed.
- *
- * Example usage:
- * ```
- * // In DatabaseModule.kt:
- * Room.databaseBuilder(context, VettrDatabase::class.java, "vettr-db")
- *     .addMigrations(MIGRATION_1_2)
- *     .build()
- * ```
+ * Adds portfolio management tables:
+ * - portfolios: User investment portfolios
+ * - portfolio_holdings: Stock positions within portfolios
+ * - portfolio_alerts: Auto-generated portfolio alerts
+ * - portfolio_insights: AI-generated portfolio insights
  */
-@Suppress("unused")
 val MIGRATION_1_2 = object : Migration(1, 2) {
     override fun migrate(database: SupportSQLiteDatabase) {
-        // TODO: Replace with actual schema changes when migrating from version 1 to 2
-        //
-        // Examples:
-        //
-        // Add a column:
-        // database.execSQL("ALTER TABLE stocks ADD COLUMN description TEXT DEFAULT '' NOT NULL")
-        //
-        // Create a new table:
-        // database.execSQL("""
-        //     CREATE TABLE IF NOT EXISTS watchlists (
-        //         id TEXT PRIMARY KEY NOT NULL,
-        //         name TEXT NOT NULL,
-        //         createdAt INTEGER NOT NULL
-        //     )
-        // """)
-        //
-        // Add an index:
-        // database.execSQL("CREATE INDEX IF NOT EXISTS index_stocks_ticker ON stocks(ticker)")
+        // Create portfolios table
+        database.execSQL("""
+            CREATE TABLE IF NOT EXISTS portfolios (
+                id TEXT PRIMARY KEY NOT NULL,
+                user_id TEXT NOT NULL,
+                provider TEXT NOT NULL,
+                account_id TEXT,
+                name TEXT NOT NULL,
+                status TEXT NOT NULL DEFAULT 'active',
+                created_at INTEGER NOT NULL,
+                updated_at INTEGER NOT NULL
+            )
+        """)
+
+        // Create portfolio_holdings table
+        database.execSQL("""
+            CREATE TABLE IF NOT EXISTS portfolio_holdings (
+                id TEXT PRIMARY KEY NOT NULL,
+                portfolio_id TEXT NOT NULL,
+                ticker TEXT NOT NULL,
+                quantity REAL NOT NULL,
+                avg_cost REAL NOT NULL,
+                current_price REAL NOT NULL DEFAULT 0.0,
+                current_value REAL NOT NULL DEFAULT 0.0,
+                gain_loss REAL NOT NULL DEFAULT 0.0,
+                gain_loss_percent REAL NOT NULL DEFAULT 0.0,
+                FOREIGN KEY (portfolio_id) REFERENCES portfolios(id) ON DELETE CASCADE
+            )
+        """)
+        database.execSQL("CREATE INDEX IF NOT EXISTS index_portfolio_holdings_portfolio_id ON portfolio_holdings(portfolio_id)")
+
+        // Create portfolio_alerts table
+        database.execSQL("""
+            CREATE TABLE IF NOT EXISTS portfolio_alerts (
+                id TEXT PRIMARY KEY NOT NULL,
+                portfolio_id TEXT NOT NULL,
+                alert_type TEXT NOT NULL,
+                severity TEXT NOT NULL,
+                title TEXT NOT NULL,
+                message TEXT NOT NULL,
+                is_read INTEGER NOT NULL DEFAULT 0,
+                triggered_at INTEGER NOT NULL,
+                FOREIGN KEY (portfolio_id) REFERENCES portfolios(id) ON DELETE CASCADE
+            )
+        """)
+        database.execSQL("CREATE INDEX IF NOT EXISTS index_portfolio_alerts_portfolio_id ON portfolio_alerts(portfolio_id)")
+
+        // Create portfolio_insights table
+        database.execSQL("""
+            CREATE TABLE IF NOT EXISTS portfolio_insights (
+                id TEXT PRIMARY KEY NOT NULL,
+                portfolio_id TEXT NOT NULL,
+                insight_type TEXT NOT NULL,
+                severity TEXT NOT NULL,
+                title TEXT NOT NULL,
+                summary TEXT NOT NULL,
+                is_dismissed INTEGER NOT NULL DEFAULT 0,
+                created_at INTEGER NOT NULL,
+                FOREIGN KEY (portfolio_id) REFERENCES portfolios(id) ON DELETE CASCADE
+            )
+        """)
+        database.execSQL("CREATE INDEX IF NOT EXISTS index_portfolio_insights_portfolio_id ON portfolio_insights(portfolio_id)")
     }
 }
-
-/**
- * Add additional migrations as needed:
- *
- * val MIGRATION_2_3 = object : Migration(2, 3) {
- *     override fun migrate(database: SupportSQLiteDatabase) {
- *         // Schema changes for version 3
- *     }
- * }
- *
- * val MIGRATION_3_4 = object : Migration(3, 4) {
- *     override fun migrate(database: SupportSQLiteDatabase) {
- *         // Schema changes for version 4
- *     }
- * }
- */

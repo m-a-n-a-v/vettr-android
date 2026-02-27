@@ -6,6 +6,11 @@ import com.vettr.android.BuildConfig
 import com.vettr.android.core.data.local.AlertRuleDao
 import com.vettr.android.core.data.local.ExecutiveDao
 import com.vettr.android.core.data.local.FilingDao
+import com.vettr.android.core.data.local.MIGRATION_1_2
+import com.vettr.android.core.data.local.PortfolioAlertDao
+import com.vettr.android.core.data.local.PortfolioDao
+import com.vettr.android.core.data.local.PortfolioHoldingDao
+import com.vettr.android.core.data.local.PortfolioInsightDao
 import com.vettr.android.core.data.local.RedFlagHistoryDao
 import com.vettr.android.core.data.local.StockDao
 import com.vettr.android.core.data.local.SyncHistoryDao
@@ -31,6 +36,9 @@ object DatabaseModule {
             VettrDatabase::class.java,
             "vettr-db"
         )
+
+        // Add migrations
+        builder.addMigrations(MIGRATION_1_2)
 
         // For debug builds, allow destructive migrations
         // This will drop and recreate tables if migration is missing
@@ -88,5 +96,29 @@ object DatabaseModule {
     @Singleton
     fun provideSyncHistoryDao(database: VettrDatabase): SyncHistoryDao {
         return database.syncHistoryDao()
+    }
+
+    @Provides
+    @Singleton
+    fun providePortfolioDao(database: VettrDatabase): PortfolioDao {
+        return database.portfolioDao()
+    }
+
+    @Provides
+    @Singleton
+    fun providePortfolioHoldingDao(database: VettrDatabase): PortfolioHoldingDao {
+        return database.portfolioHoldingDao()
+    }
+
+    @Provides
+    @Singleton
+    fun providePortfolioAlertDao(database: VettrDatabase): PortfolioAlertDao {
+        return database.portfolioAlertDao()
+    }
+
+    @Provides
+    @Singleton
+    fun providePortfolioInsightDao(database: VettrDatabase): PortfolioInsightDao {
+        return database.portfolioInsightDao()
     }
 }
