@@ -1,8 +1,13 @@
 package com.vettr.android.feature.auth
 
+import android.app.Application
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.google.firebase.messaging.FirebaseMessaging
+import com.vettr.android.core.data.remote.RegisterDeviceRequest
+import com.vettr.android.core.data.remote.VettrApi
 import com.vettr.android.core.data.repository.AuthRepository
+import com.vettr.android.core.util.notification.VettrFirebaseMessagingService
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -17,7 +22,9 @@ import javax.inject.Inject
  */
 @HiltViewModel
 class AuthViewModel @Inject constructor(
-    private val authRepository: AuthRepository
+    private val authRepository: AuthRepository,
+    private val vettrApi: VettrApi,
+    private val application: Application
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow(AuthUiState())
@@ -60,6 +67,7 @@ class AuthViewModel @Inject constructor(
                             errorMessage = null
                         )
                     }
+                    registerFcmToken()
                 },
                 onFailure = { error ->
                     _uiState.update {
@@ -91,6 +99,7 @@ class AuthViewModel @Inject constructor(
                             errorMessage = null
                         )
                     }
+                    registerFcmToken()
                 },
                 onFailure = { error ->
                     _uiState.update {
@@ -132,6 +141,7 @@ class AuthViewModel @Inject constructor(
                             errorMessage = null
                         )
                     }
+                    registerFcmToken()
                 },
                 onFailure = { error ->
                     _uiState.update {
@@ -164,6 +174,39 @@ class AuthViewModel @Inject constructor(
      */
     fun clearError() {
         _uiState.update { it.copy(errorMessage = null) }
+    }
+
+    /**
+     * Register the FCM token with the backend after successful authentication.
+     * First checks for a pending token in SharedPreferences (set by VettrFirebaseMessagingService),
+     * then falls back to requesting the current token from Firebase.
+     * Non-blocking: failures are silently ignored.
+     */
+    private fun registerFcmToken() {
+        viewModelScope.launch {
+            try {
+                // Check for pending token first (set by onNewToken callback)
+                val pendingToken = VettrFirebaseMessagingService.getPendingFcmToken(application)
+                if (pendingToken != null) {
+                    vettrApi.registerDevice(RegisterDeviceRequest(token = pendingToken))
+                    VettrFirebaseMessagingService.clearPendingFcmToken(application)
+                    return@launch
+                }
+
+                // Otherwise request current token from Firebase
+                FirebaseMessaging.getInstance().token.addOnSuccessListener { token ->
+                    viewModelScope.launch {
+                        try {
+                            vettrApi.registerDevice(RegisterDeviceRequest(token = token))
+                        } catch (_: Exception) {
+                            // Non-blocking: FCM registration failure should not affect user experience
+                        }
+                    }
+                }
+            } catch (_: Exception) {
+                // Non-blocking: FCM registration failure should not affect user experience
+            }
+        }
     }
 }
 

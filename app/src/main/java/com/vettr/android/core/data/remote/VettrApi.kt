@@ -4,6 +4,7 @@ import retrofit2.Response
 import retrofit2.http.Body
 import retrofit2.http.DELETE
 import retrofit2.http.GET
+import retrofit2.http.HTTP
 import retrofit2.http.Header
 import retrofit2.http.POST
 import retrofit2.http.PUT
@@ -219,6 +220,14 @@ interface VettrApi {
 
     @POST("auth/google")
     suspend fun googleSignIn(@Body request: LoginRequest): AuthResponse
+
+    // ═══════ Device Registration (JWT auth via AuthInterceptor) ═══════
+
+    @POST("devices/register")
+    suspend fun registerDevice(@Body request: RegisterDeviceRequest): Response<Unit>
+
+    @HTTP(method = "DELETE", path = "devices/unregister", hasBody = true)
+    suspend fun unregisterDevice(@Body request: UnregisterDeviceRequest): Response<Unit>
 
     companion object {
         const val ADMIN_SECRET = "vettr-admin-fd885f9b154cc74249c566e4cf66b4dd"

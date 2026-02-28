@@ -21,8 +21,12 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.navigation
 import androidx.navigation.compose.rememberNavController
+import androidx.navigation.navArgument
+import androidx.navigation.NavType
 import com.vettr.android.core.data.repository.AuthRepository
 import com.vettr.android.feature.auth.ForgotPasswordScreen
+import com.vettr.android.feature.auth.GuestLandingScreen
+import com.vettr.android.feature.auth.GuestStockPreviewScreen
 import com.vettr.android.feature.auth.LoginScreen
 import com.vettr.android.feature.auth.SignUpScreen
 import com.vettr.android.feature.auth.WelcomeScreen
@@ -34,6 +38,10 @@ import kotlinx.coroutines.launch
 sealed class Screen(val route: String) {
     // Auth graph routes
     data object AuthGraph : Screen("auth")
+    data object GuestLanding : Screen("guest_landing")
+    data object GuestStockPreview : Screen("guest_stock_preview/{ticker}") {
+        fun createRoute(ticker: String): String = "guest_stock_preview/$ticker"
+    }
     data object Welcome : Screen("welcome")
     data object Login : Screen("login")
     data object SignUp : Screen("signup")
@@ -139,9 +147,43 @@ fun VettrNavHost(
     ) {
         // Auth navigation graph
         navigation(
-            startDestination = Screen.Welcome.route,
+            startDestination = Screen.GuestLanding.route,
             route = Screen.AuthGraph.route
         ) {
+            // Guest Landing: first screen for unauthenticated users
+            composable(Screen.GuestLanding.route) {
+                GuestLandingScreen(
+                    onGetStartedClick = {
+                        navController.navigate(Screen.SignUp.route)
+                    },
+                    onLogInClick = {
+                        navController.navigate(Screen.Login.route)
+                    },
+                    onStockSelected = { ticker ->
+                        navController.navigate(Screen.GuestStockPreview.createRoute(ticker))
+                    }
+                )
+            }
+
+            // Guest Stock Preview: limited stock data with conversion CTA
+            composable(
+                route = Screen.GuestStockPreview.route,
+                arguments = listOf(navArgument("ticker") { type = NavType.StringType })
+            ) {
+                GuestStockPreviewScreen(
+                    onBackClick = {
+                        navController.navigateUp()
+                    },
+                    onCreateAccountClick = {
+                        navController.navigate(Screen.SignUp.route)
+                    },
+                    onSignInClick = {
+                        navController.navigate(Screen.Login.route)
+                    }
+                )
+            }
+
+            // Welcome screen (kept for backward compatibility, accessible from guest flow)
             composable(Screen.Welcome.route) {
                 WelcomeScreen(
                     onGetStartedClick = {
