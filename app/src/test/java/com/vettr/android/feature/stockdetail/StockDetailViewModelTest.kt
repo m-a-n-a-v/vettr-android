@@ -1,7 +1,11 @@
 package com.vettr.android.feature.stockdetail
 
 import androidx.lifecycle.SavedStateHandle
+import com.vettr.android.core.data.repository.AuthRepository
+import com.vettr.android.core.data.repository.ExecutiveRepository
 import com.vettr.android.core.data.repository.FilingRepository
+import com.vettr.android.core.data.repository.FundamentalsRepository
+import com.vettr.android.core.data.repository.NewsRepository
 import com.vettr.android.core.data.repository.StockRepository
 import com.vettr.android.core.data.repository.VetrScoreRepository
 import com.vettr.android.core.model.Filing
@@ -35,7 +39,11 @@ class StockDetailViewModelTest {
     private lateinit var viewModel: StockDetailViewModel
     private lateinit var stockRepository: StockRepository
     private lateinit var filingRepository: FilingRepository
+    private lateinit var executiveRepository: ExecutiveRepository
     private lateinit var vetrScoreRepository: VetrScoreRepository
+    private lateinit var fundamentalsRepository: FundamentalsRepository
+    private lateinit var newsRepository: NewsRepository
+    private lateinit var authRepository: AuthRepository
     private lateinit var hapticService: HapticService
     private lateinit var savedStateHandle: SavedStateHandle
 
@@ -47,9 +55,18 @@ class StockDetailViewModelTest {
         Dispatchers.setMain(testDispatcher)
         stockRepository = mockk()
         filingRepository = mockk()
+        executiveRepository = mockk(relaxed = true)
         vetrScoreRepository = mockk()
+        fundamentalsRepository = mockk(relaxed = true)
+        newsRepository = mockk(relaxed = true)
+        authRepository = mockk(relaxed = true)
         hapticService = mockk(relaxed = true)
         savedStateHandle = SavedStateHandle(mapOf("stockId" to testStockId))
+
+        // Mock Flow-returning methods used by ViewModel init
+        coEvery { executiveRepository.getExecutivesForStock(any()) } returns flowOf(emptyList())
+        coEvery { stockRepository.getFavorites() } returns flowOf(emptyList())
+        coEvery { authRepository.getCurrentUser() } returns flowOf(null)
     }
 
     @After
@@ -83,7 +100,7 @@ class StockDetailViewModelTest {
         coEvery { filingRepository.getFilingsForStock(testStockId) } returns flowOf(emptyList())
         coEvery { stockRepository.toggleFavorite(testStockId) } returns Unit
 
-        viewModel = StockDetailViewModel(stockRepository, filingRepository, vetrScoreRepository, hapticService, savedStateHandle)
+        viewModel = StockDetailViewModel(stockRepository, filingRepository, executiveRepository, vetrScoreRepository, fundamentalsRepository, newsRepository, authRepository, hapticService, savedStateHandle)
         advanceUntilIdle()
 
         // Verify initial state
@@ -139,7 +156,7 @@ class StockDetailViewModelTest {
         coEvery { filingRepository.getFilingsForStock(testStockId) } returns flowOf(mockFilings)
 
         // When
-        viewModel = StockDetailViewModel(stockRepository, filingRepository, vetrScoreRepository, hapticService, savedStateHandle)
+        viewModel = StockDetailViewModel(stockRepository, filingRepository, executiveRepository, vetrScoreRepository, fundamentalsRepository, newsRepository, authRepository, hapticService, savedStateHandle)
         advanceUntilIdle()
 
         // Then
@@ -167,7 +184,7 @@ class StockDetailViewModelTest {
         coEvery { stockRepository.getStock(testStockId) } returns flowOf(mockStock)
         coEvery { filingRepository.getFilingsForStock(testStockId) } returns flowOf(emptyList())
 
-        viewModel = StockDetailViewModel(stockRepository, filingRepository, vetrScoreRepository, hapticService, savedStateHandle)
+        viewModel = StockDetailViewModel(stockRepository, filingRepository, executiveRepository, vetrScoreRepository, fundamentalsRepository, newsRepository, authRepository, hapticService, savedStateHandle)
         advanceUntilIdle()
 
         // Verify initial tab is OVERVIEW
@@ -207,7 +224,7 @@ class StockDetailViewModelTest {
         coEvery { stockRepository.getStock(testStockId) } returns flowOf(mockStock)
         coEvery { filingRepository.getFilingsForStock(testStockId) } returns flowOf(emptyList())
 
-        viewModel = StockDetailViewModel(stockRepository, filingRepository, vetrScoreRepository, hapticService, savedStateHandle)
+        viewModel = StockDetailViewModel(stockRepository, filingRepository, executiveRepository, vetrScoreRepository, fundamentalsRepository, newsRepository, authRepository, hapticService, savedStateHandle)
         advanceUntilIdle()
 
         // Verify initial time range is ONE_DAY
@@ -248,7 +265,7 @@ class StockDetailViewModelTest {
         coEvery { filingRepository.getFilingsForStock(testStockId) } returns flowOf(emptyList())
         coEvery { stockRepository.toggleFavorite(testStockId) } throws Exception("Network error")
 
-        viewModel = StockDetailViewModel(stockRepository, filingRepository, vetrScoreRepository, hapticService, savedStateHandle)
+        viewModel = StockDetailViewModel(stockRepository, filingRepository, executiveRepository, vetrScoreRepository, fundamentalsRepository, newsRepository, authRepository, hapticService, savedStateHandle)
         advanceUntilIdle()
 
         // When
@@ -266,7 +283,7 @@ class StockDetailViewModelTest {
         savedStateHandle = SavedStateHandle(mapOf("stockId" to ""))
 
         // When
-        viewModel = StockDetailViewModel(stockRepository, filingRepository, vetrScoreRepository, hapticService, savedStateHandle)
+        viewModel = StockDetailViewModel(stockRepository, filingRepository, executiveRepository, vetrScoreRepository, fundamentalsRepository, newsRepository, authRepository, hapticService, savedStateHandle)
         advanceUntilIdle()
 
         // Then
