@@ -47,6 +47,7 @@ import com.vettr.android.feature.ai.AiAgentScreen
 import com.vettr.android.feature.alerts.AlertRuleCreatorScreen
 import com.vettr.android.feature.alerts.AlertsScreen
 import com.vettr.android.feature.discovery.DiscoveryScreen
+import com.vettr.android.feature.filings.FilingCalendarScreen
 import com.vettr.android.feature.news.NewsScreen
 import com.vettr.android.feature.onboarding.OnboardingScreen
 import com.vettr.android.feature.portfolio.CreatePortfolioScreen
@@ -649,6 +650,23 @@ fun MainScreen(
                     onPortfolioClick = { portfolioId ->
                         navController.navigate("sample_portfolio_dashboard/$portfolioId")
                     },
+                    modifier = Modifier.fillMaxSize()
+                )
+            }
+
+            // Filing calendar
+            composable(
+                route = "filing_calendar",
+                enterTransition = {
+                    slideInHorizontally(initialOffsetX = { it }, animationSpec = tween(300)) + fadeIn(animationSpec = tween(300))
+                },
+                popExitTransition = {
+                    slideOutHorizontally(targetOffsetX = { it }, animationSpec = tween(300)) + fadeOut(animationSpec = tween(300))
+                }
+            ) {
+                FilingCalendarScreen(
+                    onBackClick = { navController.navigateUp() },
+                    onFilingClick = { stockId -> navController.navigate("stock_detail/$stockId") },
                     modifier = Modifier.fillMaxSize()
                 )
             }
