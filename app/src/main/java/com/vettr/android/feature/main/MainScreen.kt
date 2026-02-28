@@ -52,6 +52,7 @@ import com.vettr.android.feature.onboarding.OnboardingScreen
 import com.vettr.android.feature.portfolio.CreatePortfolioScreen
 import com.vettr.android.feature.portfolio.PortfolioHoldingsScreen
 import com.vettr.android.feature.portfolio.PortfolioManagerScreen
+import com.vettr.android.feature.portfolio.SamplePortfolioDashboardScreen
 import com.vettr.android.feature.portfolio.SamplePortfolioPickerScreen
 import com.vettr.android.feature.profile.ProfileScreen
 import com.vettr.android.feature.pulse.PulseScreen
@@ -648,6 +649,24 @@ fun MainScreen(
                     onPortfolioClick = { portfolioId ->
                         navController.navigate("sample_portfolio_dashboard/$portfolioId")
                     },
+                    modifier = Modifier.fillMaxSize()
+                )
+            }
+
+            // Sample portfolio dashboard
+            composable(
+                route = "sample_portfolio_dashboard/{samplePortfolioId}",
+                arguments = listOf(navArgument("samplePortfolioId") { type = NavType.StringType }),
+                enterTransition = {
+                    slideInHorizontally(initialOffsetX = { it }, animationSpec = tween(300)) + fadeIn(animationSpec = tween(300))
+                },
+                popExitTransition = {
+                    slideOutHorizontally(targetOffsetX = { it }, animationSpec = tween(300)) + fadeOut(animationSpec = tween(300))
+                }
+            ) {
+                SamplePortfolioDashboardScreen(
+                    onBackClick = { navController.navigateUp() },
+                    onStockClick = { ticker -> navController.navigate("stock_detail/$ticker") },
                     modifier = Modifier.fillMaxSize()
                 )
             }
