@@ -218,9 +218,9 @@ class SmokeTest {
     @Test
     fun `test VETR score calculation returns valid 0-100 range`() = runTest {
         val scoreResults = listOf(
-            VetrScoreResult(0, mapOf("pedigree" to 0, "filingVelocity" to 0, "redFlag" to 0, "growth" to 0, "governance" to 0), now),
-            VetrScoreResult(50, mapOf("pedigree" to 50, "filingVelocity" to 50, "redFlag" to 50, "growth" to 50, "governance" to 50), now),
-            VetrScoreResult(100, mapOf("pedigree" to 100, "filingVelocity" to 100, "redFlag" to 100, "growth" to 100, "governance" to 100), now)
+            VetrScoreResult(0, mapOf("financialSurvival" to 0, "operationalEfficiency" to 0, "shareholderStructure" to 0, "marketSentiment" to 0), now),
+            VetrScoreResult(50, mapOf("financialSurvival" to 50, "operationalEfficiency" to 50, "shareholderStructure" to 50, "marketSentiment" to 50), now),
+            VetrScoreResult(100, mapOf("financialSurvival" to 100, "operationalEfficiency" to 100, "shareholderStructure" to 100, "marketSentiment" to 100), now)
         )
 
         scoreResults.forEach { scoreResult ->
@@ -236,12 +236,11 @@ class SmokeTest {
                 assertTrue("Component score $score not in 0-100", score in 0..100)
             }
 
-            // Verify all required components exist
-            assertTrue(result.components.containsKey("pedigree"))
-            assertTrue(result.components.containsKey("filingVelocity"))
-            assertTrue(result.components.containsKey("redFlag"))
-            assertTrue(result.components.containsKey("growth"))
-            assertTrue(result.components.containsKey("governance"))
+            // Verify all required pillars exist
+            assertTrue(result.components.containsKey("financialSurvival"))
+            assertTrue(result.components.containsKey("operationalEfficiency"))
+            assertTrue(result.components.containsKey("shareholderStructure"))
+            assertTrue(result.components.containsKey("marketSentiment"))
         }
 
         coVerify(atLeast = 3) { vetrScoreRepository.calculateScore(testTicker) }
@@ -403,11 +402,10 @@ class SmokeTest {
         val scoreResult = VetrScoreResult(
             overallScore = 75,
             components = mapOf(
-                "pedigree" to 80,
-                "filingVelocity" to 70,
-                "redFlag" to 85,
-                "growth" to 60,
-                "governance" to 75
+                "financialSurvival" to 80,
+                "operationalEfficiency" to 70,
+                "shareholderStructure" to 75,
+                "marketSentiment" to 65
             ),
             lastUpdated = now
         )

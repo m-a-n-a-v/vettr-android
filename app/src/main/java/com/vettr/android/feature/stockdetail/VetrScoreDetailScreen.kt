@@ -436,48 +436,39 @@ private fun ComponentScoresSection(
         verticalArrangement = Arrangement.spacedBy(Spacing.sm)
     ) {
         ComponentScoreRow(
-            name = "Pedigree",
-            score = components["pedigree"] ?: 0,
+            name = "Financial Survival",
+            score = components["financialSurvival"] ?: 0,
+            weight = "35%",
+            description = "Cash runway, free cash flow, and debt health indicators",
+            isSelected = selectedComponent == "financialSurvival",
+            onClick = { selectedComponent = if (selectedComponent == "financialSurvival") null else "financialSurvival" }
+        )
+
+        ComponentScoreRow(
+            name = "Operational Efficiency",
+            score = components["operationalEfficiency"] ?: 0,
             weight = "25%",
-            description = "Executive team quality and experience",
-            isSelected = selectedComponent == "pedigree",
-            onClick = { selectedComponent = if (selectedComponent == "pedigree") null else "pedigree" }
+            description = "Sector-specific operational ratios and execution cadence",
+            isSelected = selectedComponent == "operationalEfficiency",
+            onClick = { selectedComponent = if (selectedComponent == "operationalEfficiency") null else "operationalEfficiency" }
         )
 
         ComponentScoreRow(
-            name = "Filing Velocity",
-            score = components["filingVelocity"] ?: 0,
-            weight = "20%",
-            description = "Timeliness and frequency of regulatory filings",
-            isSelected = selectedComponent == "filingVelocity",
-            onClick = { selectedComponent = if (selectedComponent == "filingVelocity") null else "filingVelocity" }
-        )
-
-        ComponentScoreRow(
-            name = "Red Flag Score",
-            score = components["redFlag"] ?: 0,
+            name = "Shareholder Structure",
+            score = components["shareholderStructure"] ?: 0,
             weight = "25%",
-            description = "Inverse of red flag severity (lower flags = higher score)",
-            isSelected = selectedComponent == "redFlag",
-            onClick = { selectedComponent = if (selectedComponent == "redFlag") null else "redFlag" }
+            description = "Executive pedigree, dilution risk, insider conviction, and warrant overhang",
+            isSelected = selectedComponent == "shareholderStructure",
+            onClick = { selectedComponent = if (selectedComponent == "shareholderStructure") null else "shareholderStructure" }
         )
 
         ComponentScoreRow(
-            name = "Growth",
-            score = components["growth"] ?: 0,
+            name = "Market Sentiment",
+            score = components["marketSentiment"] ?: 0,
             weight = "15%",
-            description = "Market cap and price momentum indicators",
-            isSelected = selectedComponent == "growth",
-            onClick = { selectedComponent = if (selectedComponent == "growth") null else "growth" }
-        )
-
-        ComponentScoreRow(
-            name = "Governance",
-            score = components["governance"] ?: 0,
-            weight = "15%",
-            description = "Corporate governance quality and board structure",
-            isSelected = selectedComponent == "governance",
-            onClick = { selectedComponent = if (selectedComponent == "governance") null else "governance" }
+            description = "Liquidity, momentum, news sentiment, short interest, and analyst targets",
+            isSelected = selectedComponent == "marketSentiment",
+            onClick = { selectedComponent = if (selectedComponent == "marketSentiment") null else "marketSentiment" }
         )
     }
 }
@@ -623,34 +614,29 @@ private fun ScoringMethodologySection(
                 verticalArrangement = Arrangement.spacedBy(Spacing.sm)
             ) {
                 Text(
-                    text = "The VETR Score is calculated from five key components:",
+                    text = "The VETR Score V2 is calculated from four key pillars:",
                     style = MaterialTheme.typography.bodyMedium,
                     color = VettrTextSecondary
                 )
 
                 MethodologyItem(
-                    title = "Pedigree (25%)",
-                    description = "Evaluates executive team quality based on tenure, experience, and industry expertise."
+                    title = "Financial Survival (35%)",
+                    description = "Evaluates cash runway, free cash flow, and debt health to assess the company's ability to sustain operations."
                 )
 
                 MethodologyItem(
-                    title = "Filing Velocity (20%)",
-                    description = "Measures timeliness and frequency of regulatory filings, with penalties for overdue submissions."
+                    title = "Operational Efficiency (25%)",
+                    description = "Measures sector-specific operational ratios, filing cadence, and management execution quality."
                 )
 
                 MethodologyItem(
-                    title = "Red Flag Score (25%)",
-                    description = "Inverse score based on red flag detection. Fewer red flags result in higher scores."
+                    title = "Shareholder Structure (25%)",
+                    description = "Analyzes executive pedigree, share dilution risk, insider conviction, and warrant overhang exposure."
                 )
 
                 MethodologyItem(
-                    title = "Growth (15%)",
-                    description = "Analyzes market capitalization and price momentum to assess growth potential."
-                )
-
-                MethodologyItem(
-                    title = "Governance (15%)",
-                    description = "Evaluates corporate governance quality, board structure, and transparency indicators."
+                    title = "Market Sentiment (15%)",
+                    description = "Tracks liquidity, price momentum, news sentiment, short interest, and analyst price targets."
                 )
 
                 Spacer(modifier = Modifier.height(Spacing.xs))
@@ -1067,34 +1053,29 @@ private fun InsightItem(
 private fun generateInsights(components: Map<String, Int>, overallScore: Int): List<String> {
     val insights = mutableListOf<String>()
 
-    // Find lowest scoring components
-    val sortedComponents = components.entries.sortedBy { it.value }
+    // Find lowest scoring pillars
+    val sortedPillars = components.entries.sortedBy { it.value }
 
-    sortedComponents.take(3).forEach { (component, score) ->
-        when (component) {
-            "pedigree" -> {
+    sortedPillars.take(3).forEach { (pillar, score) ->
+        when (pillar) {
+            "financialSurvival" -> {
                 if (score < 60) {
-                    insights.add("Strengthen executive team credentials and industry experience to boost Pedigree score")
+                    insights.add("Improve cash runway and debt management to strengthen Financial Survival score")
                 }
             }
-            "filingVelocity" -> {
+            "operationalEfficiency" -> {
                 if (score < 60) {
-                    insights.add("Maintain consistent filing schedule and avoid delays to improve Filing Velocity")
+                    insights.add("Maintain consistent operational cadence and filing regularity to boost Operational Efficiency")
                 }
             }
-            "redFlag" -> {
+            "shareholderStructure" -> {
                 if (score < 60) {
-                    insights.add("Address identified red flags and improve disclosure quality to enhance this score")
+                    insights.add("Reduce dilution risk and strengthen insider conviction to improve Shareholder Structure")
                 }
             }
-            "growth" -> {
+            "marketSentiment" -> {
                 if (score < 60) {
-                    insights.add("Focus on sustainable growth strategies and positive price momentum")
-                }
-            }
-            "governance" -> {
-                if (score < 60) {
-                    insights.add("Enhance corporate governance practices and board transparency")
+                    insights.add("Focus on liquidity improvement and positive momentum to enhance Market Sentiment")
                 }
             }
         }
@@ -1102,12 +1083,12 @@ private fun generateInsights(components: Map<String, Int>, overallScore: Int): L
 
     // Add general insights if score is moderate
     if (overallScore in 40..70 && insights.size < 3) {
-        insights.add("Continue monitoring regulatory filings for timeliness and completeness")
+        insights.add("Continue monitoring financial health and operational execution for improvement opportunities")
     }
 
     // If score is already high
     if (overallScore > 80 && insights.isEmpty()) {
-        insights.add("Maintain current strong performance across all metrics")
+        insights.add("Maintain current strong performance across all pillars")
         insights.add("Continue transparent communication with stakeholders")
     }
 
@@ -1165,11 +1146,10 @@ fun VetrScoreDetailContentPreview() {
             vetrScoreResult = VetrScoreResult(
                 overallScore = 85,
                 components = mapOf(
-                    "pedigree" to 80,
-                    "filingVelocity" to 90,
-                    "redFlag" to 85,
-                    "growth" to 75,
-                    "governance" to 88
+                    "financialSurvival" to 82,
+                    "operationalEfficiency" to 88,
+                    "shareholderStructure" to 80,
+                    "marketSentiment" to 90
                 ),
                 lastUpdated = System.currentTimeMillis()
             ),
@@ -1199,11 +1179,10 @@ fun VetrScoreDetailContentTabletPreview() {
             vetrScoreResult = VetrScoreResult(
                 overallScore = 85,
                 components = mapOf(
-                    "pedigree" to 80,
-                    "filingVelocity" to 90,
-                    "redFlag" to 85,
-                    "growth" to 75,
-                    "governance" to 88
+                    "financialSurvival" to 82,
+                    "operationalEfficiency" to 88,
+                    "shareholderStructure" to 80,
+                    "marketSentiment" to 90
                 ),
                 lastUpdated = System.currentTimeMillis()
             ),

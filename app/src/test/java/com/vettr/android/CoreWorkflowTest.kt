@@ -344,11 +344,10 @@ class CoreWorkflowTest {
         val scoreResult = VetrScoreResult(
             overallScore = 75,
             components = mapOf(
-                "pedigree" to 80,
-                "filingVelocity" to 70,
-                "redFlag" to 85,
-                "growth" to 60,
-                "governance" to 75
+                "financialSurvival" to 80,
+                "operationalEfficiency" to 70,
+                "shareholderStructure" to 75,
+                "marketSentiment" to 65
             ),
             lastUpdated = now
         )
@@ -359,11 +358,11 @@ class CoreWorkflowTest {
 
         assertNotNull(result)
         assertTrue(result.overallScore in 0..100)
-        assertEquals(5, result.components.size)
+        assertEquals(4, result.components.size)
 
-        // Verify all component scores are in valid range
+        // Verify all pillar scores are in valid range
         result.components.values.forEach { score ->
-            assertTrue("Component score $score not in range 0-100", score in 0..100)
+            assertTrue("Pillar score $score not in range 0-100", score in 0..100)
         }
 
         coVerify { vetrScoreRepository.calculateScore(testTicker) }
@@ -374,11 +373,10 @@ class CoreWorkflowTest {
         val perfectScore = VetrScoreResult(
             overallScore = 100,
             components = mapOf(
-                "pedigree" to 100,
-                "filingVelocity" to 100,
-                "redFlag" to 100,
-                "growth" to 100,
-                "governance" to 100
+                "financialSurvival" to 100,
+                "operationalEfficiency" to 100,
+                "shareholderStructure" to 100,
+                "marketSentiment" to 100
             ),
             lastUpdated = now
         )
@@ -398,11 +396,10 @@ class CoreWorkflowTest {
         val lowScore = VetrScoreResult(
             overallScore = 15,
             components = mapOf(
-                "pedigree" to 10,
-                "filingVelocity" to 5,
-                "redFlag" to 20,
-                "growth" to 15,
-                "governance" to 25
+                "financialSurvival" to 10,
+                "operationalEfficiency" to 5,
+                "shareholderStructure" to 20,
+                "marketSentiment" to 15
             ),
             lastUpdated = now
         )
@@ -419,15 +416,14 @@ class CoreWorkflowTest {
     }
 
     @Test
-    fun `test VETR score has all required components`() = runTest {
+    fun `test VETR score has all required pillars`() = runTest {
         val scoreResult = VetrScoreResult(
             overallScore = 65,
             components = mapOf(
-                "pedigree" to 70,
-                "filingVelocity" to 60,
-                "redFlag" to 75,
-                "growth" to 55,
-                "governance" to 65
+                "financialSurvival" to 70,
+                "operationalEfficiency" to 60,
+                "shareholderStructure" to 65,
+                "marketSentiment" to 55
             ),
             lastUpdated = now
         )
@@ -436,12 +432,11 @@ class CoreWorkflowTest {
 
         val result = vetrScoreRepository.calculateScore(testTicker)
 
-        // Verify all required components are present
-        assertTrue(result.components.containsKey("pedigree"))
-        assertTrue(result.components.containsKey("filingVelocity"))
-        assertTrue(result.components.containsKey("redFlag"))
-        assertTrue(result.components.containsKey("growth"))
-        assertTrue(result.components.containsKey("governance"))
+        // Verify all required pillars are present
+        assertTrue(result.components.containsKey("financialSurvival"))
+        assertTrue(result.components.containsKey("operationalEfficiency"))
+        assertTrue(result.components.containsKey("shareholderStructure"))
+        assertTrue(result.components.containsKey("marketSentiment"))
 
         coVerify { vetrScoreRepository.calculateScore(testTicker) }
     }

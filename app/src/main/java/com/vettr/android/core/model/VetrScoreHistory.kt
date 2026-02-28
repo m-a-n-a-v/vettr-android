@@ -7,17 +7,16 @@ import androidx.room.PrimaryKey
 import java.util.UUID
 
 /**
- * VetrScoreHistory entity representing historical VETR Score calculations.
+ * VetrScoreHistory entity representing historical VETR Score V2 calculations.
  * Tracks score evolution over time for trend analysis and charting.
  *
  * @property id Unique identifier (auto-generated UUID)
  * @property stockTicker Stock ticker this score applies to
  * @property overallScore Overall VETR Score (0-100)
- * @property pedigreeScore Executive team quality score component (0-100)
- * @property filingVelocityScore Filing frequency and consistency score component (0-100)
- * @property redFlagScore Red flag severity score component (0-100, lower is better)
- * @property growthScore Revenue and market growth score component (0-100)
- * @property governanceScore Corporate governance score component (0-100)
+ * @property financialSurvivalScore Cash runway, FCF, debt health pillar score (0-100)
+ * @property operationalEfficiencyScore Sector-specific operational ratios pillar score (0-100)
+ * @property shareholderStructureScore Pedigree, dilution, insider conviction, warrant overhang pillar score (0-100)
+ * @property marketSentimentScore Liquidity, momentum, news, short interest, analyst targets pillar score (0-100)
  * @property calculatedAt Timestamp when score was calculated (Unix epoch milliseconds)
  */
 @Entity(
@@ -34,20 +33,17 @@ data class VetrScoreHistory(
     @ColumnInfo(name = "overall_score")
     val overallScore: Int,
 
-    @ColumnInfo(name = "pedigree_score")
-    val pedigreeScore: Int,
+    @ColumnInfo(name = "financial_survival_score")
+    val financialSurvivalScore: Int,
 
-    @ColumnInfo(name = "filing_velocity_score")
-    val filingVelocityScore: Int,
+    @ColumnInfo(name = "operational_efficiency_score")
+    val operationalEfficiencyScore: Int,
 
-    @ColumnInfo(name = "red_flag_score")
-    val redFlagScore: Int,
+    @ColumnInfo(name = "shareholder_structure_score")
+    val shareholderStructureScore: Int,
 
-    @ColumnInfo(name = "growth_score")
-    val growthScore: Int,
-
-    @ColumnInfo(name = "governance_score")
-    val governanceScore: Int,
+    @ColumnInfo(name = "market_sentiment_score")
+    val marketSentimentScore: Int,
 
     @ColumnInfo(name = "calculated_at")
     val calculatedAt: Long

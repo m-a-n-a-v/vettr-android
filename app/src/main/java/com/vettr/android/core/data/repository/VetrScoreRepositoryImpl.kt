@@ -34,11 +34,10 @@ class VetrScoreRepositoryImpl @Inject constructor(
             id = UUID.randomUUID().toString(),
             stockTicker = ticker,
             overallScore = result.overallScore,
-            pedigreeScore = result.components["pedigree"] ?: 0,
-            filingVelocityScore = result.components["filingVelocity"] ?: 0,
-            redFlagScore = result.components["redFlag"] ?: 0,
-            growthScore = result.components["growth"] ?: 0,
-            governanceScore = result.components["governance"] ?: 0,
+            financialSurvivalScore = result.components["financialSurvival"] ?: 0,
+            operationalEfficiencyScore = result.components["operationalEfficiency"] ?: 0,
+            shareholderStructureScore = result.components["shareholderStructure"] ?: 0,
+            marketSentimentScore = result.components["marketSentiment"] ?: 0,
             calculatedAt = result.lastUpdated
         )
 

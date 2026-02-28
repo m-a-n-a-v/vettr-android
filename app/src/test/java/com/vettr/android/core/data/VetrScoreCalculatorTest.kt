@@ -21,8 +21,14 @@ import org.junit.Test
 import java.util.concurrent.TimeUnit
 
 /**
- * Comprehensive unit tests for VetrScoreCalculator covering all components,
+ * Comprehensive unit tests for VetrScoreCalculator V2 covering all four pillars,
  * adjustments, caching, and edge cases.
+ *
+ * V2 Pillars:
+ * - Financial Survival (35%)
+ * - Operational Efficiency (25%)
+ * - Shareholder Structure (25%)
+ * - Market Sentiment (15%)
  */
 class VetrScoreCalculatorTest {
 
@@ -56,19 +62,18 @@ class VetrScoreCalculatorTest {
     // ========== Overall Score Calculation Tests ==========
 
     @Test
-    fun `test calculateScore returns result with all components`() = runTest(testDispatcher) {
+    fun `test calculateScore returns result with all four pillars`() = runTest(testDispatcher) {
         setupMockRepositories()
 
         val result = calculator.calculateScore(testTicker, testStockId)
 
         assertNotNull(result)
         assertTrue(result.overallScore in 0..100)
-        assertEquals(5, result.components.size)
-        assertTrue(result.components.containsKey("pedigree"))
-        assertTrue(result.components.containsKey("filingVelocity"))
-        assertTrue(result.components.containsKey("redFlag"))
-        assertTrue(result.components.containsKey("growth"))
-        assertTrue(result.components.containsKey("governance"))
+        assertEquals(4, result.components.size)
+        assertTrue(result.components.containsKey("financialSurvival"))
+        assertTrue(result.components.containsKey("operationalEfficiency"))
+        assertTrue(result.components.containsKey("shareholderStructure"))
+        assertTrue(result.components.containsKey("marketSentiment"))
     }
 
     @Test
@@ -87,13 +92,13 @@ class VetrScoreCalculatorTest {
     }
 
     @Test
-    fun `test perfect score with all components at 100`() = runTest(testDispatcher) {
+    fun `test high score with strong pillars`() = runTest(testDispatcher) {
         coEvery { executiveRepository.getExecutiveScore(testStockId) } returns 100
         coEvery { executiveRepository.getExecutivesForStock(testStockId) } returns flowOf(
             List(5) { createExecutive(yearsAtCompany = 5.0) }
         )
         coEvery { filingRepository.getFilingsForStock(testStockId) } returns flowOf(
-            List(4) { i -> createFiling(daysAgo = 90L * i, isMaterial = true, summary = "Audited financial report") }
+            List(4) { i -> createFiling(daysAgo = 90L * i, isMaterial = true, summary = "Audited financial report with cash flow analysis") }
         )
         coEvery { redFlagRepository.detectFlagsForStock(testTicker) } returns emptyList()
         coEvery { stockRepository.getStock(testStockId) } returns flowOf(
@@ -103,11 +108,11 @@ class VetrScoreCalculatorTest {
         val result = calculator.calculateScore(testTicker, testStockId)
 
         // Should be very high score with bonus for audited financials
-        assertTrue(result.overallScore >= 95)
+        assertTrue(result.overallScore >= 85)
     }
 
     @Test
-    fun `test low score with poor components`() = runTest(testDispatcher) {
+    fun `test low score with poor pillars`() = runTest(testDispatcher) {
         coEvery { executiveRepository.getExecutiveScore(testStockId) } returns 0
         coEvery { executiveRepository.getExecutivesForStock(testStockId) } returns flowOf(
             listOf(createExecutive(yearsAtCompany = 0.5))
@@ -128,32 +133,42 @@ class VetrScoreCalculatorTest {
         assertTrue(result.overallScore <= 30)
     }
 
-    // ========== Pedigree Score Tests ==========
+    // ========== Financial Survival Pillar Tests ==========
 
     @Test
-    fun `test pedigree score uses executive repository score`() = runTest(testDispatcher) {
+    fun `test financial survival with large cap and no debt flags`() = runTest(testDispatcher) {
         setupMockRepositories()
-        coEvery { executiveRepository.getExecutiveScore(testStockId) } returns 85
+        coEvery { stockRepository.getStock(testStockId) } returns flowOf(
+            createStock(marketCap = 600_000_000.0)
+        )
+        coEvery { redFlagRepository.detectFlagsForStock(testTicker) } returns emptyList()
 
         val result = calculator.calculateScore(testTicker, testStockId)
 
-        assertEquals(85, result.components["pedigree"])
+        val financialSurvival = result.components["financialSurvival"]!!
+        assertTrue(financialSurvival >= 70) // Large cap + no debt flags + decent disclosure
     }
 
     @Test
-    fun `test pedigree score clamps to 0-100`() = runTest(testDispatcher) {
+    fun `test financial survival with micro cap and debt flags`() = runTest(testDispatcher) {
         setupMockRepositories()
-        coEvery { executiveRepository.getExecutiveScore(testStockId) } returns 150
+        coEvery { stockRepository.getStock(testStockId) } returns flowOf(
+            createStock(marketCap = 15_000_000.0)
+        )
+        coEvery { redFlagRepository.detectFlagsForStock(testTicker) } returns listOf(
+            DetectedFlag(RedFlagType.DEBT_TREND, testTicker, 25.0, "High debt", now)
+        )
 
         val result = calculator.calculateScore(testTicker, testStockId)
 
-        assertEquals(100, result.components["pedigree"])
+        val financialSurvival = result.components["financialSurvival"]!!
+        assertTrue(financialSurvival <= 50) // Micro cap + debt flags
     }
 
-    // ========== Filing Velocity Score Tests ==========
+    // ========== Operational Efficiency Pillar Tests ==========
 
     @Test
-    fun `test filing velocity score with 4+ filings per year`() = runTest(testDispatcher) {
+    fun `test operational efficiency with regular filings and experienced team`() = runTest(testDispatcher) {
         setupMockRepositories()
         val filings = listOf(
             createFiling(daysAgo = 30),
@@ -162,194 +177,120 @@ class VetrScoreCalculatorTest {
             createFiling(daysAgo = 300)
         )
         coEvery { filingRepository.getFilingsForStock(testStockId) } returns flowOf(filings)
-
-        val result = calculator.calculateScore(testTicker, testStockId)
-
-        val filingScore = result.components["filingVelocity"]!!
-        assertTrue(filingScore >= 80) // High score for regular quarterly filings (60 + 30)
-    }
-
-    @Test
-    fun `test filing velocity score with 3 filings per year`() = runTest(testDispatcher) {
-        setupMockRepositories()
-        val filings = listOf(
-            createFiling(daysAgo = 40),
-            createFiling(daysAgo = 160),
-            createFiling(daysAgo = 280)
+        coEvery { executiveRepository.getExecutivesForStock(testStockId) } returns flowOf(
+            List(3) { createExecutive(yearsAtCompany = 5.0) }
         )
-        coEvery { filingRepository.getFilingsForStock(testStockId) } returns flowOf(filings)
 
         val result = calculator.calculateScore(testTicker, testStockId)
 
-        val filingScore = result.components["filingVelocity"]!!
-        assertTrue(filingScore in 60..80) // Moderate score (45 + ~30)
+        val opEfficiency = result.components["operationalEfficiency"]!!
+        assertTrue(opEfficiency >= 80) // Regular cadence + consistent gaps + experienced team
     }
 
     @Test
-    fun `test filing velocity score with inconsistent gaps`() = runTest(testDispatcher) {
-        setupMockRepositories()
-        val filings = listOf(
-            createFiling(daysAgo = 20),
-            createFiling(daysAgo = 250), // Large gap
-            createFiling(daysAgo = 300)
-        )
-        coEvery { filingRepository.getFilingsForStock(testStockId) } returns flowOf(filings)
-
-        val result = calculator.calculateScore(testTicker, testStockId)
-
-        val filingScore = result.components["filingVelocity"]!!
-        // 3 filings = 45 frequency, gaps avg ~140 days = 30 consistency
-        assertTrue(filingScore in 65..80) // Moderate score with some gaps
-    }
-
-    @Test
-    fun `test filing velocity score with no filings`() = runTest(testDispatcher) {
+    fun `test operational efficiency with no filings returns 0`() = runTest(testDispatcher) {
         setupMockRepositories()
         coEvery { filingRepository.getFilingsForStock(testStockId) } returns flowOf(emptyList())
 
         val result = calculator.calculateScore(testTicker, testStockId)
 
-        assertEquals(0, result.components["filingVelocity"])
+        assertEquals(0, result.components["operationalEfficiency"])
     }
 
-    // ========== Red Flag Score Tests ==========
+    @Test
+    fun `test operational efficiency with sparse filings`() = runTest(testDispatcher) {
+        setupMockRepositories()
+        val filings = listOf(
+            createFiling(daysAgo = 40),
+            createFiling(daysAgo = 300)
+        )
+        coEvery { filingRepository.getFilingsForStock(testStockId) } returns flowOf(filings)
+        coEvery { executiveRepository.getExecutivesForStock(testStockId) } returns flowOf(
+            listOf(createExecutive(yearsAtCompany = 1.0))
+        )
+
+        val result = calculator.calculateScore(testTicker, testStockId)
+
+        val opEfficiency = result.components["operationalEfficiency"]!!
+        assertTrue(opEfficiency in 30..60) // Sparse filings + inconsistent + limited experience
+    }
+
+    // ========== Shareholder Structure Pillar Tests ==========
 
     @Test
-    fun `test red flag score with no flags returns 100`() = runTest(testDispatcher) {
+    fun `test shareholder structure with strong pedigree and no dilution`() = runTest(testDispatcher) {
+        setupMockRepositories()
+        coEvery { executiveRepository.getExecutiveScore(testStockId) } returns 90
         coEvery { redFlagRepository.detectFlagsForStock(testTicker) } returns emptyList()
-        setupMockRepositories()
-
-        val result = calculator.calculateScore(testTicker, testStockId)
-
-        assertEquals(100, result.components["redFlag"])
-    }
-
-    @Test
-    fun `test red flag score inverts flag score correctly`() = runTest(testDispatcher) {
-        setupMockRepositories()
-        val flags = listOf(
-            DetectedFlag(RedFlagType.CONSOLIDATION_VELOCITY, testTicker, 30.0, "test", now),
-            DetectedFlag(RedFlagType.FINANCING_VELOCITY, testTicker, 20.0, "test", now)
+        coEvery { executiveRepository.getExecutivesForStock(testStockId) } returns flowOf(
+            List(5) { createExecutive(yearsAtCompany = 6.0) }
         )
-        coEvery { redFlagRepository.detectFlagsForStock(testTicker) } returns flags
 
         val result = calculator.calculateScore(testTicker, testStockId)
 
-        // Total red flag score = 50, so inverted score = 100 - 50 = 50
-        assertEquals(50, result.components["redFlag"])
+        val shareholderStructure = result.components["shareholderStructure"]!!
+        assertTrue(shareholderStructure >= 80) // Strong pedigree + no dilution + high insider conviction
     }
 
     @Test
-    fun `test red flag score with critical flags returns low score`() = runTest(testDispatcher) {
+    fun `test shareholder structure with dilution flags`() = runTest(testDispatcher) {
         setupMockRepositories()
-        val flags = listOf(
-            DetectedFlag(RedFlagType.CONSOLIDATION_VELOCITY, testTicker, 30.0, "test", now),
-            DetectedFlag(RedFlagType.FINANCING_VELOCITY, testTicker, 25.0, "test", now),
-            DetectedFlag(RedFlagType.EXECUTIVE_CHURN, testTicker, 20.0, "test", now),
-            DetectedFlag(RedFlagType.DISCLOSURE_GAPS, testTicker, 15.0, "test", now),
-            DetectedFlag(RedFlagType.DEBT_TREND, testTicker, 10.0, "test", now)
+        coEvery { executiveRepository.getExecutiveScore(testStockId) } returns 50
+        coEvery { redFlagRepository.detectFlagsForStock(testTicker) } returns listOf(
+            DetectedFlag(RedFlagType.CONSOLIDATION_VELOCITY, testTicker, 20.0, "test", now),
+            DetectedFlag(RedFlagType.FINANCING_VELOCITY, testTicker, 15.0, "test", now)
         )
-        coEvery { redFlagRepository.detectFlagsForStock(testTicker) } returns flags
+        coEvery { executiveRepository.getExecutivesForStock(testStockId) } returns flowOf(
+            listOf(createExecutive(yearsAtCompany = 1.0))
+        )
 
         val result = calculator.calculateScore(testTicker, testStockId)
 
-        // Total red flag score = 100, so inverted score = 0
-        assertEquals(0, result.components["redFlag"])
+        val shareholderStructure = result.components["shareholderStructure"]!!
+        assertTrue(shareholderStructure <= 40) // Moderate pedigree + high dilution + low conviction
     }
 
-    // ========== Growth Score Tests ==========
+    // ========== Market Sentiment Pillar Tests ==========
 
     @Test
-    fun `test growth score with large market cap and strong momentum`() = runTest(testDispatcher) {
+    fun `test market sentiment with strong momentum and high liquidity`() = runTest(testDispatcher) {
         setupMockRepositories()
         coEvery { stockRepository.getStock(testStockId) } returns flowOf(
             createStock(marketCap = 1_200_000_000.0, priceChange = 22.0)
         )
+        coEvery { redFlagRepository.detectFlagsForStock(testTicker) } returns emptyList()
 
         val result = calculator.calculateScore(testTicker, testStockId)
 
-        val growthScore = result.components["growth"]!!
-        assertTrue(growthScore >= 90) // Should be very high (40 + 60 = 100, clamped)
+        val marketSentiment = result.components["marketSentiment"]!!
+        assertTrue(marketSentiment >= 90) // High liquidity + strong momentum + clean sentiment
     }
 
     @Test
-    fun `test growth score with small market cap and negative momentum`() = runTest(testDispatcher) {
+    fun `test market sentiment with negative momentum and sentiment flags`() = runTest(testDispatcher) {
         setupMockRepositories()
         coEvery { stockRepository.getStock(testStockId) } returns flowOf(
             createStock(marketCap = 30_000_000.0, priceChange = -12.0)
         )
-
-        val result = calculator.calculateScore(testTicker, testStockId)
-
-        val growthScore = result.components["growth"]!!
-        assertTrue(growthScore <= 20) // Should be low (15 + 0 = 15)
-    }
-
-    @Test
-    fun `test growth score with mid-range values`() = runTest(testDispatcher) {
-        setupMockRepositories()
-        coEvery { stockRepository.getStock(testStockId) } returns flowOf(
-            createStock(marketCap = 150_000_000.0, priceChange = 7.0)
+        coEvery { redFlagRepository.detectFlagsForStock(testTicker) } returns listOf(
+            DetectedFlag(RedFlagType.DISCLOSURE_GAPS, testTicker, 15.0, "test", now),
+            DetectedFlag(RedFlagType.EXECUTIVE_CHURN, testTicker, 10.0, "test", now)
         )
 
         val result = calculator.calculateScore(testTicker, testStockId)
 
-        val growthScore = result.components["growth"]!!
-        assertTrue(growthScore in 55..75) // Should be moderate to good (25 + 40 = 65)
+        val marketSentiment = result.components["marketSentiment"]!!
+        assertTrue(marketSentiment <= 30) // Low liquidity + negative momentum + sentiment concern
     }
 
     @Test
-    fun `test growth score with no stock data returns 0`() = runTest(testDispatcher) {
+    fun `test market sentiment with no stock data returns 0`() = runTest(testDispatcher) {
         setupMockRepositories()
         coEvery { stockRepository.getStock(testStockId) } returns flowOf(null)
 
         val result = calculator.calculateScore(testTicker, testStockId)
 
-        assertEquals(0, result.components["growth"])
-    }
-
-    // ========== Governance Score Tests ==========
-
-    @Test
-    fun `test governance score with strong team, transparency, and stability`() = runTest(testDispatcher) {
-        setupMockRepositories()
-        val executives = List(6) { createExecutive(yearsAtCompany = 6.0) }
-        val filings = List(12) { i -> createFiling(daysAgo = 30L * i, isMaterial = true) }
-        coEvery { executiveRepository.getExecutivesForStock(testStockId) } returns flowOf(executives)
-        coEvery { filingRepository.getFilingsForStock(testStockId) } returns flowOf(filings)
-
-        val result = calculator.calculateScore(testTicker, testStockId)
-
-        val governanceScore = result.components["governance"]!!
-        assertTrue(governanceScore >= 90) // Should be excellent (35 + 35 + 30 = 100, clamped)
-    }
-
-    @Test
-    fun `test governance score with small team and low transparency`() = runTest(testDispatcher) {
-        setupMockRepositories()
-        val executives = listOf(createExecutive(yearsAtCompany = 1.0))
-        val filings = listOf(createFiling(isMaterial = false))
-        coEvery { executiveRepository.getExecutivesForStock(testStockId) } returns flowOf(executives)
-        coEvery { filingRepository.getFilingsForStock(testStockId) } returns flowOf(filings)
-
-        val result = calculator.calculateScore(testTicker, testStockId)
-
-        val governanceScore = result.components["governance"]!!
-        assertTrue(governanceScore <= 35) // Should be low (15 + 5 + 15 = 35)
-    }
-
-    @Test
-    fun `test governance score with adequate team size`() = runTest(testDispatcher) {
-        setupMockRepositories()
-        val executives = List(3) { createExecutive(yearsAtCompany = 3.5) }
-        val filings = List(6) { i -> createFiling(daysAgo = 60L * i, isMaterial = true) }
-        coEvery { executiveRepository.getExecutivesForStock(testStockId) } returns flowOf(executives)
-        coEvery { filingRepository.getFilingsForStock(testStockId) } returns flowOf(filings)
-
-        val result = calculator.calculateScore(testTicker, testStockId)
-
-        val governanceScore = result.components["governance"]!!
-        assertTrue(governanceScore in 70..90) // Should be good (25 + 25 + 25 = 75)
+        assertEquals(0, result.components["marketSentiment"])
     }
 
     // ========== Bonus and Penalty Tests ==========
@@ -361,8 +302,7 @@ class VetrScoreCalculatorTest {
         val result = calculator.calculateScore(testTicker, testStockId)
 
         // With audited financials, should have higher overall score due to +5 bonus
-        // Base score from setupMockRepositories should be moderate, plus bonus
-        assertTrue(result.overallScore >= 60) // Bonus applied
+        assertTrue(result.overallScore >= 55) // Bonus applied
     }
 
     @Test
@@ -389,8 +329,7 @@ class VetrScoreCalculatorTest {
         val result = calculator.calculateScore(testTicker, testStockId)
 
         // Penalty should be applied due to disclosure gap flag
-        // Red flag score should reflect the disclosure gap
-        assertTrue(result.components["redFlag"]!! < 90)
+        assertTrue(result.overallScore < 70) // Penalty applied
     }
 
     // ========== Caching Tests ==========
@@ -492,17 +431,26 @@ class VetrScoreCalculatorTest {
     }
 
     @Test
-    fun `test component weights sum correctly`() = runTest(testDispatcher) {
+    fun `test all four pillar keys exist in result`() = runTest(testDispatcher) {
         setupMockRepositories()
 
         val result = calculator.calculateScore(testTicker, testStockId)
 
-        // Verify all component keys exist
-        assertNotNull(result.components["pedigree"])
-        assertNotNull(result.components["filingVelocity"])
-        assertNotNull(result.components["redFlag"])
-        assertNotNull(result.components["growth"])
-        assertNotNull(result.components["governance"])
+        // Verify all pillar keys exist
+        assertNotNull(result.components["financialSurvival"])
+        assertNotNull(result.components["operationalEfficiency"])
+        assertNotNull(result.components["shareholderStructure"])
+        assertNotNull(result.components["marketSentiment"])
+    }
+
+    @Test
+    fun `test pillar weights produce expected overall range`() = runTest(testDispatcher) {
+        setupMockRepositories()
+
+        val result = calculator.calculateScore(testTicker, testStockId)
+
+        // With moderate mock data, score should be in a reasonable range
+        assertTrue(result.overallScore in 30..90)
     }
 
     // ========== Helper Functions ==========
@@ -510,7 +458,7 @@ class VetrScoreCalculatorTest {
     private fun setupMockRepositories(hasAuditedFinancials: Boolean = false) {
         val filings = if (hasAuditedFinancials) {
             listOf(
-                createFiling(summary = "Audited financial statements", daysAgo = 30),
+                createFiling(summary = "Audited financial statements with cash flow analysis", daysAgo = 30),
                 createFiling(daysAgo = 120),
                 createFiling(daysAgo = 210)
             )
@@ -588,9 +536,5 @@ class VetrScoreCalculatorTest {
             education = "MBA",
             specialization = "Technology"
         )
-    }
-
-    private fun getWeightedMultiplier(): Double {
-        return 0.25 + 0.20 + 0.25 + 0.15 + 0.15 // Sum of all weights
     }
 }

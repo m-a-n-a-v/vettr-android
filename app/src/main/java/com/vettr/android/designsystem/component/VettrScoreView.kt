@@ -21,36 +21,35 @@ import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.vettr.android.designsystem.theme.VettrGreen
-import com.vettr.android.designsystem.theme.VettrRed
 import com.vettr.android.designsystem.theme.VettrTheme
-import com.vettr.android.designsystem.theme.VettrYellow
 
 /**
- * Determines the color for a VETR score based on score ranges.
+ * Determines the color for a VETR score based on 5-tier score ranges.
  * Exposed for testing.
  */
 fun getScoreColor(score: Int): Color {
-    val normalizedScore = score.coerceIn(0, 100)
+    val s = score.coerceIn(0, 100)
     return when {
-        normalizedScore > 80 -> VettrGreen // Strong Buy
-        normalizedScore >= 60 -> VettrYellow // Buy
-        normalizedScore >= 40 -> Color(0xFFFF9800) // Orange - Hold
-        else -> VettrRed // Caution
+        s >= 90 -> Color(0xFF198754)  // Dark Green - Exceptional
+        s >= 75 -> Color(0xFF84CC16)  // Lime Green - Healthy
+        s >= 50 -> Color(0xFFFBBF24)  // Yellow - Neutral
+        s >= 30 -> Color(0xFFF97316)  // Orange - High Risk
+        else -> Color(0xFFDC2626)     // Deep Red - Toxic
     }
 }
 
 /**
- * Determines the label for a VETR score based on score ranges.
+ * Determines the label for a VETR score based on 5-tier score ranges.
  * Exposed for testing.
  */
 fun getScoreLabel(score: Int): String {
-    val normalizedScore = score.coerceIn(0, 100)
+    val s = score.coerceIn(0, 100)
     return when {
-        normalizedScore > 80 -> "Strong Buy"
-        normalizedScore >= 60 -> "Buy"
-        normalizedScore >= 40 -> "Hold"
-        else -> "Caution"
+        s >= 90 -> "Exceptional"
+        s >= 75 -> "Healthy"
+        s >= 50 -> "Neutral"
+        s >= 30 -> "High Risk"
+        else -> "Toxic"
     }
 }
 
@@ -139,32 +138,40 @@ fun VettrScoreView(
 
 @Preview(showBackground = true, backgroundColor = 0xFF0D1B2A)
 @Composable
-fun VettrScoreViewPreview_StrongBuy() {
+fun VettrScoreViewPreview_Exceptional() {
     VettrTheme {
-        VettrScoreView(score = 85)
+        VettrScoreView(score = 95)
     }
 }
 
 @Preview(showBackground = true, backgroundColor = 0xFF0D1B2A)
 @Composable
-fun VettrScoreViewPreview_Buy() {
+fun VettrScoreViewPreview_Healthy() {
     VettrTheme {
-        VettrScoreView(score = 70)
+        VettrScoreView(score = 80)
     }
 }
 
 @Preview(showBackground = true, backgroundColor = 0xFF0D1B2A)
 @Composable
-fun VettrScoreViewPreview_Hold() {
+fun VettrScoreViewPreview_Neutral() {
     VettrTheme {
-        VettrScoreView(score = 50)
+        VettrScoreView(score = 55)
     }
 }
 
 @Preview(showBackground = true, backgroundColor = 0xFF0D1B2A)
 @Composable
-fun VettrScoreViewPreview_Caution() {
+fun VettrScoreViewPreview_HighRisk() {
     VettrTheme {
-        VettrScoreView(score = 30)
+        VettrScoreView(score = 35)
+    }
+}
+
+@Preview(showBackground = true, backgroundColor = 0xFF0D1B2A)
+@Composable
+fun VettrScoreViewPreview_Toxic() {
+    VettrTheme {
+        VettrScoreView(score = 15)
     }
 }

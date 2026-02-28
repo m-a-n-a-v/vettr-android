@@ -13,7 +13,7 @@ interface VetrScoreRepository {
      * Calculate VETR Score for a stock ticker.
      * Computes the score using all available data sources and caches the result.
      * @param ticker Stock ticker symbol
-     * @return VetrScoreResult with overall score and component breakdown
+     * @return VetrScoreResult with overall score and pillar breakdown
      */
     suspend fun calculateScore(ticker: String): VetrScoreResult
 
