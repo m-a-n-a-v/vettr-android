@@ -185,6 +185,7 @@ fun StockDetailRoute(
     val fundamentals by viewModel.fundamentals.collectAsStateWithLifecycle()
     val stockNews by viewModel.stockNews.collectAsStateWithLifecycle()
     val selectedTab by viewModel.selectedTab.collectAsStateWithLifecycle()
+    val selectedTimeRange by viewModel.selectedTimeRange.collectAsStateWithLifecycle()
     val isRefreshing by viewModel.isRefreshing.collectAsStateWithLifecycle()
     val showUpgradeDialog by viewModel.showUpgradeDialog.collectAsStateWithLifecycle()
 
@@ -236,6 +237,8 @@ fun StockDetailRoute(
             )
         },
         onMarkFilingRead = { filingId -> viewModel.markFilingAsRead(filingId) },
+        selectedTimeRange = selectedTimeRange,
+        onTimeRangeSelected = { viewModel.selectTimeRange(it) },
         modifier = modifier
     )
 }
@@ -261,6 +264,8 @@ fun StockDetailScreen(
     onRefresh: () -> Unit = {},
     onTabSelected: (Int) -> Unit = {},
     onMarkFilingRead: (String) -> Unit = {},
+    selectedTimeRange: TimeRange = TimeRange.ONE_DAY,
+    onTimeRangeSelected: (TimeRange) -> Unit = {},
     modifier: Modifier = Modifier
 ) {
     var showVetrScoreHelp by remember { mutableStateOf(false) }
@@ -351,6 +356,16 @@ fun StockDetailScreen(
                                 OverviewVetrScoreSection(
                                     stock = stock,
                                     onShowHelp = { showVetrScoreHelp = true }
+                                )
+                            }
+
+                            // Price Chart
+                            item {
+                                PriceChartSection(
+                                    currentPrice = stock.price,
+                                    priceChange = stock.priceChange,
+                                    selectedTimeRange = selectedTimeRange,
+                                    onTimeRangeSelected = onTimeRangeSelected
                                 )
                             }
 
