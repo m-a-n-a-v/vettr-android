@@ -57,6 +57,7 @@ import com.vettr.android.feature.portfolio.SamplePortfolioDashboardScreen
 import com.vettr.android.feature.portfolio.SamplePortfolioPickerScreen
 import com.vettr.android.feature.profile.ProfileScreen
 import com.vettr.android.feature.pulse.PulseScreen
+import com.vettr.android.feature.pulse.RedFlagTrendsScreen
 import com.vettr.android.feature.stockdetail.StockDetailRoute
 import com.vettr.android.feature.stockdetail.StocksScreen
 
@@ -198,6 +199,9 @@ fun MainScreen(
                             launchSingleTop = true
                             restoreState = true
                         }
+                    },
+                    onSeeRedFlagTrends = {
+                        navController.navigate("red_flag_trends")
                     }
                 )
             }
@@ -685,6 +689,22 @@ fun MainScreen(
                 SamplePortfolioDashboardScreen(
                     onBackClick = { navController.navigateUp() },
                     onStockClick = { ticker -> navController.navigate("stock_detail/$ticker") },
+                    modifier = Modifier.fillMaxSize()
+                )
+            }
+
+            // Red Flag Trends
+            composable(
+                route = "red_flag_trends",
+                enterTransition = {
+                    slideInHorizontally(initialOffsetX = { it }, animationSpec = tween(300)) + fadeIn(animationSpec = tween(300))
+                },
+                popExitTransition = {
+                    slideOutHorizontally(targetOffsetX = { it }, animationSpec = tween(300)) + fadeOut(animationSpec = tween(300))
+                }
+            ) {
+                RedFlagTrendsScreen(
+                    onNavigateBack = { navController.navigateUp() },
                     modifier = Modifier.fillMaxSize()
                 )
             }

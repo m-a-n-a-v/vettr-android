@@ -97,6 +97,7 @@ fun PulseScreen(
     onSeeAllFilings: () -> Unit = {},
     onSeeAllTopScores: () -> Unit = {},
     onSeeAllMovers: () -> Unit = {},
+    onSeeRedFlagTrends: () -> Unit = {},
     viewModel: PulseViewModel = hiltViewModel()
 ) {
     val stocks by viewModel.stocks.collectAsStateWithLifecycle()
@@ -392,7 +393,7 @@ fun PulseScreen(
 
                         // ═══════ ROW 2: Red Flag Summary ═══════
                         Column(verticalArrangement = Arrangement.spacedBy(Spacing.md)) {
-                            SectionHeader(title = "Red Flag Summary")
+                            SectionHeader(title = "Red Flag Summary", onSeeAllClick = onSeeRedFlagTrends)
                             Column(
                                 modifier = Modifier.fillMaxWidth().cardStyle().vettrPadding(),
                                 verticalArrangement = Arrangement.spacedBy(Spacing.md)
