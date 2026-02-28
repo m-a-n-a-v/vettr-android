@@ -52,6 +52,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.vettr.android.core.model.HealthBucket
 import com.vettr.android.core.model.WatchlistHealth
 import com.vettr.android.core.data.remote.PortfolioSummaryResponse
+import com.vettr.android.core.model.PortfolioAlert
 import com.vettr.android.designsystem.component.EmptyStateView
 import com.vettr.android.designsystem.component.ErrorView
 import com.vettr.android.designsystem.component.FilingTypeBadge
@@ -100,6 +101,8 @@ fun PulseScreen(
     val filings by viewModel.filings.collectAsStateWithLifecycle()
     val pulseSummary by viewModel.pulseSummary.collectAsStateWithLifecycle()
     val portfolioSummary by viewModel.portfolioSummary.collectAsStateWithLifecycle()
+    val portfolioAlerts by viewModel.portfolioAlerts.collectAsStateWithLifecycle()
+    val unreadAlertCount by viewModel.unreadAlertCount.collectAsStateWithLifecycle()
     val isLoading by viewModel.isLoading.collectAsStateWithLifecycle()
     val errorMessage by viewModel.errorMessage.collectAsStateWithLifecycle()
     val lastUpdatedAt by viewModel.lastUpdatedAt.collectAsStateWithLifecycle()
@@ -278,6 +281,17 @@ fun PulseScreen(
                         // ═══════ Portfolio Summary ═══════
                         if (portfolioSummary != null && portfolioSummary!!.holdingsCount > 0) {
                             PortfolioSummarySection(summary = portfolioSummary!!)
+                        }
+
+                        // ═══════ Portfolio Alerts ═══════
+                        if (portfolioAlerts.isNotEmpty()) {
+                            PortfolioAlertsSection(
+                                alerts = portfolioAlerts,
+                                unreadCount = unreadAlertCount,
+                                onAlertClick = { alert ->
+                                    viewModel.markAlertRead(alert.id)
+                                }
+                            )
                         }
 
                         // ═══════ ROW 1: Market Overview ═══════
@@ -558,6 +572,102 @@ private fun AllClearCard(category: String, modifier: Modifier = Modifier) {
         }
         Text(text = "All Clear", style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant, fontWeight = FontWeight.Medium)
         Text(text = "No flags", style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.6f))
+    }
+}
+
+@Composable
+private fun PortfolioAlertsSection(
+    alerts: List<PortfolioAlert>,
+    unreadCount: Int,
+    onAlertClick: (PortfolioAlert) -> Unit,
+    modifier: Modifier = Modifier
+) {
+    Column(
+        modifier = modifier,
+        verticalArrangement = Arrangement.spacedBy(Spacing.md)
+    ) {
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            SectionHeader(title = "Portfolio Alerts")
+            if (unreadCount > 0) {
+                Box(
+                    modifier = Modifier
+                        .clip(RoundedCornerShape(12.dp))
+                        .background(VettrRed)
+                        .padding(horizontal = Spacing.sm, vertical = 2.dp)
+                ) {
+                    Text(
+                        text = "$unreadCount new",
+                        style = MaterialTheme.typography.labelSmall,
+                        color = Color.White,
+                        fontWeight = FontWeight.Bold
+                    )
+                }
+            }
+        }
+
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .cardStyle()
+                .vettrPadding(),
+            verticalArrangement = Arrangement.spacedBy(Spacing.sm)
+        ) {
+            alerts.forEach { alert ->
+                val severityColor = when (alert.severity) {
+                    "critical" -> VettrRed
+                    "high" -> VettrOrange
+                    "medium" -> VettrWarning
+                    else -> VettrAccent
+                }
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .clip(RoundedCornerShape(8.dp))
+                        .background(
+                            if (!alert.isRead) severityColor.copy(alpha = 0.05f)
+                            else Color.Transparent
+                        )
+                        .clickable { onAlertClick(alert) }
+                        .padding(Spacing.sm),
+                    horizontalArrangement = Arrangement.spacedBy(Spacing.sm),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    // Severity indicator dot
+                    Box(
+                        modifier = Modifier
+                            .size(8.dp)
+                            .clip(CircleShape)
+                            .background(severityColor)
+                    )
+                    Column(modifier = Modifier.weight(1f)) {
+                        Text(
+                            text = alert.title,
+                            style = MaterialTheme.typography.bodySmall,
+                            color = MaterialTheme.colorScheme.onSurface,
+                            fontWeight = if (!alert.isRead) FontWeight.SemiBold else FontWeight.Normal,
+                            maxLines = 1,
+                            overflow = TextOverflow.Ellipsis
+                        )
+                        Text(
+                            text = alert.message,
+                            style = MaterialTheme.typography.labelSmall,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                            maxLines = 1,
+                            overflow = TextOverflow.Ellipsis
+                        )
+                    }
+                    Text(
+                        text = formatFilingDate(alert.triggeredAt),
+                        style = MaterialTheme.typography.labelSmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                }
+            }
+        }
     }
 }
 

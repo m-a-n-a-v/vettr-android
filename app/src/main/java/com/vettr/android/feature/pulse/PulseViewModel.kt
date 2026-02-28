@@ -4,10 +4,12 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.vettr.android.core.data.remote.PortfolioSummaryResponse
 import com.vettr.android.core.data.repository.FilingRepository
+import com.vettr.android.core.data.repository.PortfolioAlertsRepository
 import com.vettr.android.core.data.repository.PortfolioRepository
 import com.vettr.android.core.data.repository.PulseRepository
 import com.vettr.android.core.data.repository.StockRepository
 import com.vettr.android.core.model.Filing
+import com.vettr.android.core.model.PortfolioAlert
 import com.vettr.android.core.model.PulseSummary
 import com.vettr.android.core.model.Stock
 import com.vettr.android.core.util.NetworkMonitor
@@ -32,6 +34,7 @@ class PulseViewModel @Inject constructor(
     private val filingRepository: FilingRepository,
     private val pulseRepository: PulseRepository,
     private val portfolioRepository: PortfolioRepository,
+    private val portfolioAlertsRepository: PortfolioAlertsRepository,
     private val observabilityService: ObservabilityService,
     private val networkMonitor: NetworkMonitor
 ) : ViewModel() {
@@ -47,6 +50,12 @@ class PulseViewModel @Inject constructor(
 
     private val _portfolioSummary = MutableStateFlow<PortfolioSummaryResponse?>(null)
     val portfolioSummary: StateFlow<PortfolioSummaryResponse?> = _portfolioSummary.asStateFlow()
+
+    private val _portfolioAlerts = MutableStateFlow<List<PortfolioAlert>>(emptyList())
+    val portfolioAlerts: StateFlow<List<PortfolioAlert>> = _portfolioAlerts.asStateFlow()
+
+    private val _unreadAlertCount = MutableStateFlow(0)
+    val unreadAlertCount: StateFlow<Int> = _unreadAlertCount.asStateFlow()
 
     private val _isLoading = MutableStateFlow(false)
     val isLoading: StateFlow<Boolean> = _isLoading.asStateFlow()
@@ -68,6 +77,36 @@ class PulseViewModel @Inject constructor(
         screenLoadStartTime = System.currentTimeMillis()
         loadData()
         observeNetworkState()
+        observePortfolioAlerts()
+    }
+
+    /**
+     * Observe portfolio alerts from local database (kept in sync by repository).
+     */
+    private fun observePortfolioAlerts() {
+        viewModelScope.launch {
+            portfolioAlertsRepository.getAlerts()
+                .catch { /* Non-critical, ignore */ }
+                .collect { alerts ->
+                    _portfolioAlerts.value = alerts.take(5) // Show latest 5 on Pulse
+                }
+        }
+        viewModelScope.launch {
+            portfolioAlertsRepository.getUnreadCount()
+                .catch { /* Non-critical, ignore */ }
+                .collect { count ->
+                    _unreadAlertCount.value = count
+                }
+        }
+    }
+
+    /**
+     * Mark a portfolio alert as read.
+     */
+    fun markAlertRead(alertId: String) {
+        viewModelScope.launch {
+            portfolioAlertsRepository.markRead(alertId)
+        }
     }
 
     /**
