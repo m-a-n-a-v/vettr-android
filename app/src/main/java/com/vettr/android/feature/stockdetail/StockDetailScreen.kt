@@ -226,6 +226,7 @@ fun StockDetailRoute(
                 }
             )
         },
+        onMarkFilingRead = { filingId -> viewModel.markFilingAsRead(filingId) },
         modifier = modifier
     )
 }
@@ -249,6 +250,7 @@ fun StockDetailScreen(
     onFavoriteClick: () -> Unit = {},
     onRefresh: () -> Unit = {},
     onTabSelected: (Int) -> Unit = {},
+    onMarkFilingRead: (String) -> Unit = {},
     modifier: Modifier = Modifier
 ) {
     var showVetrScoreHelp by remember { mutableStateOf(false) }
@@ -361,7 +363,10 @@ fun StockDetailScreen(
                                 }
 
                                 items(filings, key = { it.id }) { filing ->
-                                    FilingRow(filing = filing)
+                                    FilingRow(
+                                        filing = filing,
+                                        onMarkRead = { onMarkFilingRead(filing.id) }
+                                    )
                                 }
                             } else {
                                 item {
@@ -693,6 +698,7 @@ private fun OverviewKeyMetrics(
 @Composable
 private fun FilingRow(
     filing: Filing,
+    onMarkRead: () -> Unit = {},
     modifier: Modifier = Modifier
 ) {
     val typeColor = getFilingTypeColor(filing.type)
@@ -700,9 +706,10 @@ private fun FilingRow(
     Card(
         modifier = modifier.fillMaxWidth(),
         colors = CardDefaults.cardColors(
-            containerColor = VettrCardBackground
+            containerColor = if (!filing.isRead) VettrCardBackground else VettrCardBackground.copy(alpha = 0.7f)
         ),
-        shape = RoundedCornerShape(12.dp)
+        shape = RoundedCornerShape(12.dp),
+        onClick = onMarkRead
     ) {
         Row(
             modifier = Modifier
@@ -711,7 +718,7 @@ private fun FilingRow(
             horizontalArrangement = Arrangement.spacedBy(Spacing.md),
             verticalAlignment = Alignment.Top
         ) {
-            // Filing type icon
+            // Filing type icon with read status
             Box(
                 modifier = Modifier
                     .size(40.dp)
@@ -725,24 +732,62 @@ private fun FilingRow(
                     tint = typeColor,
                     modifier = Modifier.size(20.dp)
                 )
+                // Unread dot indicator
+                if (!filing.isRead) {
+                    Box(
+                        modifier = Modifier
+                            .align(Alignment.TopEnd)
+                            .size(8.dp)
+                            .clip(CircleShape)
+                            .background(VettrAccent)
+                    )
+                }
             }
 
             Column(
                 modifier = Modifier.weight(1f),
                 verticalArrangement = Arrangement.spacedBy(Spacing.xs)
             ) {
-                // Title row with type badge and date
+                // Title row with type badge, material badge, and date
                 Row(
                     modifier = Modifier.fillMaxWidth(),
                     horizontalArrangement = Arrangement.SpaceBetween,
                     verticalAlignment = Alignment.CenterVertically
                 ) {
-                    Text(
-                        text = filing.type,
-                        style = MaterialTheme.typography.labelSmall,
-                        fontWeight = FontWeight.Bold,
-                        color = typeColor
-                    )
+                    Row(
+                        horizontalArrangement = Arrangement.spacedBy(Spacing.xs),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Text(
+                            text = filing.type,
+                            style = MaterialTheme.typography.labelSmall,
+                            fontWeight = FontWeight.Bold,
+                            color = typeColor
+                        )
+                        if (filing.isMaterial) {
+                            Box(
+                                modifier = Modifier
+                                    .clip(RoundedCornerShape(4.dp))
+                                    .background(VettrRed.copy(alpha = 0.1f))
+                                    .padding(horizontal = 4.dp, vertical = 1.dp)
+                            ) {
+                                Text(
+                                    text = "MATERIAL",
+                                    style = MaterialTheme.typography.labelSmall,
+                                    color = VettrRed,
+                                    fontWeight = FontWeight.Bold
+                                )
+                            }
+                        }
+                        if (filing.isRead) {
+                            Icon(
+                                imageVector = Icons.Default.CheckCircle,
+                                contentDescription = "Read",
+                                tint = VettrGreen.copy(alpha = 0.6f),
+                                modifier = Modifier.size(14.dp)
+                            )
+                        }
+                    }
                     Text(
                         text = formatRelativeDate(filing.date),
                         style = MaterialTheme.typography.labelSmall,
@@ -754,7 +799,7 @@ private fun FilingRow(
                 Text(
                     text = filing.title,
                     style = MaterialTheme.typography.titleSmall,
-                    fontWeight = FontWeight.SemiBold,
+                    fontWeight = if (!filing.isRead) FontWeight.Bold else FontWeight.SemiBold,
                     color = MaterialTheme.colorScheme.onSurface,
                     maxLines = 1,
                     overflow = TextOverflow.Ellipsis

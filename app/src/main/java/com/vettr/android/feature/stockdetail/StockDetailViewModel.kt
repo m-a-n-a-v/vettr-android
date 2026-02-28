@@ -263,6 +263,15 @@ class StockDetailViewModel @Inject constructor(
     }
 
     /**
+     * Mark a filing as read.
+     */
+    fun markFilingAsRead(filingId: String) {
+        viewModelScope.launch {
+            filingRepository.markAsRead(filingId)
+        }
+    }
+
+    /**
      * Select a tab on the stock detail screen.
      * @param tab The tab to select
      */
