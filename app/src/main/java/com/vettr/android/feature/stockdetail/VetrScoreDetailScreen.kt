@@ -78,6 +78,7 @@ import com.vettr.android.designsystem.theme.VettrYellow
 fun VetrScoreDetailBottomSheet(
     ticker: String,
     onDismiss: () -> Unit,
+    onNavigateToPeer: ((String) -> Unit)? = null,
     modifier: Modifier = Modifier,
     viewModel: StockDetailViewModel = hiltViewModel()
 ) {
@@ -103,7 +104,8 @@ fun VetrScoreDetailBottomSheet(
             vetrScoreResult = vetrScoreResult,
             scoreHistory = scoreHistory,
             scoreTrend = scoreTrend,
-            peerComparison = peerComparison
+            peerComparison = peerComparison,
+            onPeerClick = onNavigateToPeer
         )
     }
 }
@@ -118,6 +120,7 @@ private fun VetrScoreDetailContent(
     scoreHistory: List<Int>,
     scoreTrend: String,
     peerComparison: PeerComparison?,
+    onPeerClick: ((String) -> Unit)? = null,
     modifier: Modifier = Modifier
 ) {
     Column(
@@ -178,7 +181,10 @@ private fun VetrScoreDetailContent(
 
         // Peer Comparison
         if (peerComparison != null) {
-            PeerComparisonSection(peerComparison = peerComparison)
+            PeerComparisonSection(
+                peerComparison = peerComparison,
+                onPeerClick = onPeerClick
+            )
 
             Spacer(modifier = Modifier.height(Spacing.lg))
         }
@@ -693,11 +699,12 @@ private fun MethodologyItem(
 }
 
 /**
- * Peer Comparison section with percentile bar.
+ * Peer Comparison section with percentile bar, horizontal stock vs sector bar, and peer list.
  */
 @Composable
 private fun PeerComparisonSection(
     peerComparison: PeerComparison,
+    onPeerClick: ((String) -> Unit)? = null,
     modifier: Modifier = Modifier
 ) {
     Column(
@@ -714,6 +721,16 @@ private fun PeerComparisonSection(
             style = MaterialTheme.typography.titleMedium,
             fontWeight = FontWeight.Bold,
             color = MaterialTheme.colorScheme.onSurface
+        )
+
+        Spacer(modifier = Modifier.height(Spacing.sm))
+
+        // Percentile rank headline
+        Text(
+            text = "Top ${100 - peerComparison.percentile}% in sector",
+            style = MaterialTheme.typography.titleSmall,
+            fontWeight = FontWeight.SemiBold,
+            color = VettrAccent
         )
 
         Spacer(modifier = Modifier.height(Spacing.sm))
@@ -753,6 +770,14 @@ private fun PeerComparisonSection(
 
         Spacer(modifier = Modifier.height(Spacing.md))
 
+        // Horizontal bar comparing stock vs sector average
+        StockVsSectorBar(
+            stockScore = peerComparison.score,
+            sectorAverage = peerComparison.sectorAverage
+        )
+
+        Spacer(modifier = Modifier.height(Spacing.md))
+
         // Percentile Bar
         PercentileBar(percentile = peerComparison.percentile)
 
@@ -762,6 +787,172 @@ private fun PeerComparisonSection(
             text = "${peerComparison.percentile}th percentile in sector",
             style = MaterialTheme.typography.bodySmall,
             color = VettrTextSecondary
+        )
+
+        // Peer scores list
+        if (peerComparison.peerScores.isNotEmpty()) {
+            Spacer(modifier = Modifier.height(Spacing.md))
+
+            Text(
+                text = "Sector Peers",
+                style = MaterialTheme.typography.titleSmall,
+                fontWeight = FontWeight.Bold,
+                color = MaterialTheme.colorScheme.onSurface
+            )
+
+            Spacer(modifier = Modifier.height(Spacing.sm))
+
+            peerComparison.peerScores.take(5).forEach { peer ->
+                PeerScoreRow(
+                    peerScore = peer,
+                    onClick = onPeerClick?.let { { it(peer.ticker) } }
+                )
+                Spacer(modifier = Modifier.height(Spacing.xs))
+            }
+        }
+    }
+}
+
+/**
+ * Horizontal bar showing stock score vs sector average side by side.
+ */
+@Composable
+private fun StockVsSectorBar(
+    stockScore: Int,
+    sectorAverage: Int,
+    modifier: Modifier = Modifier
+) {
+    val maxScore = maxOf(stockScore, sectorAverage, 1)
+
+    Column(
+        modifier = modifier.fillMaxWidth(),
+        verticalArrangement = Arrangement.spacedBy(Spacing.xs)
+    ) {
+        // Stock bar
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(Spacing.sm)
+        ) {
+            Text(
+                text = "Stock",
+                style = MaterialTheme.typography.labelSmall,
+                color = VettrTextSecondary,
+                modifier = Modifier.width(50.dp)
+            )
+            Box(
+                modifier = Modifier
+                    .weight(1f)
+                    .height(8.dp)
+                    .background(
+                        color = Color(0xFF3A4A5A),
+                        shape = RoundedCornerShape(4.dp)
+                    )
+            ) {
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth(stockScore.toFloat() / 100f)
+                        .height(8.dp)
+                        .background(
+                            color = getScoreColor(stockScore),
+                            shape = RoundedCornerShape(4.dp)
+                        )
+                )
+            }
+        }
+
+        // Sector average bar
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(Spacing.sm)
+        ) {
+            Text(
+                text = "Sector",
+                style = MaterialTheme.typography.labelSmall,
+                color = VettrTextSecondary,
+                modifier = Modifier.width(50.dp)
+            )
+            Box(
+                modifier = Modifier
+                    .weight(1f)
+                    .height(8.dp)
+                    .background(
+                        color = Color(0xFF3A4A5A),
+                        shape = RoundedCornerShape(4.dp)
+                    )
+            ) {
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth(sectorAverage.toFloat() / 100f)
+                        .height(8.dp)
+                        .background(
+                            color = VettrTextSecondary,
+                            shape = RoundedCornerShape(4.dp)
+                        )
+                )
+            }
+        }
+    }
+}
+
+/**
+ * Individual peer score row with ticker, name, score, and optional tap navigation.
+ */
+@Composable
+private fun PeerScoreRow(
+    peerScore: PeerScore,
+    onClick: (() -> Unit)? = null,
+    modifier: Modifier = Modifier
+) {
+    Row(
+        modifier = modifier
+            .fillMaxWidth()
+            .then(
+                if (onClick != null) Modifier.clickable(onClick = onClick)
+                else Modifier
+            )
+            .background(
+                color = Color(0xFF1A2A3A),
+                shape = RoundedCornerShape(8.dp)
+            )
+            .padding(horizontal = Spacing.md, vertical = Spacing.sm),
+        horizontalArrangement = Arrangement.SpaceBetween,
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        Row(
+            horizontalArrangement = Arrangement.spacedBy(Spacing.sm),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            // Ticker badge
+            Box(
+                modifier = Modifier
+                    .background(
+                        color = VettrAccent.copy(alpha = 0.15f),
+                        shape = RoundedCornerShape(4.dp)
+                    )
+                    .padding(horizontal = Spacing.sm, vertical = 2.dp)
+            ) {
+                Text(
+                    text = peerScore.ticker,
+                    style = MaterialTheme.typography.labelSmall,
+                    fontWeight = FontWeight.Bold,
+                    color = VettrAccent
+                )
+            }
+            Text(
+                text = peerScore.name,
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.onSurface
+            )
+        }
+
+        // Score
+        Text(
+            text = "${peerScore.score}",
+            style = MaterialTheme.typography.titleSmall,
+            fontWeight = FontWeight.Bold,
+            color = getScoreColor(peerScore.score)
         )
     }
 }
