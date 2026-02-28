@@ -693,6 +693,40 @@ fun MainScreen(
                 )
             }
 
+            // Change password screen
+            composable(
+                route = "change_password",
+                enterTransition = {
+                    slideInHorizontally(
+                        initialOffsetX = { it },
+                        animationSpec = tween(300)
+                    ) + fadeIn(animationSpec = tween(300))
+                },
+                exitTransition = {
+                    slideOutHorizontally(
+                        targetOffsetX = { -it / 4 },
+                        animationSpec = tween(300)
+                    ) + fadeOut(animationSpec = tween(300))
+                },
+                popEnterTransition = {
+                    slideInHorizontally(
+                        initialOffsetX = { -it / 4 },
+                        animationSpec = tween(300)
+                    ) + fadeIn(animationSpec = tween(300))
+                },
+                popExitTransition = {
+                    slideOutHorizontally(
+                        targetOffsetX = { it },
+                        animationSpec = tween(300)
+                    ) + fadeOut(animationSpec = tween(300))
+                }
+            ) {
+                com.vettr.android.feature.profile.ChangePasswordScreen(
+                    onBackClick = { navController.navigateUp() },
+                    modifier = Modifier.fillMaxSize()
+                )
+            }
+
             // Red Flag Trends
             composable(
                 route = "red_flag_trends",

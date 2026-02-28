@@ -17,11 +17,14 @@ import javax.inject.Singleton
  * 2. If 401 response: attempt token refresh
  * 3. On refresh success: retry original request with new token
  * 4. On refresh failure: clear tokens and emit unauthorized state
+ *
+ * Uses dagger.Lazy<AuthRepository> to break the dependency cycle:
+ * OkHttpClient -> Retrofit -> VettrApi -> AuthRepositoryImpl -> AuthRepository -> AuthInterceptor -> OkHttpClient
  */
 @Singleton
 class AuthInterceptor @Inject constructor(
     private val tokenManager: TokenManager,
-    private val authRepository: AuthRepository
+    private val authRepository: dagger.Lazy<AuthRepository>
 ) : Interceptor {
 
     override fun intercept(chain: Interceptor.Chain): Response {
@@ -66,7 +69,7 @@ class AuthInterceptor @Inject constructor(
             } else {
                 // Refresh failed - sign out user
                 runBlocking {
-                    authRepository.signOut()
+                    authRepository.get().signOut()
                 }
 
                 // Return original 401 response
