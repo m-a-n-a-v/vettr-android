@@ -52,6 +52,7 @@ import com.vettr.android.feature.onboarding.OnboardingScreen
 import com.vettr.android.feature.portfolio.CreatePortfolioScreen
 import com.vettr.android.feature.portfolio.PortfolioHoldingsScreen
 import com.vettr.android.feature.portfolio.PortfolioManagerScreen
+import com.vettr.android.feature.portfolio.SamplePortfolioPickerScreen
 import com.vettr.android.feature.profile.ProfileScreen
 import com.vettr.android.feature.pulse.PulseScreen
 import com.vettr.android.feature.stockdetail.StockDetailRoute
@@ -627,6 +628,25 @@ fun MainScreen(
                         navController.navigate("portfolio_holdings/$portfolioId") {
                             popUpTo("portfolio_manager") { inclusive = false }
                         }
+                    },
+                    modifier = Modifier.fillMaxSize()
+                )
+            }
+
+            // Sample portfolio picker
+            composable(
+                route = "sample_portfolios",
+                enterTransition = {
+                    slideInHorizontally(initialOffsetX = { it }, animationSpec = tween(300)) + fadeIn(animationSpec = tween(300))
+                },
+                popExitTransition = {
+                    slideOutHorizontally(targetOffsetX = { it }, animationSpec = tween(300)) + fadeOut(animationSpec = tween(300))
+                }
+            ) {
+                SamplePortfolioPickerScreen(
+                    onBackClick = { navController.navigateUp() },
+                    onPortfolioClick = { portfolioId ->
+                        navController.navigate("sample_portfolio_dashboard/$portfolioId")
                     },
                     modifier = Modifier.fillMaxSize()
                 )
