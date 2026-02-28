@@ -2,6 +2,7 @@ package com.vettr.android.feature.pulse
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.vettr.android.core.data.local.TokenManager
 import com.vettr.android.core.data.remote.PortfolioSummaryResponse
 import com.vettr.android.core.data.repository.FilingRepository
 import com.vettr.android.core.data.repository.PortfolioAlertsRepository
@@ -10,6 +11,7 @@ import com.vettr.android.core.data.repository.PortfolioRepository
 import com.vettr.android.core.data.repository.PulseRepository
 import com.vettr.android.core.data.repository.StockRepository
 import com.vettr.android.core.model.Filing
+import com.vettr.android.core.model.Portfolio
 import com.vettr.android.core.model.PortfolioAlert
 import com.vettr.android.core.model.PortfolioInsight
 import com.vettr.android.core.model.PulseSummary
@@ -25,10 +27,22 @@ import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 /**
+ * Represents the portfolio state for conditional Pulse rendering.
+ * - NoPortfolio: User has no real portfolios and no sample selected -> show SamplePortfolioPicker
+ * - SampleOnly: User has a selected sample portfolio but no real ones -> show SamplePortfolioDashboard + "Connect" banner
+ * - RealPortfolio: User has real portfolio(s) -> show full portfolio dashboard
+ */
+sealed class PulsePortfolioState {
+    data object NoPortfolio : PulsePortfolioState()
+    data class SampleOnly(val samplePortfolioId: String) : PulsePortfolioState()
+    data object RealPortfolio : PulsePortfolioState()
+}
+
+/**
  * ViewModel for the Pulse screen.
  * Manages UI state for market overview, strategic events, trending stocks,
  * pulse summary (watchlist health, sector exposure, red flag categories),
- * and portfolio summary.
+ * portfolio summary, and portfolio-centric conditional rendering.
  */
 @HiltViewModel
 class PulseViewModel @Inject constructor(
@@ -39,7 +53,8 @@ class PulseViewModel @Inject constructor(
     private val portfolioAlertsRepository: PortfolioAlertsRepository,
     private val portfolioInsightsRepository: PortfolioInsightsRepository,
     private val observabilityService: ObservabilityService,
-    private val networkMonitor: NetworkMonitor
+    private val networkMonitor: NetworkMonitor,
+    private val tokenManager: TokenManager
 ) : ViewModel() {
 
     private val _stocks = MutableStateFlow<List<Stock>>(emptyList())
@@ -72,6 +87,14 @@ class PulseViewModel @Inject constructor(
     private val _lastUpdatedAt = MutableStateFlow<Long?>(null)
     val lastUpdatedAt: StateFlow<Long?> = _lastUpdatedAt.asStateFlow()
 
+    // Portfolio state for conditional rendering
+    private val _portfolioState = MutableStateFlow<PulsePortfolioState>(PulsePortfolioState.NoPortfolio)
+    val portfolioState: StateFlow<PulsePortfolioState> = _portfolioState.asStateFlow()
+
+    // User's real portfolios from local database
+    private val _userPortfolios = MutableStateFlow<List<Portfolio>>(emptyList())
+    val userPortfolios: StateFlow<List<Portfolio>> = _userPortfolios.asStateFlow()
+
     // Expose network connectivity state
     val isOnline: StateFlow<Boolean> = networkMonitor.isOnline
 
@@ -85,6 +108,43 @@ class PulseViewModel @Inject constructor(
         observeNetworkState()
         observePortfolioAlerts()
         observePortfolioInsights()
+        observeUserPortfolios()
+    }
+
+    /**
+     * Observe user's real portfolios to determine portfolio state.
+     */
+    private fun observeUserPortfolios() {
+        viewModelScope.launch {
+            portfolioRepository.getPortfolios()
+                .catch { /* Non-critical, default to no portfolio */ }
+                .collect { portfolios ->
+                    _userPortfolios.value = portfolios
+                    updatePortfolioState(portfolios)
+                }
+        }
+    }
+
+    /**
+     * Update the portfolio state based on real portfolios and sample selection.
+     */
+    private fun updatePortfolioState(portfolios: List<Portfolio>) {
+        val hasRealPortfolios = portfolios.isNotEmpty()
+        val sampleId = tokenManager.getSamplePortfolioId()
+
+        _portfolioState.value = when {
+            hasRealPortfolios -> PulsePortfolioState.RealPortfolio
+            sampleId != null -> PulsePortfolioState.SampleOnly(sampleId)
+            else -> PulsePortfolioState.NoPortfolio
+        }
+    }
+
+    /**
+     * Called when user selects a sample portfolio from the picker.
+     */
+    fun selectSamplePortfolio(samplePortfolioId: String) {
+        tokenManager.saveSamplePortfolioId(samplePortfolioId)
+        _portfolioState.value = PulsePortfolioState.SampleOnly(samplePortfolioId)
     }
 
     /**

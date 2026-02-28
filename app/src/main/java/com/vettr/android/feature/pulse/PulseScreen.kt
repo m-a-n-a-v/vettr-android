@@ -84,8 +84,20 @@ import kotlin.math.abs
 import kotlin.math.roundToInt
 
 /**
- * Pulse screen - displays market overview dashboard with watchlist health,
- * sector exposure, red flag summary, filings, movers, and top VETTR scores.
+ * Pulse screen - portfolio-centric dashboard that conditionally renders based on portfolio state:
+ * - No portfolio + no sample -> SamplePortfolioPickerScreen
+ * - Sample selected -> SamplePortfolioDashboard + "Connect Portfolio" banner + existing sections
+ * - Real portfolio -> Full portfolio dashboard (Portfolio Summary, Alerts, Insights) + existing sections
+ *
+ * Dashboard section order (when portfolio exists):
+ * 1. Portfolio Summary
+ * 2. Portfolio Alerts
+ * 3. Portfolio Insights
+ * 4. Watchlist Health / Market Overview
+ * 5. Top Movers
+ * 6. Red Flag Summary
+ * 7. Smart Filings
+ * 8. Top VETTR Scores
  */
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalLayoutApi::class)
 @Composable
@@ -98,6 +110,9 @@ fun PulseScreen(
     onSeeAllTopScores: () -> Unit = {},
     onSeeAllMovers: () -> Unit = {},
     onSeeRedFlagTrends: () -> Unit = {},
+    onNavigateToSamplePicker: () -> Unit = {},
+    onNavigateToSampleDashboard: (String) -> Unit = {},
+    onNavigateToCreatePortfolio: () -> Unit = {},
     viewModel: PulseViewModel = hiltViewModel()
 ) {
     val stocks by viewModel.stocks.collectAsStateWithLifecycle()
@@ -111,6 +126,7 @@ fun PulseScreen(
     val errorMessage by viewModel.errorMessage.collectAsStateWithLifecycle()
     val lastUpdatedAt by viewModel.lastUpdatedAt.collectAsStateWithLifecycle()
     val isOnline by viewModel.isOnline.collectAsStateWithLifecycle()
+    val portfolioState by viewModel.portfolioState.collectAsStateWithLifecycle()
 
     val snackbarHostState = remember { SnackbarHostState() }
 
@@ -230,7 +246,22 @@ fun PulseScreen(
             return@Scaffold
         }
 
-        if (!isLoading && stocks.isEmpty()) {
+        // Portfolio-centric conditional rendering:
+        // No portfolio + no sample -> redirect to SamplePortfolioPicker
+        if (!isLoading && portfolioState is PulsePortfolioState.NoPortfolio && stocks.isEmpty()) {
+            Box(modifier = Modifier.padding(paddingValues)) {
+                EmptyStateView(
+                    icon = Icons.Default.Star,
+                    title = "Get Started with VETTR",
+                    subtitle = "Choose a sample portfolio to explore, or add stocks to your watchlist",
+                    actionLabel = "Browse Sample Portfolios",
+                    onAction = onNavigateToSamplePicker
+                )
+            }
+            return@Scaffold
+        }
+
+        if (!isLoading && stocks.isEmpty() && portfolioState !is PulsePortfolioState.SampleOnly) {
             Box(modifier = Modifier.padding(paddingValues)) {
                 EmptyStateView(
                     icon = Icons.Default.Star,
@@ -281,6 +312,13 @@ fun PulseScreen(
                         verticalArrangement = Arrangement.spacedBy(Spacing.lg)
                     ) {
                         LastUpdatedText(lastUpdatedAt = lastUpdatedAt, modifier = Modifier.fillMaxWidth())
+
+                        // ═══════ Connect Portfolio Banner (sample-only users) ═══════
+                        if (portfolioState is PulsePortfolioState.SampleOnly) {
+                            ConnectPortfolioBanner(
+                                onConnectClick = onNavigateToCreatePortfolio
+                            )
+                        }
 
                         // ═══════ Portfolio Summary ═══════
                         if (portfolioSummary != null && portfolioSummary!!.holdingsCount > 0) {
@@ -535,6 +573,56 @@ fun PulseScreen(
 // ════════════════════════════════════════════════════════════════════
 // Supporting Composables
 // ════════════════════════════════════════════════════════════════════
+
+/**
+ * Banner shown to users who only have a sample portfolio selected,
+ * encouraging them to connect a real portfolio.
+ */
+@Composable
+private fun ConnectPortfolioBanner(
+    onConnectClick: () -> Unit,
+    modifier: Modifier = Modifier
+) {
+    Row(
+        modifier = modifier
+            .fillMaxWidth()
+            .clip(RoundedCornerShape(12.dp))
+            .background(VettrAccent.copy(alpha = 0.1f))
+            .clickable { onConnectClick() }
+            .padding(Spacing.md),
+        horizontalArrangement = Arrangement.SpaceBetween,
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        Column(modifier = Modifier.weight(1f)) {
+            Text(
+                text = "Connect Your Portfolio",
+                style = MaterialTheme.typography.titleSmall,
+                color = VettrAccent,
+                fontWeight = FontWeight.Bold
+            )
+            Spacer(modifier = Modifier.height(2.dp))
+            Text(
+                text = "Import your holdings for personalized insights and alerts",
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant
+            )
+        }
+        Spacer(modifier = Modifier.width(Spacing.sm))
+        Box(
+            modifier = Modifier
+                .clip(RoundedCornerShape(8.dp))
+                .background(VettrAccent)
+                .padding(horizontal = Spacing.md, vertical = Spacing.sm)
+        ) {
+            Text(
+                text = "Connect",
+                style = MaterialTheme.typography.labelMedium,
+                color = Color.White,
+                fontWeight = FontWeight.SemiBold
+            )
+        }
+    }
+}
 
 @Composable
 private fun WatchlistHealthCard(health: WatchlistHealth, modifier: Modifier = Modifier) {

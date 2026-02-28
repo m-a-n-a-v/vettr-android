@@ -50,6 +50,22 @@ class TokenManager @Inject constructor(
         return sharedPreferences.getString(KEY_REFRESH_TOKEN, null)
     }
 
+    fun saveSamplePortfolioId(id: String) {
+        sharedPreferences.edit()
+            .putString(KEY_SAMPLE_PORTFOLIO_ID, id)
+            .apply()
+    }
+
+    fun getSamplePortfolioId(): String? {
+        return sharedPreferences.getString(KEY_SAMPLE_PORTFOLIO_ID, null)
+    }
+
+    fun clearSamplePortfolioId() {
+        sharedPreferences.edit()
+            .remove(KEY_SAMPLE_PORTFOLIO_ID)
+            .apply()
+    }
+
     fun clearAll() {
         sharedPreferences.edit()
             .clear()
@@ -60,5 +76,6 @@ class TokenManager @Inject constructor(
         private const val PREFS_FILE_NAME = "vettr_secure_prefs"
         private const val KEY_ACCESS_TOKEN = "access_token"
         private const val KEY_REFRESH_TOKEN = "refresh_token"
+        private const val KEY_SAMPLE_PORTFOLIO_ID = "vettr_sample_portfolio_id"
     }
 }

@@ -202,6 +202,15 @@ fun MainScreen(
                     },
                     onSeeRedFlagTrends = {
                         navController.navigate("red_flag_trends")
+                    },
+                    onNavigateToSamplePicker = {
+                        navController.navigate("sample_portfolios")
+                    },
+                    onNavigateToSampleDashboard = { sampleId ->
+                        navController.navigate("sample_portfolio_dashboard/$sampleId")
+                    },
+                    onNavigateToCreatePortfolio = {
+                        navController.navigate("create_portfolio")
                     }
                 )
             }
