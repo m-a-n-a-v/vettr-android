@@ -100,7 +100,7 @@ class PulseViewModelTest {
             )
         )
 
-        coEvery { stockRepository.getStocks() } returns flowOf(mockStocks)
+        coEvery { stockRepository.getFavorites() } returns flowOf(mockStocks)
         coEvery { filingRepository.getLatestFilings(any()) } returns flowOf(emptyList())
 
         // When
@@ -114,7 +114,34 @@ class PulseViewModelTest {
 
     @Test
     fun `loadData populates filings flow`() = runTest {
-        // Given
+        // Given - stocks must match filing stockIds since filings are filtered to watchlist
+        val mockStocks = listOf(
+            Stock(
+                id = "stock-1",
+                ticker = "TSLA",
+                name = "Tesla Inc",
+                exchange = "NASDAQ",
+                sector = "Automotive",
+                marketCap = 800000000000.0,
+                price = 250.50,
+                priceChange = 2.5,
+                vetrScore = 75,
+                isFavorite = true
+            ),
+            Stock(
+                id = "stock-2",
+                ticker = "AAPL",
+                name = "Apple Inc",
+                exchange = "NASDAQ",
+                sector = "Technology",
+                marketCap = 3000000000000.0,
+                price = 175.25,
+                priceChange = -1.2,
+                vetrScore = 88,
+                isFavorite = true
+            )
+        )
+
         val mockFilings = listOf(
             Filing(
                 id = "filing-1",
@@ -136,8 +163,8 @@ class PulseViewModelTest {
             )
         )
 
-        coEvery { stockRepository.getStocks() } returns flowOf(emptyList())
-        coEvery { filingRepository.getLatestFilings(10) } returns flowOf(mockFilings)
+        coEvery { stockRepository.getFavorites() } returns flowOf(mockStocks)
+        coEvery { filingRepository.getLatestFilings(any()) } returns flowOf(mockFilings)
 
         // When
         viewModel = PulseViewModel(stockRepository, filingRepository, pulseRepository, portfolioRepository, portfolioAlertsRepository, portfolioInsightsRepository, observabilityService, networkMonitor, tokenManager)
@@ -151,7 +178,7 @@ class PulseViewModelTest {
     @Test
     fun `loadData sets loading state during fetch`() = runTest {
         // Given
-        coEvery { stockRepository.getStocks() } returns flowOf(emptyList())
+        coEvery { stockRepository.getFavorites() } returns flowOf(emptyList())
         coEvery { filingRepository.getLatestFilings(any()) } returns flowOf(emptyList())
 
         // When
@@ -165,7 +192,7 @@ class PulseViewModelTest {
     @Test
     fun `loadData handles stock repository error`() = runTest {
         // Given
-        coEvery { stockRepository.getStocks() } returns flowOf(emptyList())
+        coEvery { stockRepository.getFavorites() } returns flowOf(emptyList())
         coEvery { filingRepository.getLatestFilings(any()) } returns flowOf(emptyList())
 
         // When
@@ -191,7 +218,7 @@ class PulseViewModelTest {
                 price = 250.50,
                 priceChange = 2.5,
                 vetrScore = 75,
-                isFavorite = false
+                isFavorite = true
             )
         )
 
@@ -206,11 +233,11 @@ class PulseViewModelTest {
                 price = 255.75,
                 priceChange = 5.25,
                 vetrScore = 78,
-                isFavorite = false
+                isFavorite = true
             )
         )
 
-        coEvery { stockRepository.getStocks() } returnsMany listOf(
+        coEvery { stockRepository.getFavorites() } returnsMany listOf(
             flowOf(initialStocks),
             flowOf(updatedStocks)
         )
