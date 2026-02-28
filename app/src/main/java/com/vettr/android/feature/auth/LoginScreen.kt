@@ -25,9 +25,11 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
@@ -39,6 +41,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.vettr.android.designsystem.component.PrimaryButton
 import com.vettr.android.designsystem.theme.Spacing
 import com.vettr.android.designsystem.theme.VettrTheme
+import kotlinx.coroutines.launch
 
 @Composable
 fun LoginScreen(
@@ -49,6 +52,8 @@ fun LoginScreen(
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     var passwordVisible by remember { mutableStateOf(false) }
+    val context = LocalContext.current
+    val coroutineScope = rememberCoroutineScope()
 
     Column(
         modifier = Modifier
@@ -159,7 +164,23 @@ fun LoginScreen(
 
         // Google Sign-In button
         OutlinedButton(
-            onClick = onGoogleSignInClick,
+            onClick = {
+                coroutineScope.launch {
+                    val helper = com.vettr.android.core.util.GoogleSignInHelper(context)
+                    when (val result = helper.signIn()) {
+                        is com.vettr.android.core.util.GoogleSignInHelper.GoogleSignInResult.Success -> {
+                            viewModel.signInWithGoogle(result.idToken)
+                        }
+                        is com.vettr.android.core.util.GoogleSignInHelper.GoogleSignInResult.Error -> {
+                            viewModel.clearError()
+                            // Show error via viewModel if needed
+                        }
+                        is com.vettr.android.core.util.GoogleSignInHelper.GoogleSignInResult.Cancelled -> {
+                            // User cancelled, no action needed
+                        }
+                    }
+                }
+            },
             enabled = !uiState.isLoading,
             modifier = Modifier.fillMaxWidth()
         ) {

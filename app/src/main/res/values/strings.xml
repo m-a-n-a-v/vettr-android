@@ -42,6 +42,9 @@
     <string name="auth_text_noaccount">Don\'t have an account? </string>
     <string name="auth_link_signup">Sign Up</string>
 
+    <!-- Google Sign-In -->
+    <string name="google_web_client_id" translatable="false">YOUR_WEB_CLIENT_ID.apps.googleusercontent.com</string>
+
     <!-- Auth - Sign Up Screen -->
     <string name="auth_signup_title">Create Account</string>
     <string name="auth_signup_subtitle">Sign up to get started</string>
