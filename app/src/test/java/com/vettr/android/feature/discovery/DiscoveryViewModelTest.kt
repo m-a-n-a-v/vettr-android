@@ -18,12 +18,13 @@ import kotlinx.coroutines.test.setMain
 import org.junit.After
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
+import org.junit.Assert.assertTrue
 import org.junit.Before
 import org.junit.Test
 
 /**
  * Unit tests for DiscoveryViewModel.
- * Tests filter toggle functionality and stock display updates.
+ * Tests stock loading, search, and sector filtering functionality.
  */
 @OptIn(ExperimentalCoroutinesApi::class)
 class DiscoveryViewModelTest {
@@ -35,6 +36,33 @@ class DiscoveryViewModelTest {
     private lateinit var api: VettrApi
 
     private val testDispatcher = StandardTestDispatcher()
+
+    private val testStocks = listOf(
+        Stock(
+            id = "stock-1",
+            ticker = "TSLA",
+            name = "Tesla Inc",
+            exchange = "NASDAQ",
+            sector = "Automotive",
+            marketCap = 800000000000.0,
+            price = 250.50,
+            priceChange = 2.5,
+            vetrScore = 75,
+            isFavorite = true
+        ),
+        Stock(
+            id = "stock-2",
+            ticker = "AAPL",
+            name = "Apple Inc",
+            exchange = "NASDAQ",
+            sector = "Technology",
+            marketCap = 3000000000000.0,
+            price = 175.25,
+            priceChange = -1.2,
+            vetrScore = 88,
+            isFavorite = false
+        )
+    )
 
     @Before
     fun setup() {
@@ -51,294 +79,117 @@ class DiscoveryViewModelTest {
     }
 
     @Test
-    fun `toggleFilter updates displayed stocks from watchlist to alerts`() = runTest {
+    fun `loadData populates stocks flow`() = runTest {
         // Given
-        val watchlistStocks = listOf(
-            Stock(
-                id = "stock-1",
-                ticker = "TSLA",
-                name = "Tesla Inc",
-                exchange = "NASDAQ",
-                sector = "Automotive",
-                marketCap = 800000000000.0,
-                price = 250.50,
-                priceChange = 2.5,
-                vetrScore = 75,
-                isFavorite = true
-            )
-        )
-
-        val allStocks = listOf(
-            Stock(
-                id = "stock-1",
-                ticker = "TSLA",
-                name = "Tesla Inc",
-                exchange = "NASDAQ",
-                sector = "Automotive",
-                marketCap = 800000000000.0,
-                price = 250.50,
-                priceChange = 2.5,
-                vetrScore = 75,
-                isFavorite = true
-            ),
-            Stock(
-                id = "stock-2",
-                ticker = "AAPL",
-                name = "Apple Inc",
-                exchange = "NASDAQ",
-                sector = "Technology",
-                marketCap = 3000000000000.0,
-                price = 175.25,
-                priceChange = -1.2,
-                vetrScore = 88,
-                isFavorite = false
-            )
-        )
-
-        // Mock repository to return favorites first, then all stocks
-        coEvery { stockRepository.getFavorites() } returns flowOf(watchlistStocks)
-        coEvery { stockRepository.getStocks() } returns flowOf(allStocks)
-
-        viewModel = DiscoveryViewModel(stockRepository, filingRepository, observabilityService, api)
-        advanceUntilIdle()
-
-        // Verify initial state is WATCHLIST
-        assertEquals(DiscoveryFilter.WATCHLIST, viewModel.selectedFilter.value)
-        assertEquals(watchlistStocks, viewModel.stocks.value)
-
-        // When - toggle filter
-        viewModel.toggleFilter()
-        advanceUntilIdle()
-
-        // Then - filter should be ALERTS and stocks should be all stocks
-        assertEquals(DiscoveryFilter.ALERTS, viewModel.selectedFilter.value)
-        assertEquals(allStocks, viewModel.stocks.value)
-    }
-
-    @Test
-    fun `toggleFilter updates from alerts back to watchlist`() = runTest {
-        // Given
-        val watchlistStocks = listOf(
-            Stock(
-                id = "stock-1",
-                ticker = "TSLA",
-                name = "Tesla Inc",
-                exchange = "NASDAQ",
-                sector = "Automotive",
-                marketCap = 800000000000.0,
-                price = 250.50,
-                priceChange = 2.5,
-                vetrScore = 75,
-                isFavorite = true
-            )
-        )
-
-        val allStocks = listOf(
-            Stock(
-                id = "stock-1",
-                ticker = "TSLA",
-                name = "Tesla Inc",
-                exchange = "NASDAQ",
-                sector = "Automotive",
-                marketCap = 800000000000.0,
-                price = 250.50,
-                priceChange = 2.5,
-                vetrScore = 75,
-                isFavorite = true
-            ),
-            Stock(
-                id = "stock-2",
-                ticker = "AAPL",
-                name = "Apple Inc",
-                exchange = "NASDAQ",
-                sector = "Technology",
-                marketCap = 3000000000000.0,
-                price = 175.25,
-                priceChange = -1.2,
-                vetrScore = 88,
-                isFavorite = false
-            )
-        )
-
-        coEvery { stockRepository.getFavorites() } returns flowOf(watchlistStocks)
-        coEvery { stockRepository.getStocks() } returns flowOf(allStocks)
-
-        viewModel = DiscoveryViewModel(stockRepository, filingRepository, observabilityService, api)
-        advanceUntilIdle()
-
-        // Toggle to ALERTS
-        viewModel.toggleFilter()
-        advanceUntilIdle()
-
-        assertEquals(DiscoveryFilter.ALERTS, viewModel.selectedFilter.value)
-
-        // When - toggle back to WATCHLIST
-        viewModel.toggleFilter()
-        advanceUntilIdle()
-
-        // Then
-        assertEquals(DiscoveryFilter.WATCHLIST, viewModel.selectedFilter.value)
-        assertEquals(watchlistStocks, viewModel.stocks.value)
-    }
-
-    @Test
-    fun `loadData populates stocks based on watchlist filter`() = runTest {
-        // Given
-        val favoriteStocks = listOf(
-            Stock(
-                id = "stock-1",
-                ticker = "TSLA",
-                name = "Tesla Inc",
-                exchange = "NASDAQ",
-                sector = "Automotive",
-                marketCap = 800000000000.0,
-                price = 250.50,
-                priceChange = 2.5,
-                vetrScore = 75,
-                isFavorite = true
-            )
-        )
-
-        coEvery { stockRepository.getFavorites() } returns flowOf(favoriteStocks)
+        coEvery { stockRepository.getStocks() } returns flowOf(testStocks)
+        coEvery { filingRepository.getLatestFilings(any()) } returns flowOf(emptyList())
 
         // When
         viewModel = DiscoveryViewModel(stockRepository, filingRepository, observabilityService, api)
         advanceUntilIdle()
 
         // Then
-        assertEquals(favoriteStocks, viewModel.stocks.value)
-        assertEquals(DiscoveryFilter.WATCHLIST, viewModel.selectedFilter.value)
+        assertEquals(testStocks, viewModel.stocks.value)
         assertFalse(viewModel.isLoading.value)
     }
 
     @Test
-    fun `searchStocks filters stocks by query`() = runTest {
+    fun `loadData extracts unique sectors from stocks`() = runTest {
         // Given
-        val initialStocks = listOf(
-            Stock(
-                id = "stock-1",
-                ticker = "TSLA",
-                name = "Tesla Inc",
-                exchange = "NASDAQ",
-                sector = "Automotive",
-                marketCap = 800000000000.0,
-                price = 250.50,
-                priceChange = 2.5,
-                vetrScore = 75,
-                isFavorite = true
-            )
-        )
+        coEvery { stockRepository.getStocks() } returns flowOf(testStocks)
+        coEvery { filingRepository.getLatestFilings(any()) } returns flowOf(emptyList())
 
-        val searchResults = listOf(
-            Stock(
-                id = "stock-2",
-                ticker = "AAPL",
-                name = "Apple Inc",
-                exchange = "NASDAQ",
-                sector = "Technology",
-                marketCap = 3000000000000.0,
-                price = 175.25,
-                priceChange = -1.2,
-                vetrScore = 88,
-                isFavorite = false
-            )
-        )
+        // When
+        viewModel = DiscoveryViewModel(stockRepository, filingRepository, observabilityService, api)
+        advanceUntilIdle()
 
-        coEvery { stockRepository.getFavorites() } returns flowOf(initialStocks)
-        coEvery { stockRepository.searchStocks("AAPL") } returns flowOf(searchResults)
+        // Then - sectors should be extracted from stock data
+        val sectors = viewModel.sectors.value
+        assertTrue(sectors.contains("Automotive"))
+        assertTrue(sectors.contains("Technology"))
+    }
+
+    @Test
+    fun `updateSearchQuery filters stocks by query`() = runTest {
+        // Given
+        coEvery { stockRepository.getStocks() } returns flowOf(testStocks)
+        coEvery { filingRepository.getLatestFilings(any()) } returns flowOf(emptyList())
 
         viewModel = DiscoveryViewModel(stockRepository, filingRepository, observabilityService, api)
         advanceUntilIdle()
 
-        // When
-        viewModel.searchStocks("AAPL")
+        // When - search for AAPL
+        viewModel.updateSearchQuery("AAPL")
         advanceUntilIdle()
 
         // Then
-        assertEquals(searchResults, viewModel.stocks.value)
         assertEquals("AAPL", viewModel.searchQuery.value)
+        assertEquals(1, viewModel.stocks.value.size)
+        assertEquals("AAPL", viewModel.stocks.value.first().ticker)
     }
 
     @Test
-    fun `searchStocks with empty query reloads data`() = runTest {
+    fun `updateSearchQuery with empty string shows all stocks`() = runTest {
         // Given
-        val favoriteStocks = listOf(
-            Stock(
-                id = "stock-1",
-                ticker = "TSLA",
-                name = "Tesla Inc",
-                exchange = "NASDAQ",
-                sector = "Automotive",
-                marketCap = 800000000000.0,
-                price = 250.50,
-                priceChange = 2.5,
-                vetrScore = 75,
-                isFavorite = true
-            )
-        )
-
-        coEvery { stockRepository.getFavorites() } returns flowOf(favoriteStocks)
+        coEvery { stockRepository.getStocks() } returns flowOf(testStocks)
+        coEvery { filingRepository.getLatestFilings(any()) } returns flowOf(emptyList())
 
         viewModel = DiscoveryViewModel(stockRepository, filingRepository, observabilityService, api)
         advanceUntilIdle()
 
-        // When - search with empty query
-        viewModel.searchStocks("")
+        // Search first
+        viewModel.updateSearchQuery("AAPL")
+        advanceUntilIdle()
+        assertEquals(1, viewModel.stocks.value.size)
+
+        // When - clear search
+        viewModel.updateSearchQuery("")
         advanceUntilIdle()
 
-        // Then - should reload favorites (current filter is WATCHLIST)
-        assertEquals(favoriteStocks, viewModel.stocks.value)
+        // Then - should show all stocks
         assertEquals("", viewModel.searchQuery.value)
+        assertEquals(testStocks.size, viewModel.stocks.value.size)
     }
 
     @Test
-    fun `refresh reloads data from repositories`() = runTest {
+    fun `toggleSector filters stocks by selected sector`() = runTest {
         // Given
-        val initialStocks = listOf(
-            Stock(
-                id = "stock-1",
-                ticker = "TSLA",
-                name = "Tesla Inc",
-                exchange = "NASDAQ",
-                sector = "Automotive",
-                marketCap = 800000000000.0,
-                price = 250.50,
-                priceChange = 2.5,
-                vetrScore = 75,
-                isFavorite = true
-            )
-        )
-
-        val updatedStocks = listOf(
-            Stock(
-                id = "stock-1",
-                ticker = "TSLA",
-                name = "Tesla Inc",
-                exchange = "NASDAQ",
-                sector = "Automotive",
-                marketCap = 800000000000.0,
-                price = 255.75,
-                priceChange = 5.25,
-                vetrScore = 78,
-                isFavorite = true
-            )
-        )
-
-        coEvery { stockRepository.getFavorites() } returnsMany listOf(
-            flowOf(initialStocks),
-            flowOf(updatedStocks)
-        )
+        coEvery { stockRepository.getStocks() } returns flowOf(testStocks)
+        coEvery { filingRepository.getLatestFilings(any()) } returns flowOf(emptyList())
 
         viewModel = DiscoveryViewModel(stockRepository, filingRepository, observabilityService, api)
         advanceUntilIdle()
 
-        assertEquals(initialStocks, viewModel.stocks.value)
-
-        // When
-        viewModel.refresh()
+        // When - select Technology sector
+        viewModel.toggleSector("Technology")
         advanceUntilIdle()
 
         // Then
-        assertEquals(updatedStocks, viewModel.stocks.value)
+        assertTrue(viewModel.selectedSectors.value.contains("Technology"))
+        assertEquals(1, viewModel.stocks.value.size)
+        assertEquals("AAPL", viewModel.stocks.value.first().ticker)
+    }
+
+    @Test
+    fun `clearSectors shows all stocks`() = runTest {
+        // Given
+        coEvery { stockRepository.getStocks() } returns flowOf(testStocks)
+        coEvery { filingRepository.getLatestFilings(any()) } returns flowOf(emptyList())
+
+        viewModel = DiscoveryViewModel(stockRepository, filingRepository, observabilityService, api)
+        advanceUntilIdle()
+
+        // Filter by sector first
+        viewModel.toggleSector("Technology")
+        advanceUntilIdle()
+        assertEquals(1, viewModel.stocks.value.size)
+
+        // When - clear sectors
+        viewModel.clearSectors()
+        advanceUntilIdle()
+
+        // Then
+        assertTrue(viewModel.selectedSectors.value.isEmpty())
+        assertEquals(testStocks.size, viewModel.stocks.value.size)
     }
 }
