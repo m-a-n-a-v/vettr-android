@@ -1,11 +1,16 @@
 package com.vettr.android.feature.pulse
 
 import com.vettr.android.core.data.repository.FilingRepository
+import com.vettr.android.core.data.repository.PortfolioAlertsRepository
+import com.vettr.android.core.data.repository.PortfolioInsightsRepository
+import com.vettr.android.core.data.repository.PortfolioRepository
+import com.vettr.android.core.data.repository.PulseRepository
 import com.vettr.android.core.data.repository.StockRepository
 import com.vettr.android.core.model.Filing
 import com.vettr.android.core.model.Stock
 import com.vettr.android.core.util.NetworkMonitor
 import com.vettr.android.core.util.ObservabilityService
+import com.vettr.android.core.data.local.TokenManager
 import io.mockk.coEvery
 import io.mockk.every
 import io.mockk.mockk
@@ -34,8 +39,13 @@ class PulseViewModelTest {
     private lateinit var viewModel: PulseViewModel
     private lateinit var stockRepository: StockRepository
     private lateinit var filingRepository: FilingRepository
+    private lateinit var pulseRepository: PulseRepository
+    private lateinit var portfolioRepository: PortfolioRepository
+    private lateinit var portfolioAlertsRepository: PortfolioAlertsRepository
+    private lateinit var portfolioInsightsRepository: PortfolioInsightsRepository
     private lateinit var observabilityService: ObservabilityService
     private lateinit var networkMonitor: NetworkMonitor
+    private lateinit var tokenManager: TokenManager
 
     private val testDispatcher = StandardTestDispatcher()
 
@@ -44,10 +54,15 @@ class PulseViewModelTest {
         Dispatchers.setMain(testDispatcher)
         stockRepository = mockk()
         filingRepository = mockk()
+        pulseRepository = mockk(relaxed = true)
+        portfolioRepository = mockk(relaxed = true)
+        portfolioAlertsRepository = mockk(relaxed = true)
+        portfolioInsightsRepository = mockk(relaxed = true)
         observabilityService = mockk(relaxed = true)
         networkMonitor = mockk {
             every { isOnline } returns MutableStateFlow(true)
         }
+        tokenManager = mockk(relaxed = true)
     }
 
     @After
@@ -89,7 +104,7 @@ class PulseViewModelTest {
         coEvery { filingRepository.getLatestFilings(any()) } returns flowOf(emptyList())
 
         // When
-        viewModel = PulseViewModel(stockRepository, filingRepository, observabilityService, networkMonitor)
+        viewModel = PulseViewModel(stockRepository, filingRepository, pulseRepository, portfolioRepository, portfolioAlertsRepository, portfolioInsightsRepository, observabilityService, networkMonitor, tokenManager)
         advanceUntilIdle()
 
         // Then
@@ -125,7 +140,7 @@ class PulseViewModelTest {
         coEvery { filingRepository.getLatestFilings(10) } returns flowOf(mockFilings)
 
         // When
-        viewModel = PulseViewModel(stockRepository, filingRepository, observabilityService, networkMonitor)
+        viewModel = PulseViewModel(stockRepository, filingRepository, pulseRepository, portfolioRepository, portfolioAlertsRepository, portfolioInsightsRepository, observabilityService, networkMonitor, tokenManager)
         advanceUntilIdle()
 
         // Then
@@ -140,7 +155,7 @@ class PulseViewModelTest {
         coEvery { filingRepository.getLatestFilings(any()) } returns flowOf(emptyList())
 
         // When
-        viewModel = PulseViewModel(stockRepository, filingRepository, observabilityService, networkMonitor)
+        viewModel = PulseViewModel(stockRepository, filingRepository, pulseRepository, portfolioRepository, portfolioAlertsRepository, portfolioInsightsRepository, observabilityService, networkMonitor, tokenManager)
         advanceUntilIdle()
 
         // Then - loading is false after data loads
@@ -154,7 +169,7 @@ class PulseViewModelTest {
         coEvery { filingRepository.getLatestFilings(any()) } returns flowOf(emptyList())
 
         // When
-        viewModel = PulseViewModel(stockRepository, filingRepository, observabilityService, networkMonitor)
+        viewModel = PulseViewModel(stockRepository, filingRepository, pulseRepository, portfolioRepository, portfolioAlertsRepository, portfolioInsightsRepository, observabilityService, networkMonitor, tokenManager)
         advanceUntilIdle()
 
         // Then - ViewModel completes loading even with empty data
@@ -201,7 +216,7 @@ class PulseViewModelTest {
         )
         coEvery { filingRepository.getLatestFilings(any()) } returns flowOf(emptyList())
 
-        viewModel = PulseViewModel(stockRepository, filingRepository, observabilityService, networkMonitor)
+        viewModel = PulseViewModel(stockRepository, filingRepository, pulseRepository, portfolioRepository, portfolioAlertsRepository, portfolioInsightsRepository, observabilityService, networkMonitor, tokenManager)
         advanceUntilIdle()
 
         // Verify initial state

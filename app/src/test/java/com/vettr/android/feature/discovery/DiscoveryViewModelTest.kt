@@ -1,5 +1,6 @@
 package com.vettr.android.feature.discovery
 
+import com.vettr.android.core.data.remote.VettrApi
 import com.vettr.android.core.data.repository.FilingRepository
 import com.vettr.android.core.data.repository.StockRepository
 import com.vettr.android.core.model.Stock
@@ -31,6 +32,7 @@ class DiscoveryViewModelTest {
     private lateinit var stockRepository: StockRepository
     private lateinit var filingRepository: FilingRepository
     private lateinit var observabilityService: ObservabilityService
+    private lateinit var api: VettrApi
 
     private val testDispatcher = StandardTestDispatcher()
 
@@ -40,6 +42,7 @@ class DiscoveryViewModelTest {
         stockRepository = mockk()
         filingRepository = mockk()
         observabilityService = mockk(relaxed = true)
+        api = mockk(relaxed = true)
     }
 
     @After
@@ -96,7 +99,7 @@ class DiscoveryViewModelTest {
         coEvery { stockRepository.getFavorites() } returns flowOf(watchlistStocks)
         coEvery { stockRepository.getStocks() } returns flowOf(allStocks)
 
-        viewModel = DiscoveryViewModel(stockRepository, filingRepository, observabilityService)
+        viewModel = DiscoveryViewModel(stockRepository, filingRepository, observabilityService, api)
         advanceUntilIdle()
 
         // Verify initial state is WATCHLIST
@@ -160,7 +163,7 @@ class DiscoveryViewModelTest {
         coEvery { stockRepository.getFavorites() } returns flowOf(watchlistStocks)
         coEvery { stockRepository.getStocks() } returns flowOf(allStocks)
 
-        viewModel = DiscoveryViewModel(stockRepository, filingRepository, observabilityService)
+        viewModel = DiscoveryViewModel(stockRepository, filingRepository, observabilityService, api)
         advanceUntilIdle()
 
         // Toggle to ALERTS
@@ -199,7 +202,7 @@ class DiscoveryViewModelTest {
         coEvery { stockRepository.getFavorites() } returns flowOf(favoriteStocks)
 
         // When
-        viewModel = DiscoveryViewModel(stockRepository, filingRepository, observabilityService)
+        viewModel = DiscoveryViewModel(stockRepository, filingRepository, observabilityService, api)
         advanceUntilIdle()
 
         // Then
@@ -244,7 +247,7 @@ class DiscoveryViewModelTest {
         coEvery { stockRepository.getFavorites() } returns flowOf(initialStocks)
         coEvery { stockRepository.searchStocks("AAPL") } returns flowOf(searchResults)
 
-        viewModel = DiscoveryViewModel(stockRepository, filingRepository, observabilityService)
+        viewModel = DiscoveryViewModel(stockRepository, filingRepository, observabilityService, api)
         advanceUntilIdle()
 
         // When
@@ -276,7 +279,7 @@ class DiscoveryViewModelTest {
 
         coEvery { stockRepository.getFavorites() } returns flowOf(favoriteStocks)
 
-        viewModel = DiscoveryViewModel(stockRepository, filingRepository, observabilityService)
+        viewModel = DiscoveryViewModel(stockRepository, filingRepository, observabilityService, api)
         advanceUntilIdle()
 
         // When - search with empty query
@@ -326,7 +329,7 @@ class DiscoveryViewModelTest {
             flowOf(updatedStocks)
         )
 
-        viewModel = DiscoveryViewModel(stockRepository, filingRepository, observabilityService)
+        viewModel = DiscoveryViewModel(stockRepository, filingRepository, observabilityService, api)
         advanceUntilIdle()
 
         assertEquals(initialStocks, viewModel.stocks.value)

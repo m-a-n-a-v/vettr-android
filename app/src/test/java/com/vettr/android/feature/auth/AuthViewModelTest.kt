@@ -1,5 +1,7 @@
 package com.vettr.android.feature.auth
 
+import android.app.Application
+import com.vettr.android.core.data.remote.VettrApi
 import com.vettr.android.core.data.repository.AuthRepository
 import com.vettr.android.core.model.User
 import io.mockk.coEvery
@@ -30,6 +32,8 @@ class AuthViewModelTest {
 
     private lateinit var viewModel: AuthViewModel
     private lateinit var authRepository: AuthRepository
+    private lateinit var vettrApi: VettrApi
+    private lateinit var application: Application
 
     private val testDispatcher = StandardTestDispatcher()
 
@@ -37,11 +41,13 @@ class AuthViewModelTest {
     fun setup() {
         Dispatchers.setMain(testDispatcher)
         authRepository = mockk()
+        vettrApi = mockk(relaxed = true)
+        application = mockk(relaxed = true)
 
         // Mock isAuthenticated flow to return false by default
         coEvery { authRepository.isAuthenticated() } returns flowOf(false)
 
-        viewModel = AuthViewModel(authRepository)
+        viewModel = AuthViewModel(authRepository, vettrApi, application)
     }
 
     @After
@@ -68,7 +74,7 @@ class AuthViewModelTest {
         coEvery { authRepository.signInWithEmail(email, password) } returns Result.success(mockUser)
 
         // Recreate viewModel to pick up the new mock flow
-        viewModel = AuthViewModel(authRepository)
+        viewModel = AuthViewModel(authRepository, vettrApi, application)
         advanceUntilIdle()
 
         // Update email and password in UI state
@@ -164,7 +170,7 @@ class AuthViewModelTest {
         coEvery { authRepository.signUp(email, password) } returns Result.success(mockUser)
 
         // Recreate viewModel to pick up the new mock flow
-        viewModel = AuthViewModel(authRepository)
+        viewModel = AuthViewModel(authRepository, vettrApi, application)
         advanceUntilIdle()
 
         viewModel.onEmailChange(email)
@@ -224,7 +230,7 @@ class AuthViewModelTest {
         coEvery { authRepository.signInWithGoogle(idToken) } returns Result.success(mockUser)
 
         // Recreate viewModel to pick up the new mock flow
-        viewModel = AuthViewModel(authRepository)
+        viewModel = AuthViewModel(authRepository, vettrApi, application)
         advanceUntilIdle()
 
         // When
