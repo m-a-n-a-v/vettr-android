@@ -7,11 +7,13 @@ import androidx.compose.material.icons.filled.Lock
 import androidx.compose.material.icons.filled.SearchOff
 import androidx.compose.material.icons.filled.Warning
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.runtime.Stable
 
 /**
  * Sealed class representing different types of errors that can occur in the app.
  * Each error type provides a user-friendly message, icon, and suggested action.
  */
+@Stable
 sealed class AppError(
     open val userMessage: String,
     open val icon: ImageVector,

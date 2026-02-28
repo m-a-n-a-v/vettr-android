@@ -1,9 +1,13 @@
 package com.vettr.android.core.model
 
+import androidx.compose.runtime.Immutable
+import androidx.compose.runtime.Stable
+
 /**
  * Pulse summary data representing the aggregated dashboard state.
  * Contains watchlist health, sector exposure, and red flag categories.
  */
+@Stable
 data class PulseSummary(
     val watchlistHealth: WatchlistHealth,
     val sectorExposure: List<SectorExposureItem>,
@@ -13,6 +17,7 @@ data class PulseSummary(
 /**
  * Watchlist health breakdown showing distribution across 5-tier ratings.
  */
+@Immutable
 data class WatchlistHealth(
     val elite: HealthBucket,
     val contender: HealthBucket,
@@ -24,6 +29,7 @@ data class WatchlistHealth(
 /**
  * A single health bucket with count and percentage.
  */
+@Immutable
 data class HealthBucket(
     val count: Int,
     val pct: Int
@@ -32,6 +38,7 @@ data class HealthBucket(
 /**
  * Sector exposure item showing how many stocks belong to a sector/exchange combination.
  */
+@Immutable
 data class SectorExposureItem(
     val sector: String,
     val exchange: String,
@@ -42,6 +49,7 @@ data class SectorExposureItem(
 /**
  * Red flag categories summary with critical/warning counts, category breakdown, and latest alert.
  */
+@Stable
 data class RedFlagCategories(
     val criticalCount: Int,
     val warningCount: Int,
@@ -52,6 +60,7 @@ data class RedFlagCategories(
 /**
  * A single red flag category with severity.
  */
+@Immutable
 data class RedFlagCategoryItem(
     val category: String,
     val label: String,
@@ -62,6 +71,7 @@ data class RedFlagCategoryItem(
 /**
  * The most recent alert for red flag display.
  */
+@Immutable
 data class LatestAlert(
     val ticker: String,
     val label: String,

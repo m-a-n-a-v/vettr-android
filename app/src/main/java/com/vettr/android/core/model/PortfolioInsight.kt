@@ -6,6 +6,7 @@ import androidx.room.ForeignKey
 import androidx.room.Index
 import androidx.room.PrimaryKey
 import java.util.UUID
+import androidx.compose.runtime.Immutable
 
 /**
  * Portfolio insight entity representing AI-generated insights for portfolio analysis.
@@ -21,6 +22,7 @@ import java.util.UUID
  * @property isDismissed Whether the user has dismissed this insight
  * @property createdAt Creation timestamp (Unix epoch milliseconds)
  */
+@Immutable
 @Entity(
     tableName = "portfolio_insights",
     foreignKeys = [

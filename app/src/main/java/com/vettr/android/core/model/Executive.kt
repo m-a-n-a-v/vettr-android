@@ -6,6 +6,7 @@ import androidx.room.ForeignKey
 import androidx.room.Index
 import androidx.room.PrimaryKey
 import java.util.UUID
+import androidx.compose.runtime.Immutable
 
 /**
  * Executive entity representing company leadership and management.
@@ -22,6 +23,7 @@ import java.util.UUID
  * @property socialLinkedIn LinkedIn profile URL (nullable)
  * @property socialTwitter Twitter/X profile URL (nullable)
  */
+@Immutable
 @Entity(
     tableName = "executives",
     foreignKeys = [

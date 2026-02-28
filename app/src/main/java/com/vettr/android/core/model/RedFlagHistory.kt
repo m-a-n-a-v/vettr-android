@@ -5,6 +5,7 @@ import androidx.room.Entity
 import androidx.room.Index
 import androidx.room.PrimaryKey
 import java.util.UUID
+import androidx.compose.runtime.Immutable
 
 /**
  * RedFlagHistory entity representing detected red flags over time.
@@ -19,6 +20,7 @@ import java.util.UUID
  * @property detectedAt Timestamp when flag was detected (Unix epoch milliseconds)
  * @property isAcknowledged Whether user has acknowledged this flag
  */
+@Immutable
 @Entity(
     tableName = "red_flag_history",
     indices = [Index(value = ["stock_ticker"])]

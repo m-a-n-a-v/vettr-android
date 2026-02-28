@@ -6,6 +6,7 @@ import androidx.room.ForeignKey
 import androidx.room.Index
 import androidx.room.PrimaryKey
 import java.util.UUID
+import androidx.compose.runtime.Immutable
 
 /**
  * Portfolio holding entity representing a stock position within a portfolio.
@@ -20,6 +21,7 @@ import java.util.UUID
  * @property gainLoss Unrealized gain/loss in dollars
  * @property gainLossPercent Unrealized gain/loss as percentage
  */
+@Immutable
 @Entity(
     tableName = "portfolio_holdings",
     foreignKeys = [

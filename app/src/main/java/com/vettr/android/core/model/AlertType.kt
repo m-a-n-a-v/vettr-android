@@ -1,8 +1,11 @@
 package com.vettr.android.core.model
 
+import androidx.compose.runtime.Immutable
+
 /**
  * Represents different types of alerts that can be triggered in the VETTR platform.
  */
+@Immutable
 enum class AlertType(
     val displayName: String,
     val iconName: String

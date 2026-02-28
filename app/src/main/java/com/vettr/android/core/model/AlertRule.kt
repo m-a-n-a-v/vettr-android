@@ -5,6 +5,7 @@ import androidx.room.Entity
 import androidx.room.Index
 import androidx.room.PrimaryKey
 import java.util.UUID
+import androidx.compose.runtime.Immutable
 
 /**
  * AlertRule entity for user-defined alert rules.
@@ -20,6 +21,7 @@ import java.util.UUID
  * @property lastTriggeredAt Timestamp when alert last triggered (nullable)
  * @property frequency Alert frequency (e.g., "Real-time", "Daily", "Weekly")
  */
+@Immutable
 @Entity(
     tableName = "alert_rules",
     indices = [

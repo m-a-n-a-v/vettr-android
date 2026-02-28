@@ -4,6 +4,7 @@ import androidx.room.ColumnInfo
 import androidx.room.Entity
 import androidx.room.PrimaryKey
 import java.util.UUID
+import androidx.compose.runtime.Immutable
 
 /**
  * SyncHistory entity tracking data synchronization operations.
@@ -17,6 +18,7 @@ import java.util.UUID
  * @property errors Error messages if sync failed (nullable)
  * @property status Sync status (e.g., "in_progress", "success", "failed")
  */
+@Immutable
 @Entity(tableName = "sync_history")
 data class SyncHistory(
     @PrimaryKey

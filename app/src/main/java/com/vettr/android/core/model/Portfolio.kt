@@ -4,6 +4,7 @@ import androidx.room.ColumnInfo
 import androidx.room.Entity
 import androidx.room.PrimaryKey
 import java.util.UUID
+import androidx.compose.runtime.Immutable
 
 /**
  * Portfolio entity representing a user's investment portfolio.
@@ -18,6 +19,7 @@ import java.util.UUID
  * @property createdAt Creation timestamp (Unix epoch milliseconds)
  * @property updatedAt Last update timestamp (Unix epoch milliseconds)
  */
+@Immutable
 @Entity(tableName = "portfolios")
 data class Portfolio(
     @PrimaryKey

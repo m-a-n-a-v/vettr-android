@@ -6,6 +6,7 @@ import androidx.room.ForeignKey
 import androidx.room.Index
 import androidx.room.PrimaryKey
 import java.util.UUID
+import androidx.compose.runtime.Immutable
 
 /**
  * Portfolio alert entity representing auto-generated alerts for portfolio events.
@@ -21,6 +22,7 @@ import java.util.UUID
  * @property isRead Whether the user has read this alert
  * @property triggeredAt Timestamp when the alert was triggered (Unix epoch milliseconds)
  */
+@Immutable
 @Entity(
     tableName = "portfolio_alerts",
     foreignKeys = [

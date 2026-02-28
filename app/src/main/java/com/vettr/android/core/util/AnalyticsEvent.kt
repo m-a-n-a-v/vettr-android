@@ -1,9 +1,12 @@
 package com.vettr.android.core.util
 
+import androidx.compose.runtime.Stable
+
 /**
  * Sealed class hierarchy representing all analytics events in the VETTR app.
  * Privacy-first: no PII (email, password, names) should be tracked.
  */
+@Stable
 sealed class AnalyticsEvent(
     open val name: String,
     open val params: Map<String, Any> = emptyMap()

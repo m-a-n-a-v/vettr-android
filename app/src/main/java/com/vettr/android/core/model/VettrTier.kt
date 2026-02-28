@@ -1,8 +1,11 @@
 package com.vettr.android.core.model
 
+import androidx.compose.runtime.Immutable
+
 /**
  * Represents VETTR subscription tiers with associated feature limits.
  */
+@Immutable
 enum class VettrTier(
     val watchlistLimit: Int,
     val pulseDelayHours: Int,

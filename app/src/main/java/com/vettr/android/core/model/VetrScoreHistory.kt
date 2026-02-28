@@ -5,6 +5,7 @@ import androidx.room.Entity
 import androidx.room.Index
 import androidx.room.PrimaryKey
 import java.util.UUID
+import androidx.compose.runtime.Immutable
 
 /**
  * VetrScoreHistory entity representing historical VETR Score V2 calculations.
@@ -19,6 +20,7 @@ import java.util.UUID
  * @property marketSentimentScore Liquidity, momentum, news, short interest, analyst targets pillar score (0-100)
  * @property calculatedAt Timestamp when score was calculated (Unix epoch milliseconds)
  */
+@Immutable
 @Entity(
     tableName = "vetr_score_history",
     indices = [Index(value = ["stock_ticker"])]

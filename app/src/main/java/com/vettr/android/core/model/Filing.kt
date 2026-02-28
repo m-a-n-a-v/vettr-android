@@ -6,6 +6,7 @@ import androidx.room.ForeignKey
 import androidx.room.Index
 import androidx.room.PrimaryKey
 import java.util.UUID
+import androidx.compose.runtime.Immutable
 
 /**
  * Filing entity representing SEC regulatory filings.
@@ -20,6 +21,7 @@ import java.util.UUID
  * @property isRead Whether user has marked this filing as read
  * @property isMaterial Whether this filing contains material information
  */
+@Immutable
 @Entity(
     tableName = "filings",
     foreignKeys = [

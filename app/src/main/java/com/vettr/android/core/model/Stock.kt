@@ -4,6 +4,7 @@ import androidx.room.ColumnInfo
 import androidx.room.Entity
 import androidx.room.PrimaryKey
 import java.util.UUID
+import androidx.compose.runtime.Immutable
 
 /**
  * Stock entity representing a publicly traded company.
@@ -20,6 +21,7 @@ import java.util.UUID
  * @property vetrScore VETR quality score (0-100)
  * @property isFavorite Whether user has marked this stock as favorite
  */
+@Immutable
 @Entity(tableName = "stocks")
 data class Stock(
     @PrimaryKey
