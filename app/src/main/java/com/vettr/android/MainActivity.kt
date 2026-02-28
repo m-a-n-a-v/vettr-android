@@ -18,6 +18,7 @@ import androidx.lifecycle.lifecycleScope
 import com.vettr.android.core.data.repository.AuthRepository
 import com.vettr.android.core.util.BiometricCheckResult
 import com.vettr.android.core.util.BiometricService
+import com.vettr.android.core.util.RootDetector
 import com.vettr.android.designsystem.theme.VettrTheme
 import com.vettr.android.feature.main.VettrNavHost
 import dagger.hilt.android.AndroidEntryPoint
@@ -53,6 +54,11 @@ class MainActivity : FragmentActivity() {
             android.view.WindowManager.LayoutParams.FLAG_SECURE,
             android.view.WindowManager.LayoutParams.FLAG_SECURE
         )
+
+        // Root detection — show informational warning; never block the user
+        if (RootDetector.isRooted) {
+            showRootWarningDialog()
+        }
 
         // Initialize app data
         initializeAppData()
@@ -124,6 +130,18 @@ class MainActivity : FragmentActivity() {
         super.onNewIntent(intent)
         setIntent(intent)
         handleDeepLink(intent)
+    }
+
+    private fun showRootWarningDialog() {
+        android.app.AlertDialog.Builder(this)
+            .setTitle("Security Warning")
+            .setMessage(
+                "This device appears to be rooted. VETTR handles sensitive financial data — " +
+                "using VETTR on a rooted device may expose your information to security risks."
+            )
+            .setPositiveButton("I Understand") { dialog, _ -> dialog.dismiss() }
+            .setCancelable(false)
+            .show()
     }
 
     private fun handleDeepLink(intent: Intent?) {
