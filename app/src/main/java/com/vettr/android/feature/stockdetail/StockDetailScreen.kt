@@ -35,6 +35,7 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Tab
+import androidx.compose.material3.ScrollableTabRow
 import androidx.compose.material3.TabRow
 import androidx.compose.material3.TabRowDefaults
 import androidx.compose.material3.TabRowDefaults.tabIndicatorOffset
@@ -201,8 +202,9 @@ fun StockDetailRoute(
         selectedTab = when (selectedTab) {
             StockDetailTab.OVERVIEW -> 0
             StockDetailTab.FUNDAMENTALS -> 1
-            StockDetailTab.PEDIGREE -> 2
-            StockDetailTab.RED_FLAGS -> 3
+            StockDetailTab.FILINGS -> 2
+            StockDetailTab.PEDIGREE -> 3
+            StockDetailTab.RED_FLAGS -> 4
         },
         isRefreshing = isRefreshing,
         windowSizeClass = windowSizeClass,
@@ -220,8 +222,9 @@ fun StockDetailRoute(
                 when (tabIndex) {
                     0 -> StockDetailTab.OVERVIEW
                     1 -> StockDetailTab.FUNDAMENTALS
-                    2 -> StockDetailTab.PEDIGREE
-                    3 -> StockDetailTab.RED_FLAGS
+                    2 -> StockDetailTab.FILINGS
+                    3 -> StockDetailTab.PEDIGREE
+                    4 -> StockDetailTab.RED_FLAGS
                     else -> StockDetailTab.OVERVIEW
                 }
             )
@@ -383,6 +386,22 @@ fun StockDetailScreen(
                         }
 
                         2 -> {
+                            // FILINGS TAB - All filings with read status and material badges
+                            if (filings.isNotEmpty()) {
+                                items(filings.sortedByDescending { it.date }, key = { it.id }) { filing ->
+                                    FilingRow(
+                                        filing = filing,
+                                        onMarkRead = { onMarkFilingRead(filing.id) }
+                                    )
+                                }
+                            } else {
+                                item {
+                                    EmptyFilingsState()
+                                }
+                            }
+                        }
+
+                        3 -> {
                             // PEDIGREE TAB
                             item {
                                 PedigreeHeader(
@@ -402,7 +421,7 @@ fun StockDetailScreen(
                             }
                         }
 
-                        3 -> {
+                        4 -> {
                             // RED FLAGS TAB
                             item {
                                 RedFlagsTabContent(
@@ -558,13 +577,14 @@ private fun StockDetailTabs(
     onTabSelected: (Int) -> Unit,
     modifier: Modifier = Modifier
 ) {
-    val tabs = listOf("Overview", "Fundamentals", "Pedigree", "Red Flags")
+    val tabs = listOf("Overview", "Fundamentals", "Filings", "Pedigree", "Red Flags")
 
-    TabRow(
+    ScrollableTabRow(
         selectedTabIndex = selectedTabIndex,
         modifier = modifier.fillMaxWidth(),
         containerColor = MaterialTheme.colorScheme.surface,
         contentColor = MaterialTheme.colorScheme.onSurface,
+        edgePadding = Spacing.md,
         indicator = { tabPositions ->
             TabRowDefaults.SecondaryIndicator(
                 modifier = Modifier.tabIndicatorOffset(tabPositions[selectedTabIndex]),

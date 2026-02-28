@@ -35,6 +35,7 @@ import javax.inject.Inject
 enum class StockDetailTab {
     OVERVIEW,
     FUNDAMENTALS,
+    FILINGS,
     PEDIGREE,
     RED_FLAGS
 }
