@@ -31,7 +31,10 @@ import androidx.compose.material.icons.filled.Star
 import androidx.compose.material.icons.filled.Storage
 import androidx.compose.material.icons.filled.Sync
 import androidx.compose.material.icons.filled.Verified
+import android.content.Intent
+import android.net.Uri
 import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
@@ -50,7 +53,9 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
@@ -106,6 +111,8 @@ fun ProfileScreen(
     val cacheCleared by viewModel.cacheCleared.collectAsStateWithLifecycle()
 
     var showLogoutDialog by remember { mutableStateOf(false) }
+    var showDeleteAccountDialog by remember { mutableStateOf(false) }
+    val deleteAccountError by viewModel.deleteAccountError.collectAsStateWithLifecycle()
 
     ProfileScreenContent(
         user = user,
@@ -121,6 +128,12 @@ fun ProfileScreen(
         cacheCleared = cacheCleared,
         showLogoutDialog = showLogoutDialog,
         onShowLogoutDialog = { showLogoutDialog = it },
+        showDeleteAccountDialog = showDeleteAccountDialog,
+        onShowDeleteAccountDialog = { showDeleteAccountDialog = it },
+        deleteAccountError = deleteAccountError,
+        onDeleteAccount = {
+            viewModel.deleteAccount { onLogout() }
+        },
         onManualSync = { viewModel.triggerManualSync() },
         onClearCache = { viewModel.clearCache() },
         onNavigateToSettings = onNavigateToSettings,
@@ -155,6 +168,10 @@ private fun ProfileScreenContent(
     cacheCleared: Boolean,
     showLogoutDialog: Boolean,
     onShowLogoutDialog: (Boolean) -> Unit,
+    showDeleteAccountDialog: Boolean,
+    onShowDeleteAccountDialog: (Boolean) -> Unit,
+    deleteAccountError: String?,
+    onDeleteAccount: () -> Unit,
     onManualSync: () -> Unit,
     onClearCache: () -> Unit,
     onNavigateToSettings: () -> Unit,
@@ -281,11 +298,17 @@ private fun ProfileScreenContent(
 
             Spacer(modifier = Modifier.height(Spacing.sm))
 
-            MenuRow(
-                icon = Icons.Default.Shield,
-                title = "Privacy Policy",
-                onClick = onNavigateToPrivacy
-            )
+            run {
+                val context = LocalContext.current
+                MenuRow(
+                    icon = Icons.Default.Shield,
+                    title = "Privacy Policy",
+                    onClick = {
+                        val intent = Intent(Intent.ACTION_VIEW, Uri.parse("https://vettr.app/privacy"))
+                        context.startActivity(intent)
+                    }
+                )
+            }
 
             Spacer(modifier = Modifier.height(Spacing.sm))
 
@@ -327,6 +350,15 @@ private fun ProfileScreenContent(
                 onClick = { onShowLogoutDialog(true) }
             )
 
+            Spacer(modifier = Modifier.height(Spacing.sm))
+
+            MenuRow(
+                icon = Icons.Default.DeleteOutline,
+                title = "Delete Account",
+                tint = Color(0xFFE53935),
+                onClick = { onShowDeleteAccountDialog(true) }
+            )
+
             Spacer(modifier = Modifier.height(Spacing.xl))
 
             // Version info at the bottom
@@ -359,6 +391,18 @@ private fun ProfileScreenContent(
                 onLogout()
             },
             onDismiss = { onShowLogoutDialog(false) }
+        )
+    }
+
+    // Delete account confirmation dialog
+    if (showDeleteAccountDialog) {
+        DeleteAccountConfirmationDialog(
+            errorMessage = deleteAccountError,
+            onConfirm = {
+                onShowDeleteAccountDialog(false)
+                onDeleteAccount()
+            },
+            onDismiss = { onShowDeleteAccountDialog(false) }
         )
     }
 }
@@ -474,7 +518,7 @@ private fun SubscriptionSection(
                 Icon(
                     imageVector = Icons.Default.Verified,
                     contentDescription = "Subscription",
-                    tint = VettrAccent,
+                    tint = tint,
                     modifier = Modifier.size(24.dp)
                 )
 
@@ -862,6 +906,7 @@ private fun MenuRow(
     icon: ImageVector,
     title: String,
     onClick: () -> Unit,
+    tint: Color = VettrAccent,
     modifier: Modifier = Modifier
 ) {
     Card(
@@ -995,6 +1040,61 @@ private fun LogoutConfirmationDialog(
                     text = "Log Out",
                     color = VettrAccent
                 )
+            }
+        },
+        dismissButton = {
+            TextButton(onClick = onDismiss) {
+                Text(
+                    text = "Cancel",
+                    color = VettrTextSecondary
+                )
+            }
+        }
+    )
+}
+
+/**
+ * Delete account confirmation dialog with destructive styling.
+ */
+@Composable
+private fun DeleteAccountConfirmationDialog(
+    errorMessage: String?,
+    onConfirm: () -> Unit,
+    onDismiss: () -> Unit
+) {
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        containerColor = VettrCardBackground,
+        title = {
+            Text(
+                text = "Delete Account",
+                style = MaterialTheme.typography.titleMedium,
+                color = Color(0xFFE53935)
+            )
+        },
+        text = {
+            Column {
+                Text(
+                    text = "This will permanently delete your account and all associated data. This action cannot be undone.",
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = VettrTextSecondary
+                )
+                if (errorMessage != null) {
+                    Spacer(modifier = Modifier.height(8.dp))
+                    Text(
+                        text = errorMessage,
+                        style = MaterialTheme.typography.bodySmall,
+                        color = Color(0xFFE53935)
+                    )
+                }
+            }
+        },
+        confirmButton = {
+            TextButton(
+                onClick = onConfirm,
+                colors = ButtonDefaults.textButtonColors(contentColor = Color(0xFFE53935))
+            ) {
+                Text(text = "Delete Account", fontWeight = FontWeight.Bold)
             }
         },
         dismissButton = {

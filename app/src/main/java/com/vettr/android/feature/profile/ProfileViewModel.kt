@@ -61,6 +61,9 @@ class ProfileViewModel @Inject constructor(
     private val _cacheCleared = MutableStateFlow(false)
     val cacheCleared: StateFlow<Boolean> = _cacheCleared.asStateFlow()
 
+    private val _deleteAccountError = MutableStateFlow<String?>(null)
+    val deleteAccountError: StateFlow<String?> = _deleteAccountError.asStateFlow()
+
     init {
         loadUserData()
         loadSyncHistory()
@@ -199,5 +202,30 @@ class ProfileViewModel @Inject constructor(
      */
     fun getBuildType(): String {
         return versionManager.getBuildType()
+    }
+
+    /**
+     * Delete the current user account via DELETE /v1/users/me.
+     * On success, signs out and invokes the onSuccess callback for navigation.
+     * On failure, exposes an error message via deleteAccountError.
+     */
+    fun deleteAccount(onSuccess: () -> Unit) {
+        viewModelScope.launch {
+            _isLoading.update { true }
+            _deleteAccountError.update { null }
+            val result = authRepository.deleteAccount()
+            if (result.isSuccess) {
+                authRepository.signOut()
+                _user.update { null }
+                _tier.update { VettrTier.FREE }
+                _isLoading.update { false }
+                onSuccess()
+            } else {
+                _deleteAccountError.update {
+                    result.exceptionOrNull()?.message ?: "Failed to delete account. Please try again."
+                }
+                _isLoading.update { false }
+            }
+        }
     }
 }

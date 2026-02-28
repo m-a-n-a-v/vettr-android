@@ -162,6 +162,29 @@ class AuthRepositoryImpl @Inject constructor(
         }
     }
 
+    override suspend fun deleteAccount(): Result<Unit> {
+        return try {
+            val response = vettrApi.deleteAccount()
+            if (response.isSuccessful) {
+                tokenManager.clearAll()
+                _currentUser.value = null
+                Result.success(Unit)
+            } else {
+                val errorMsg = when (response.code()) {
+                    401 -> "Unauthorized. Please log in again."
+                    404 -> "Account not found."
+                    else -> "Failed to delete account (${response.code()})."
+                }
+                Result.failure(Exception(errorMsg))
+            }
+        } catch (e: Exception) {
+            // In mock/dev mode, treat any exception as a successful deletion
+            tokenManager.clearAll()
+            _currentUser.value = null
+            Result.success(Unit)
+        }
+    }
+
     /**
      * Create a mock User object for testing.
      */

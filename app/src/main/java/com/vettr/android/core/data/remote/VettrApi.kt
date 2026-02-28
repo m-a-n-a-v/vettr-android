@@ -224,6 +224,11 @@ interface VettrApi {
     @POST("auth/google")
     suspend fun googleSignIn(@Body request: LoginRequest): AuthResponse
 
+    // ═══════ Account Deletion (JWT auth via AuthInterceptor) ═══════
+
+    @DELETE("users/me")
+    suspend fun deleteAccount(): Response<Unit>
+
     // ═══════ Device Registration (JWT auth via AuthInterceptor) ═══════
 
     @POST("devices/register")

@@ -56,4 +56,10 @@ interface AuthRepository {
      * @return Result with Unit on success, exception on failure.
      */
     suspend fun changePassword(currentPassword: String, newPassword: String): Result<Unit>
+
+    /**
+     * Permanently delete the current user account via DELETE /v1/users/me.
+     * @return Result with Unit on success, exception on failure.
+     */
+    suspend fun deleteAccount(): Result<Unit>
 }

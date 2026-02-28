@@ -1,10 +1,13 @@
 package com.vettr.android.core.util
 
 import android.content.Context
+import android.content.SharedPreferences
 import androidx.biometric.BiometricManager
 import androidx.biometric.BiometricPrompt
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.FragmentActivity
+import androidx.security.crypto.EncryptedSharedPreferences
+import androidx.security.crypto.MasterKey
 import com.vettr.android.core.data.repository.SettingsRepository
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.flow.first
@@ -18,7 +21,8 @@ import javax.inject.Singleton
  * Features:
  * - Checks for biometric hardware availability
  * - Shows biometric authentication prompt
- * - Tracks failure count with fallback to password after 3 failures
+ * - Tracks failure count with persistent EncryptedSharedPreferences (survives app restarts)
+ * - Enforces 15-minute lockout after 3 failed attempts
  * - Integrates with SettingsRepository for enable/disable state
  */
 @Singleton
@@ -27,8 +31,66 @@ class BiometricService @Inject constructor(
     private val settingsRepository: SettingsRepository
 ) {
     companion object {
-        private const val MAX_BIOMETRIC_FAILURES = 3
-        private var failureCount = 0
+        private const val PREFS_NAME = "biometric_security"
+        private const val KEY_FAILURE_COUNT = "failure_count"
+        private const val KEY_LOCKOUT_UNTIL = "lockout_until_ms"
+        private const val MAX_FAILURES = 3
+        private const val LOCKOUT_DURATION_MS = 15 * 60 * 1000L // 15 minutes
+    }
+
+    private val masterKey: MasterKey = MasterKey.Builder(context)
+        .setKeyScheme(MasterKey.KeyScheme.AES256_GCM)
+        .build()
+
+    private val prefs: SharedPreferences = EncryptedSharedPreferences.create(
+        context,
+        PREFS_NAME,
+        masterKey,
+        EncryptedSharedPreferences.PrefKeyEncryptionScheme.AES256_SIV,
+        EncryptedSharedPreferences.PrefValueEncryptionScheme.AES256_GCM
+    )
+
+    // ── Persistent failure tracking ────────────────────────────────────────────
+
+    private fun getFailureCount(): Int = prefs.getInt(KEY_FAILURE_COUNT, 0)
+
+    private fun setFailureCount(count: Int) {
+        prefs.edit().putInt(KEY_FAILURE_COUNT, count).apply()
+    }
+
+    private fun getLockoutUntil(): Long = prefs.getLong(KEY_LOCKOUT_UNTIL, 0L)
+
+    private fun setLockoutUntil(timestampMs: Long) {
+        prefs.edit().putLong(KEY_LOCKOUT_UNTIL, timestampMs).apply()
+    }
+
+    /**
+     * Returns true if the account is currently locked out due to too many failed attempts.
+     */
+    fun isLockedOut(): Boolean {
+        val lockoutUntil = getLockoutUntil()
+        if (lockoutUntil == 0L) return false
+        return System.currentTimeMillis() < lockoutUntil
+    }
+
+    /**
+     * Returns the remaining lockout duration in milliseconds, or 0 if not locked out.
+     */
+    fun remainingLockoutMs(): Long {
+        val lockoutUntil = getLockoutUntil()
+        if (lockoutUntil == 0L) return 0L
+        return maxOf(0L, lockoutUntil - System.currentTimeMillis())
+    }
+
+    private fun recordFailure(): Boolean {
+        val newCount = getFailureCount() + 1
+        setFailureCount(newCount)
+        if (newCount >= MAX_FAILURES) {
+            setLockoutUntil(System.currentTimeMillis() + LOCKOUT_DURATION_MS)
+            setFailureCount(0)
+            return true // locked out
+        }
+        return false
     }
 
     /**
@@ -59,10 +121,12 @@ class BiometricService @Inject constructor(
 
     /**
      * Shows biometric authentication prompt.
+     * Refuses to show the prompt if the account is currently locked out.
+     *
      * @param activity FragmentActivity required for BiometricPrompt
      * @param onSuccess Callback invoked when authentication succeeds
      * @param onError Callback invoked when authentication fails (with error message)
-     * @param onFallbackToPassword Callback invoked after 3 failures to fallback to password
+     * @param onFallbackToPassword Callback invoked after MAX_FAILURES failures to fallback to password
      */
     fun showBiometricPrompt(
         activity: FragmentActivity,
@@ -70,6 +134,14 @@ class BiometricService @Inject constructor(
         onError: (String) -> Unit,
         onFallbackToPassword: () -> Unit
     ) {
+        // Enforce persistent lockout before showing the prompt
+        if (isLockedOut()) {
+            val remainingMinutes = (remainingLockoutMs() / 60_000) + 1
+            onError("Too many failed attempts. Please wait ${remainingMinutes} minute(s) before trying again.")
+            onFallbackToPassword()
+            return
+        }
+
         val executor = ContextCompat.getMainExecutor(context)
 
         val promptInfo = BiometricPrompt.PromptInfo.Builder()
@@ -86,7 +158,8 @@ class BiometricService @Inject constructor(
                 override fun onAuthenticationSucceeded(result: BiometricPrompt.AuthenticationResult) {
                     super.onAuthenticationSucceeded(result)
                     // Reset failure count on success
-                    failureCount = 0
+                    setFailureCount(0)
+                    setLockoutUntil(0L)
                     onSuccess()
                 }
 
@@ -110,14 +183,13 @@ class BiometricService @Inject constructor(
 
                 override fun onAuthenticationFailed() {
                     super.onAuthenticationFailed()
-                    failureCount++
-
-                    if (failureCount >= MAX_BIOMETRIC_FAILURES) {
-                        failureCount = 0
-                        onError("Too many failed attempts. Please use password to unlock.")
+                    val lockedOut = recordFailure()
+                    if (lockedOut) {
+                        onError("Too many failed attempts. Locked out for 15 minutes.")
                         onFallbackToPassword()
                     } else {
-                        onError("Authentication failed. Try again.")
+                        val remaining = MAX_FAILURES - getFailureCount()
+                        onError("Authentication failed. $remaining attempt(s) remaining.")
                     }
                 }
             }
@@ -134,10 +206,11 @@ class BiometricService @Inject constructor(
     }
 
     /**
-     * Resets the failure count (useful when user successfully authenticates via password).
+     * Resets the failure count and lockout (useful when user successfully authenticates via password).
      */
     fun resetFailureCount() {
-        failureCount = 0
+        setFailureCount(0)
+        setLockoutUntil(0L)
     }
 }
 

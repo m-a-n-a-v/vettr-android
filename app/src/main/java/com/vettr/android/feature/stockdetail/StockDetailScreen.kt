@@ -70,6 +70,7 @@ import com.vettr.android.core.data.remote.NewsArticleResponse
 import com.vettr.android.core.model.Executive
 import com.vettr.android.core.model.Filing
 import com.vettr.android.core.model.Stock
+import com.vettr.android.designsystem.component.FinancialDisclaimerBanner
 import com.vettr.android.designsystem.component.MetricCard
 import com.vettr.android.designsystem.component.VettrScoreView
 import com.vettr.android.designsystem.theme.Spacing
@@ -338,6 +339,13 @@ fun StockDetailScreen(
                     // ---- Price Header ----
                     item {
                         PriceHeader(stock = stock)
+                    }
+
+                    // ---- Financial Disclaimer ----
+                    item {
+                        FinancialDisclaimerBanner(
+                            modifier = Modifier.padding(horizontal = 16.dp, vertical = 4.dp)
+                        )
                     }
 
                     // ---- Tab Bar ----
