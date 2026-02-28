@@ -5,10 +5,12 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.vettr.android.core.data.VetrScoreResult
 import com.vettr.android.core.data.remote.FundamentalsResponse
+import com.vettr.android.core.data.remote.NewsArticleResponse
 import com.vettr.android.core.data.repository.AuthRepository
 import com.vettr.android.core.data.repository.ExecutiveRepository
 import com.vettr.android.core.data.repository.FilingRepository
 import com.vettr.android.core.data.repository.FundamentalsRepository
+import com.vettr.android.core.data.repository.NewsRepository
 import com.vettr.android.core.data.repository.PeerComparison
 import com.vettr.android.core.data.repository.StockRepository
 import com.vettr.android.core.data.repository.VetrScoreRepository
@@ -36,6 +38,7 @@ enum class StockDetailTab {
     OVERVIEW,
     FUNDAMENTALS,
     FILINGS,
+    NEWS,
     PEDIGREE,
     RED_FLAGS
 }
@@ -61,6 +64,7 @@ class StockDetailViewModel @Inject constructor(
     private val executiveRepository: ExecutiveRepository,
     private val vetrScoreRepository: VetrScoreRepository,
     private val fundamentalsRepository: FundamentalsRepository,
+    private val newsRepository: NewsRepository,
     private val authRepository: AuthRepository,
     val hapticService: HapticService,
     savedStateHandle: SavedStateHandle
@@ -113,6 +117,9 @@ class StockDetailViewModel @Inject constructor(
 
     private val _fundamentals = MutableStateFlow<FundamentalsResponse?>(null)
     val fundamentals: StateFlow<FundamentalsResponse?> = _fundamentals.asStateFlow()
+
+    private val _stockNews = MutableStateFlow<List<NewsArticleResponse>>(emptyList())
+    val stockNews: StateFlow<List<NewsArticleResponse>> = _stockNews.asStateFlow()
 
     /**
      * Count of favorite stocks for watchlist limit enforcement.
@@ -200,6 +207,11 @@ class StockDetailViewModel @Inject constructor(
                 launch {
                     loadFundamentals()
                 }
+
+                // Load news for this stock
+                launch {
+                    loadStockNews()
+                }
             } finally {
                 _isLoading.value = false
             }
@@ -260,6 +272,24 @@ class StockDetailViewModel @Inject constructor(
                 // Error haptic for failure
                 hapticService.error(view)
             }
+        }
+    }
+
+    /**
+     * Load news articles related to this stock's ticker.
+     */
+    private suspend fun loadStockNews() {
+        try {
+            val ticker = _stock.value?.ticker ?: stockId
+            val result = newsRepository.getNews(limit = 20)
+            result.onSuccess { articles ->
+                // Filter to articles mentioning this stock's ticker
+                _stockNews.value = articles.filter { article ->
+                    article.tickers.any { it.equals(ticker, ignoreCase = true) }
+                }
+            }
+        } catch (_: Exception) {
+            // News is non-critical
         }
     }
 

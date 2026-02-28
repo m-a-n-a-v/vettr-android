@@ -66,6 +66,7 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.vettr.android.core.data.remote.FundamentalsResponse
+import com.vettr.android.core.data.remote.NewsArticleResponse
 import com.vettr.android.core.model.Executive
 import com.vettr.android.core.model.Filing
 import com.vettr.android.core.model.Stock
@@ -76,6 +77,7 @@ import com.vettr.android.designsystem.theme.VettrAccent
 import com.vettr.android.designsystem.theme.VettrCardBackground
 import com.vettr.android.designsystem.theme.VettrGreen
 import com.vettr.android.designsystem.theme.VettrRed
+import com.vettr.android.designsystem.theme.VettrSurfaceVariant
 import com.vettr.android.designsystem.theme.VettrTextSecondary
 import com.vettr.android.designsystem.theme.VettrTheme
 import com.vettr.android.designsystem.theme.VettrYellow
@@ -181,6 +183,7 @@ fun StockDetailRoute(
     val filings by viewModel.filings.collectAsStateWithLifecycle()
     val executives by viewModel.executives.collectAsStateWithLifecycle()
     val fundamentals by viewModel.fundamentals.collectAsStateWithLifecycle()
+    val stockNews by viewModel.stockNews.collectAsStateWithLifecycle()
     val selectedTab by viewModel.selectedTab.collectAsStateWithLifecycle()
     val isRefreshing by viewModel.isRefreshing.collectAsStateWithLifecycle()
     val showUpgradeDialog by viewModel.showUpgradeDialog.collectAsStateWithLifecycle()
@@ -199,12 +202,14 @@ fun StockDetailRoute(
         filings = filings,
         executives = executives,
         fundamentals = fundamentals,
+        stockNews = stockNews,
         selectedTab = when (selectedTab) {
             StockDetailTab.OVERVIEW -> 0
             StockDetailTab.FUNDAMENTALS -> 1
             StockDetailTab.FILINGS -> 2
-            StockDetailTab.PEDIGREE -> 3
-            StockDetailTab.RED_FLAGS -> 4
+            StockDetailTab.NEWS -> 3
+            StockDetailTab.PEDIGREE -> 4
+            StockDetailTab.RED_FLAGS -> 5
         },
         isRefreshing = isRefreshing,
         windowSizeClass = windowSizeClass,
@@ -223,8 +228,9 @@ fun StockDetailRoute(
                     0 -> StockDetailTab.OVERVIEW
                     1 -> StockDetailTab.FUNDAMENTALS
                     2 -> StockDetailTab.FILINGS
-                    3 -> StockDetailTab.PEDIGREE
-                    4 -> StockDetailTab.RED_FLAGS
+                    3 -> StockDetailTab.NEWS
+                    4 -> StockDetailTab.PEDIGREE
+                    5 -> StockDetailTab.RED_FLAGS
                     else -> StockDetailTab.OVERVIEW
                 }
             )
@@ -245,6 +251,7 @@ fun StockDetailScreen(
     filings: List<Filing> = emptyList(),
     executives: List<Executive> = emptyList(),
     fundamentals: FundamentalsResponse? = null,
+    stockNews: List<NewsArticleResponse> = emptyList(),
     selectedTab: Int = 0,
     isRefreshing: Boolean = false,
     windowSizeClass: WindowSizeClass,
@@ -402,6 +409,28 @@ fun StockDetailScreen(
                         }
 
                         3 -> {
+                            // NEWS TAB - News articles mentioning this stock
+                            if (stockNews.isNotEmpty()) {
+                                items(stockNews, key = { it.id }) { article ->
+                                    StockNewsRow(article = article)
+                                }
+                            } else {
+                                item {
+                                    Box(
+                                        modifier = Modifier.fillMaxWidth().padding(Spacing.xl),
+                                        contentAlignment = Alignment.Center
+                                    ) {
+                                        Text(
+                                            text = "No news found for this stock",
+                                            style = MaterialTheme.typography.bodyMedium,
+                                            color = VettrTextSecondary
+                                        )
+                                    }
+                                }
+                            }
+                        }
+
+                        4 -> {
                             // PEDIGREE TAB
                             item {
                                 PedigreeHeader(
@@ -421,7 +450,7 @@ fun StockDetailScreen(
                             }
                         }
 
-                        4 -> {
+                        5 -> {
                             // RED FLAGS TAB
                             item {
                                 RedFlagsTabContent(
@@ -577,7 +606,7 @@ private fun StockDetailTabs(
     onTabSelected: (Int) -> Unit,
     modifier: Modifier = Modifier
 ) {
-    val tabs = listOf("Overview", "Fundamentals", "Filings", "Pedigree", "Red Flags")
+    val tabs = listOf("Overview", "Fundamentals", "Filings", "News", "Pedigree", "Red Flags")
 
     ScrollableTabRow(
         selectedTabIndex = selectedTabIndex,
@@ -864,6 +893,115 @@ private fun EmptyFilingsState(modifier: Modifier = Modifier) {
                 style = MaterialTheme.typography.bodyMedium,
                 color = VettrTextSecondary
             )
+        }
+    }
+}
+
+// =============================================================================
+// NEWS TAB - Stock-related news articles
+// =============================================================================
+
+/**
+ * A single news article row for the stock detail News tab.
+ */
+@Composable
+private fun StockNewsRow(
+    article: NewsArticleResponse,
+    modifier: Modifier = Modifier
+) {
+    Card(
+        modifier = modifier.fillMaxWidth(),
+        colors = CardDefaults.cardColors(containerColor = VettrSurfaceVariant),
+        shape = RoundedCornerShape(12.dp)
+    ) {
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(Spacing.md),
+            verticalArrangement = Arrangement.spacedBy(Spacing.xs)
+        ) {
+            // Source + Material badge + Date
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Row(
+                    horizontalArrangement = Arrangement.spacedBy(Spacing.xs),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Text(
+                        text = article.source,
+                        style = MaterialTheme.typography.labelSmall,
+                        color = VettrAccent,
+                        fontWeight = FontWeight.SemiBold
+                    )
+                    if (article.isMaterial) {
+                        Box(
+                            modifier = Modifier
+                                .clip(RoundedCornerShape(4.dp))
+                                .background(VettrRed.copy(alpha = 0.1f))
+                                .padding(horizontal = 4.dp, vertical = 1.dp)
+                        ) {
+                            Text(
+                                text = "MATERIAL",
+                                style = MaterialTheme.typography.labelSmall,
+                                color = VettrRed,
+                                fontWeight = FontWeight.Bold
+                            )
+                        }
+                    }
+                }
+                Text(
+                    text = article.publishedAt.take(10),
+                    style = MaterialTheme.typography.labelSmall,
+                    color = VettrTextSecondary
+                )
+            }
+
+            // Title
+            Text(
+                text = article.title,
+                style = MaterialTheme.typography.titleSmall,
+                fontWeight = FontWeight.SemiBold,
+                color = MaterialTheme.colorScheme.onSurface,
+                maxLines = 2,
+                overflow = TextOverflow.Ellipsis
+            )
+
+            // Summary
+            article.summary?.let { summary ->
+                Text(
+                    text = summary,
+                    style = MaterialTheme.typography.bodySmall,
+                    color = VettrTextSecondary,
+                    maxLines = 3,
+                    overflow = TextOverflow.Ellipsis
+                )
+            }
+
+            // Ticker tags
+            if (article.tickers.isNotEmpty()) {
+                Row(
+                    horizontalArrangement = Arrangement.spacedBy(Spacing.xs)
+                ) {
+                    article.tickers.take(5).forEach { ticker ->
+                        Box(
+                            modifier = Modifier
+                                .clip(RoundedCornerShape(4.dp))
+                                .background(VettrAccent.copy(alpha = 0.1f))
+                                .padding(horizontal = 6.dp, vertical = 2.dp)
+                        ) {
+                            Text(
+                                text = ticker,
+                                style = MaterialTheme.typography.labelSmall,
+                                color = VettrAccent,
+                                fontWeight = FontWeight.Medium
+                            )
+                        }
+                    }
+                }
+            }
         }
     }
 }

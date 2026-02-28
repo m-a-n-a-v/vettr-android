@@ -69,25 +69,133 @@ fun FundamentalsTab(
             ) {
                 FundamentalRow("Market Cap", formatLargeNumber(val_.marketCap))
                 FundamentalRow("Enterprise Value", formatLargeNumber(val_.enterpriseValue))
-                FundamentalRow("P/E Ratio", formatDouble(val_.peRatio))
-                FundamentalRow("Forward P/E", formatDouble(val_.forwardPe))
-                FundamentalRow("P/B Ratio", formatDouble(val_.pbRatio))
+                FundamentalRow("P/E Ratio", formatDouble(val_.pe))
+                FundamentalRow("P/B Ratio", formatDouble(val_.pb))
+                FundamentalRow("P/S Ratio", formatDouble(val_.ps))
+                FundamentalRow("Price/FCF", formatDouble(val_.priceFcf))
                 FundamentalRow("EV/EBITDA", formatDouble(val_.evEbitda))
             }
         }
 
-        // Earnings
+        // Earnings History
         fundamentals.earnings?.let { earn ->
-            SectionHeader(title = "Earnings")
-            Column(
-                modifier = Modifier.fillMaxWidth().cardStyle().vettrPadding(),
-                verticalArrangement = Arrangement.spacedBy(Spacing.sm)
-            ) {
-                FundamentalRow("EPS", formatDouble(earn.eps))
-                FundamentalRow("Revenue", formatLargeNumber(earn.revenue))
-                FundamentalRow("Net Income", formatLargeNumber(earn.netIncome))
-                FundamentalRow("Profit Margin", formatPercent(earn.profitMargin))
-                FundamentalRow("Operating Margin", formatPercent(earn.operatingMargin))
+            if (earn.history.isNotEmpty()) {
+                SectionHeader(title = "Earnings History")
+                Column(
+                    modifier = Modifier.fillMaxWidth().cardStyle().vettrPadding(),
+                    verticalArrangement = Arrangement.spacedBy(Spacing.sm)
+                ) {
+                    // Header row
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.SpaceBetween
+                    ) {
+                        Text(
+                            text = "Quarter",
+                            style = MaterialTheme.typography.labelSmall,
+                            color = VettrAccent,
+                            fontWeight = FontWeight.Bold,
+                            modifier = Modifier.weight(1f)
+                        )
+                        Text(
+                            text = "EPS",
+                            style = MaterialTheme.typography.labelSmall,
+                            color = VettrAccent,
+                            fontWeight = FontWeight.Bold,
+                            modifier = Modifier.weight(1f)
+                        )
+                        Text(
+                            text = "Revenue",
+                            style = MaterialTheme.typography.labelSmall,
+                            color = VettrAccent,
+                            fontWeight = FontWeight.Bold,
+                            modifier = Modifier.weight(1f)
+                        )
+                        Text(
+                            text = "Surprise",
+                            style = MaterialTheme.typography.labelSmall,
+                            color = VettrAccent,
+                            fontWeight = FontWeight.Bold,
+                            modifier = Modifier.weight(1f)
+                        )
+                    }
+                    earn.history.take(4).forEach { item ->
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.SpaceBetween
+                        ) {
+                            Text(
+                                text = item.quarter,
+                                style = MaterialTheme.typography.bodySmall,
+                                color = MaterialTheme.colorScheme.onSurface,
+                                modifier = Modifier.weight(1f)
+                            )
+                            Text(
+                                text = formatDouble(item.eps),
+                                style = MaterialTheme.typography.bodySmall,
+                                color = MaterialTheme.colorScheme.onSurface,
+                                fontWeight = FontWeight.SemiBold,
+                                modifier = Modifier.weight(1f)
+                            )
+                            Text(
+                                text = formatLargeNumber(item.revenue),
+                                style = MaterialTheme.typography.bodySmall,
+                                color = MaterialTheme.colorScheme.onSurface,
+                                fontWeight = FontWeight.SemiBold,
+                                modifier = Modifier.weight(1f)
+                            )
+                            Text(
+                                text = item.surprise?.let { "${formatDouble(it)}%" } ?: "N/A",
+                                style = MaterialTheme.typography.bodySmall,
+                                color = when {
+                                    item.surprise == null -> VettrTextSecondary
+                                    item.surprise > 0 -> VettrGreen
+                                    item.surprise < 0 -> VettrRed
+                                    else -> MaterialTheme.colorScheme.onSurface
+                                },
+                                fontWeight = FontWeight.SemiBold,
+                                modifier = Modifier.weight(1f)
+                            )
+                        }
+                    }
+                }
+            }
+
+            // Earnings Estimates
+            if (earn.estimates.isNotEmpty()) {
+                SectionHeader(title = "Earnings Estimates")
+                Column(
+                    modifier = Modifier.fillMaxWidth().cardStyle().vettrPadding(),
+                    verticalArrangement = Arrangement.spacedBy(Spacing.sm)
+                ) {
+                    earn.estimates.take(4).forEach { estimate ->
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.SpaceBetween
+                        ) {
+                            Text(
+                                text = estimate.quarter,
+                                style = MaterialTheme.typography.bodySmall,
+                                color = MaterialTheme.colorScheme.onSurface,
+                                modifier = Modifier.weight(1f)
+                            )
+                            Text(
+                                text = "EPS: ${formatDouble(estimate.epsEstimate)}",
+                                style = MaterialTheme.typography.bodySmall,
+                                color = MaterialTheme.colorScheme.onSurface,
+                                fontWeight = FontWeight.SemiBold,
+                                modifier = Modifier.weight(1f)
+                            )
+                            Text(
+                                text = "Rev: ${formatLargeNumber(estimate.revenueEstimate)}",
+                                style = MaterialTheme.typography.bodySmall,
+                                color = MaterialTheme.colorScheme.onSurface,
+                                fontWeight = FontWeight.SemiBold,
+                                modifier = Modifier.weight(1f)
+                            )
+                        }
+                    }
+                }
             }
         }
 
@@ -106,6 +214,7 @@ fun FundamentalsTab(
                     modifier = Modifier.fillMaxWidth(),
                     horizontalArrangement = Arrangement.spacedBy(Spacing.sm)
                 ) {
+                    RatingBox(label = "Strong Buy", count = analyst.strongBuy, color = VettrGreen, modifier = Modifier.weight(1f))
                     RatingBox(label = "Buy", count = analyst.buy, color = VettrGreen, modifier = Modifier.weight(1f))
                     RatingBox(label = "Hold", count = analyst.hold, color = VettrAccent, modifier = Modifier.weight(1f))
                     RatingBox(label = "Sell", count = analyst.sell, color = VettrRed, modifier = Modifier.weight(1f))
@@ -121,8 +230,8 @@ fun FundamentalsTab(
                 verticalArrangement = Arrangement.spacedBy(Spacing.sm)
             ) {
                 FundamentalRow("Short Ratio", formatDouble(si.shortRatio))
-                FundamentalRow("Short % Float", formatPercent(si.shortPercentFloat))
-                FundamentalRow("Shares Short", formatLargeNumber(si.sharesShort?.toDouble()))
+                FundamentalRow("Short %", formatPercent(si.shortPercent))
+                FundamentalRow("Days to Cover", formatDouble(si.daysToCover))
             }
         }
 
@@ -145,7 +254,7 @@ fun FundamentalsTab(
                             modifier = Modifier.weight(1f)
                         )
                         Text(
-                            text = formatPercent(holder.pctHeld),
+                            text = formatPercent(holder.percentHeld),
                             style = MaterialTheme.typography.bodySmall,
                             color = VettrAccent,
                             fontWeight = FontWeight.SemiBold
@@ -162,24 +271,65 @@ fun FundamentalsTab(
                 modifier = Modifier.fillMaxWidth().cardStyle().vettrPadding(),
                 verticalArrangement = Arrangement.spacedBy(Spacing.sm)
             ) {
-                FundamentalRow("Insider Ownership", formatPercent(insider.insiderOwnership))
-                FundamentalRow("Net Transactions (3M)", "${insider.netTransactions3m}")
-                FundamentalRow("Buy Transactions", "${insider.buyTransactions}")
-                FundamentalRow("Sell Transactions", "${insider.sellTransactions}")
+                FundamentalRow("Net Buy/Sell", formatLargeNumber(insider.netBuySell))
+                if (insider.recentTransactions.isNotEmpty()) {
+                    Spacer(modifier = Modifier.height(Spacing.xs))
+                    Text(
+                        text = "Recent Transactions",
+                        style = MaterialTheme.typography.labelSmall,
+                        color = VettrAccent,
+                        fontWeight = FontWeight.Bold
+                    )
+                    insider.recentTransactions.take(5).forEach { txn ->
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.SpaceBetween
+                        ) {
+                            Column(modifier = Modifier.weight(1f)) {
+                                Text(
+                                    text = txn.name,
+                                    style = MaterialTheme.typography.bodySmall,
+                                    color = MaterialTheme.colorScheme.onSurface,
+                                    fontWeight = FontWeight.SemiBold
+                                )
+                                txn.title?.let {
+                                    Text(
+                                        text = it,
+                                        style = MaterialTheme.typography.labelSmall,
+                                        color = VettrTextSecondary
+                                    )
+                                }
+                            }
+                            Column(horizontalAlignment = Alignment.End) {
+                                Text(
+                                    text = "${txn.type} ${txn.shares}",
+                                    style = MaterialTheme.typography.bodySmall,
+                                    color = if (txn.type.equals("Buy", ignoreCase = true)) VettrGreen else VettrRed,
+                                    fontWeight = FontWeight.SemiBold
+                                )
+                                Text(
+                                    text = txn.date.take(10),
+                                    style = MaterialTheme.typography.labelSmall,
+                                    color = VettrTextSecondary
+                                )
+                            }
+                        }
+                    }
+                }
             }
         }
 
         // Dividend
-        fundamentals.dividend?.let { div ->
+        fundamentals.dividends?.let { div ->
             SectionHeader(title = "Dividend")
             Column(
                 modifier = Modifier.fillMaxWidth().cardStyle().vettrPadding(),
                 verticalArrangement = Arrangement.spacedBy(Spacing.sm)
             ) {
-                FundamentalRow("Yield", formatPercent(div.yield))
+                FundamentalRow("Yield", formatPercent(div.yieldPercent))
                 FundamentalRow("Annual Dividend", "$${formatDouble(div.annualDividend)}")
                 FundamentalRow("Payout Ratio", formatPercent(div.payoutRatio))
-                div.exDividendDate?.let { FundamentalRow("Ex-Dividend Date", it.take(10)) }
+                div.exDate?.let { FundamentalRow("Ex-Dividend Date", it.take(10)) }
             }
         }
 
