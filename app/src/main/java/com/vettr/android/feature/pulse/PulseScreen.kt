@@ -53,6 +53,7 @@ import com.vettr.android.core.model.HealthBucket
 import com.vettr.android.core.model.WatchlistHealth
 import com.vettr.android.core.data.remote.PortfolioSummaryResponse
 import com.vettr.android.core.model.PortfolioAlert
+import com.vettr.android.core.model.PortfolioInsight
 import com.vettr.android.designsystem.component.EmptyStateView
 import com.vettr.android.designsystem.component.ErrorView
 import com.vettr.android.designsystem.component.FilingTypeBadge
@@ -75,6 +76,7 @@ import com.vettr.android.designsystem.theme.VettrGreen
 import com.vettr.android.designsystem.theme.VettrOrange
 import com.vettr.android.designsystem.theme.VettrRed
 import com.vettr.android.designsystem.theme.VettrTeal
+import com.vettr.android.designsystem.theme.VettrTextSecondary
 import com.vettr.android.designsystem.theme.VettrTheme
 import com.vettr.android.designsystem.theme.VettrWarning
 import com.vettr.android.designsystem.theme.VettrYellow
@@ -103,6 +105,7 @@ fun PulseScreen(
     val portfolioSummary by viewModel.portfolioSummary.collectAsStateWithLifecycle()
     val portfolioAlerts by viewModel.portfolioAlerts.collectAsStateWithLifecycle()
     val unreadAlertCount by viewModel.unreadAlertCount.collectAsStateWithLifecycle()
+    val portfolioInsights by viewModel.portfolioInsights.collectAsStateWithLifecycle()
     val isLoading by viewModel.isLoading.collectAsStateWithLifecycle()
     val errorMessage by viewModel.errorMessage.collectAsStateWithLifecycle()
     val lastUpdatedAt by viewModel.lastUpdatedAt.collectAsStateWithLifecycle()
@@ -290,6 +293,16 @@ fun PulseScreen(
                                 unreadCount = unreadAlertCount,
                                 onAlertClick = { alert ->
                                     viewModel.markAlertRead(alert.id)
+                                }
+                            )
+                        }
+
+                        // ═══════ Portfolio Insights ═══════
+                        if (portfolioInsights.isNotEmpty()) {
+                            PortfolioInsightsSection(
+                                insights = portfolioInsights,
+                                onDismiss = { insight ->
+                                    viewModel.dismissInsight(insight.id)
                                 }
                             )
                         }
@@ -572,6 +585,92 @@ private fun AllClearCard(category: String, modifier: Modifier = Modifier) {
         }
         Text(text = "All Clear", style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant, fontWeight = FontWeight.Medium)
         Text(text = "No flags", style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.6f))
+    }
+}
+
+@Composable
+private fun PortfolioInsightsSection(
+    insights: List<PortfolioInsight>,
+    onDismiss: (PortfolioInsight) -> Unit,
+    modifier: Modifier = Modifier
+) {
+    Column(
+        modifier = modifier,
+        verticalArrangement = Arrangement.spacedBy(Spacing.md)
+    ) {
+        SectionHeader(title = "AI Insights")
+
+        Column(verticalArrangement = Arrangement.spacedBy(Spacing.sm)) {
+            insights.forEach { insight ->
+                val insightIcon = when (insight.insightType) {
+                    "warrant_overhang" -> "W"
+                    "cash_runway" -> "C"
+                    "sedi_insider" -> "S"
+                    "hold_expiry" -> "H"
+                    "flow_through_seasonality" -> "F"
+                    "executive_pedigree" -> "E"
+                    else -> "I"
+                }
+                val severityColor = when (insight.severity) {
+                    "critical" -> VettrRed
+                    "high" -> VettrOrange
+                    "medium" -> VettrWarning
+                    else -> VettrAccent
+                }
+
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .cardStyle()
+                        .vettrPadding(),
+                    horizontalArrangement = Arrangement.spacedBy(Spacing.md),
+                    verticalAlignment = Alignment.Top
+                ) {
+                    // Insight type badge
+                    Box(
+                        modifier = Modifier
+                            .size(36.dp)
+                            .clip(RoundedCornerShape(8.dp))
+                            .background(severityColor.copy(alpha = 0.1f)),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Text(
+                            text = insightIcon,
+                            style = MaterialTheme.typography.titleSmall,
+                            color = severityColor,
+                            fontWeight = FontWeight.Bold
+                        )
+                    }
+
+                    Column(modifier = Modifier.weight(1f)) {
+                        Text(
+                            text = insight.title,
+                            style = MaterialTheme.typography.bodyMedium,
+                            color = MaterialTheme.colorScheme.onSurface,
+                            fontWeight = FontWeight.SemiBold,
+                            maxLines = 1,
+                            overflow = TextOverflow.Ellipsis
+                        )
+                        Spacer(modifier = Modifier.height(2.dp))
+                        Text(
+                            text = insight.summary,
+                            style = MaterialTheme.typography.bodySmall,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                            maxLines = 2,
+                            overflow = TextOverflow.Ellipsis
+                        )
+                    }
+
+                    Text(
+                        text = "Dismiss",
+                        style = MaterialTheme.typography.labelSmall,
+                        color = VettrTextSecondary,
+                        fontWeight = FontWeight.Medium,
+                        modifier = Modifier.clickable { onDismiss(insight) }
+                    )
+                }
+            }
+        }
     }
 }
 

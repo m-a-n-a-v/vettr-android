@@ -5,11 +5,13 @@ import androidx.lifecycle.viewModelScope
 import com.vettr.android.core.data.remote.PortfolioSummaryResponse
 import com.vettr.android.core.data.repository.FilingRepository
 import com.vettr.android.core.data.repository.PortfolioAlertsRepository
+import com.vettr.android.core.data.repository.PortfolioInsightsRepository
 import com.vettr.android.core.data.repository.PortfolioRepository
 import com.vettr.android.core.data.repository.PulseRepository
 import com.vettr.android.core.data.repository.StockRepository
 import com.vettr.android.core.model.Filing
 import com.vettr.android.core.model.PortfolioAlert
+import com.vettr.android.core.model.PortfolioInsight
 import com.vettr.android.core.model.PulseSummary
 import com.vettr.android.core.model.Stock
 import com.vettr.android.core.util.NetworkMonitor
@@ -35,6 +37,7 @@ class PulseViewModel @Inject constructor(
     private val pulseRepository: PulseRepository,
     private val portfolioRepository: PortfolioRepository,
     private val portfolioAlertsRepository: PortfolioAlertsRepository,
+    private val portfolioInsightsRepository: PortfolioInsightsRepository,
     private val observabilityService: ObservabilityService,
     private val networkMonitor: NetworkMonitor
 ) : ViewModel() {
@@ -57,6 +60,9 @@ class PulseViewModel @Inject constructor(
     private val _unreadAlertCount = MutableStateFlow(0)
     val unreadAlertCount: StateFlow<Int> = _unreadAlertCount.asStateFlow()
 
+    private val _portfolioInsights = MutableStateFlow<List<PortfolioInsight>>(emptyList())
+    val portfolioInsights: StateFlow<List<PortfolioInsight>> = _portfolioInsights.asStateFlow()
+
     private val _isLoading = MutableStateFlow(false)
     val isLoading: StateFlow<Boolean> = _isLoading.asStateFlow()
 
@@ -78,6 +84,7 @@ class PulseViewModel @Inject constructor(
         loadData()
         observeNetworkState()
         observePortfolioAlerts()
+        observePortfolioInsights()
     }
 
     /**
@@ -106,6 +113,28 @@ class PulseViewModel @Inject constructor(
     fun markAlertRead(alertId: String) {
         viewModelScope.launch {
             portfolioAlertsRepository.markRead(alertId)
+        }
+    }
+
+    /**
+     * Observe portfolio insights from local database.
+     */
+    private fun observePortfolioInsights() {
+        viewModelScope.launch {
+            portfolioInsightsRepository.getInsights()
+                .catch { /* Non-critical, ignore */ }
+                .collect { insights ->
+                    _portfolioInsights.value = insights.take(3) // Show top 3 on Pulse
+                }
+        }
+    }
+
+    /**
+     * Dismiss a portfolio insight.
+     */
+    fun dismissInsight(insightId: String) {
+        viewModelScope.launch {
+            portfolioInsightsRepository.dismissInsight(insightId)
         }
     }
 
