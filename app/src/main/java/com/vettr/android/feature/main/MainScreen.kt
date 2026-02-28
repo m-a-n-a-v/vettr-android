@@ -49,6 +49,7 @@ import com.vettr.android.feature.alerts.AlertsScreen
 import com.vettr.android.feature.discovery.DiscoveryScreen
 import com.vettr.android.feature.news.NewsScreen
 import com.vettr.android.feature.onboarding.OnboardingScreen
+import com.vettr.android.feature.portfolio.CreatePortfolioScreen
 import com.vettr.android.feature.portfolio.PortfolioManagerScreen
 import com.vettr.android.feature.profile.ProfileScreen
 import com.vettr.android.feature.pulse.PulseScreen
@@ -580,6 +581,33 @@ fun MainScreen(
                     },
                     onCreatePortfolio = {
                         navController.navigate("create_portfolio")
+                    },
+                    modifier = Modifier.fillMaxSize()
+                )
+            }
+
+            // Create portfolio screen
+            composable(
+                route = "create_portfolio",
+                enterTransition = {
+                    slideInVertically(
+                        initialOffsetY = { it },
+                        animationSpec = tween(300)
+                    ) + fadeIn(animationSpec = tween(300))
+                },
+                popExitTransition = {
+                    slideOutVertically(
+                        targetOffsetY = { it },
+                        animationSpec = tween(300)
+                    ) + fadeOut(animationSpec = tween(300))
+                }
+            ) {
+                CreatePortfolioScreen(
+                    onBackClick = { navController.navigateUp() },
+                    onPortfolioCreated = { portfolioId ->
+                        navController.navigate("portfolio_holdings/$portfolioId") {
+                            popUpTo("portfolio_manager") { inclusive = false }
+                        }
                     },
                     modifier = Modifier.fillMaxSize()
                 )
