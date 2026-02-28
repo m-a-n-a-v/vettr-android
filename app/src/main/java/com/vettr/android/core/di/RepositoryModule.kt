@@ -5,7 +5,7 @@ import com.vettr.android.core.data.repository.AiAgentRepositoryImpl
 import com.vettr.android.core.data.repository.AlertRuleRepository
 import com.vettr.android.core.data.repository.AlertRuleRepositoryImpl
 import com.vettr.android.core.data.repository.AuthRepository
-import com.vettr.android.core.data.repository.AuthRepositoryImpl
+import com.vettr.android.core.data.repository.ClerkAuthRepositoryImpl
 import com.vettr.android.core.data.repository.ExecutiveRepository
 import com.vettr.android.core.data.repository.ExecutiveRepositoryImpl
 import com.vettr.android.core.data.repository.FilingRepository
@@ -55,7 +55,7 @@ abstract class RepositoryModule {
     @Binds
     @Singleton
     abstract fun bindAuthRepository(
-        authRepositoryImpl: AuthRepositoryImpl
+        clerkAuthRepositoryImpl: ClerkAuthRepositoryImpl
     ): AuthRepository
 
     @Binds

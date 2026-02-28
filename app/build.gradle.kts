@@ -30,6 +30,7 @@ android {
                 "proguard-rules.pro"
             )
             buildConfigField("String", "API_BASE_URL", "\"https://vettr-backend.vercel.app/v1/\"")
+            buildConfigField("String", "CLERK_PUBLISHABLE_KEY", "\"REPLACE_WITH_YOUR_CLERK_PUBLISHABLE_KEY\"")
         }
         debug {
             isMinifyEnabled = false
@@ -37,6 +38,7 @@ android {
             versionNameSuffix = "-debug"
             // Use production API for live data (was 10.0.2.2 for local Docker)
             buildConfigField("String", "API_BASE_URL", "\"https://vettr-backend.vercel.app/v1/\"")
+            buildConfigField("String", "CLERK_PUBLISHABLE_KEY", "\"REPLACE_WITH_YOUR_CLERK_PUBLISHABLE_KEY\"")
         }
     }
 
@@ -108,6 +110,9 @@ dependencies {
     // Coroutines
     implementation(libs.kotlinx.coroutines.android)
     implementation(libs.kotlinx.coroutines.core)
+
+    // Clerk Authentication
+    implementation("com.clerk.android:clerk-android:2.0.0")
 
     // Google Sign-In / Auth
     implementation(libs.play.services.auth)

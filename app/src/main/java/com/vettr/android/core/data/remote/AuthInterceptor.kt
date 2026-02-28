@@ -1,6 +1,6 @@
 package com.vettr.android.core.data.remote
 
-import com.vettr.android.core.data.local.TokenManager
+import clerk.android.Clerk
 import com.vettr.android.core.data.repository.AuthRepository
 import kotlinx.coroutines.runBlocking
 import okhttp3.Interceptor
@@ -9,96 +9,58 @@ import javax.inject.Inject
 import javax.inject.Singleton
 
 /**
- * OkHttp interceptor that automatically adds authentication headers
- * and handles token refresh on 401 responses.
+ * OkHttp interceptor that automatically adds the Clerk session token as
+ * Authorization: Bearer header on every authenticated request.
  *
- * Flow:
- * 1. Add Authorization: Bearer {token} header to all requests
- * 2. If 401 response: attempt token refresh
- * 3. On refresh success: retry original request with new token
- * 4. On refresh failure: clear tokens and emit unauthorized state
+ * Clerk handles token refresh automatically — if the cached session token
+ * is close to expiry, Clerk rotates it before returning it here.
  *
- * Uses dagger.Lazy<AuthRepository> to break the dependency cycle:
- * OkHttpClient -> Retrofit -> VettrApi -> AuthRepositoryImpl -> AuthRepository -> AuthInterceptor -> OkHttpClient
+ * Uses dagger.Lazy<AuthRepository> to break the circular dependency:
+ * OkHttpClient → Retrofit → VettrApi → AuthRepository → AuthInterceptor → OkHttpClient
  */
 @Singleton
 class AuthInterceptor @Inject constructor(
-    private val tokenManager: TokenManager,
     private val authRepository: dagger.Lazy<AuthRepository>
 ) : Interceptor {
 
     override fun intercept(chain: Interceptor.Chain): Response {
         val originalRequest = chain.request()
 
-        // Skip auth header for auth and admin endpoints
-        if (originalRequest.url.encodedPath.contains("/auth/") ||
-            originalRequest.url.encodedPath.contains("/admin/")) {
+        // Skip auth header for admin endpoints
+        if (originalRequest.url.encodedPath.contains("/admin/")) {
             return chain.proceed(originalRequest)
         }
 
-        // Add Authorization header if token exists
-        val token = tokenManager.getToken()
+        // Fetch the current Clerk session token (blocking call on the OkHttp thread).
+        val token: String? = runBlocking {
+            try {
+                Clerk.shared.session?.getToken()?.jwt
+            } catch (_: Exception) {
+                null
+            }
+        }
+
         val requestWithAuth = if (token != null) {
             originalRequest.newBuilder()
-                .addHeader("Authorization", "Bearer $token")
+                .header("Authorization", "Bearer $token")
                 .build()
         } else {
             originalRequest
         }
 
-        // Execute request
         val response = chain.proceed(requestWithAuth)
 
-        // Handle 401 Unauthorized
-        if (response.code == 401 && token != null) {
+        // If the backend returns 401, sign the user out so they can re-authenticate.
+        if (response.code == 401) {
             response.close()
-
-            // Attempt token refresh
-            val refreshSuccess = runBlocking {
-                refreshToken()
-            }
-
-            if (refreshSuccess) {
-                // Retry original request with new token
-                val newToken = tokenManager.getToken()
-                val retryRequest = originalRequest.newBuilder()
-                    .addHeader("Authorization", "Bearer $newToken")
-                    .build()
-
-                return chain.proceed(retryRequest)
-            } else {
-                // Refresh failed - sign out user
-                runBlocking {
+            runBlocking {
+                try {
                     authRepository.get().signOut()
-                }
-
-                // Return original 401 response
-                return chain.proceed(originalRequest)
+                } catch (_: Exception) { /* best effort */ }
             }
+            return chain.proceed(originalRequest)
         }
 
         return response
-    }
-
-    /**
-     * Attempt to refresh the access token using the refresh token.
-     * @return true if refresh succeeded, false otherwise
-     */
-    private suspend fun refreshToken(): Boolean {
-        return try {
-            val refreshToken = tokenManager.getRefreshToken() ?: return false
-
-            // TODO: Call actual refresh endpoint when backend is ready
-            // For now, this is a placeholder that returns false
-            // In production, this would call:
-            // val response = vettrApi.refreshToken(RefreshTokenRequest(refreshToken))
-            // tokenManager.saveToken(response.accessToken)
-            // tokenManager.saveRefreshToken(response.refreshToken)
-            // return true
-
-            false
-        } catch (e: Exception) {
-            false
-        }
     }
 }

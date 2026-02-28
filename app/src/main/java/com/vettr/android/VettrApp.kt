@@ -5,6 +5,7 @@ import android.content.ComponentCallbacks2
 import androidx.hilt.work.HiltWorkerFactory
 import timber.log.Timber
 import androidx.work.Configuration
+import clerk.android.Clerk
 import coil3.ImageLoader
 import coil3.SingletonImageLoader
 import com.vettr.android.core.util.AppStartupTracker
@@ -35,6 +36,10 @@ class VettrApp : Application(), Configuration.Provider, SingletonImageLoader.Fac
         if (BuildConfig.DEBUG) {
             Timber.plant(Timber.DebugTree())
         }
+
+        // Initialize Clerk authentication SDK.
+        // Replace CLERK_PUBLISHABLE_KEY in build.gradle.kts with your actual key.
+        Clerk.initialize(this, BuildConfig.CLERK_PUBLISHABLE_KEY)
 
         // Track app startup time
         val startupDuration = AppStartupTracker.getElapsedTime()
