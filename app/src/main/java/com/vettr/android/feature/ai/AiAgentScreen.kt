@@ -382,25 +382,41 @@ private fun AiMessageBubble(
                     color = MaterialTheme.colorScheme.onSurface
                 )
 
-                // Data points
+                // Data points table
                 if (response != null && response.dataPoints.isNotEmpty()) {
-                    Spacer(modifier = Modifier.height(4.dp))
-                    response.dataPoints.forEach { dp ->
-                        Row(
-                            modifier = Modifier.fillMaxWidth(),
-                            horizontalArrangement = Arrangement.SpaceBetween
-                        ) {
-                            Text(
-                                text = dp.key,
-                                style = MaterialTheme.typography.labelSmall,
-                                color = VettrTextSecondary
-                            )
-                            Text(
-                                text = dp.value,
-                                style = MaterialTheme.typography.labelSmall,
-                                color = MaterialTheme.colorScheme.onSurface,
-                                fontWeight = FontWeight.SemiBold
-                            )
+                    Spacer(modifier = Modifier.height(Spacing.sm))
+                    Column(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .clip(RoundedCornerShape(8.dp))
+                            .background(MaterialTheme.colorScheme.surface.copy(alpha = 0.5f))
+                            .padding(Spacing.sm),
+                        verticalArrangement = Arrangement.spacedBy(Spacing.xs)
+                    ) {
+                        Text(
+                            text = "Key Data",
+                            style = MaterialTheme.typography.labelSmall,
+                            color = VettrAccent,
+                            fontWeight = FontWeight.Bold
+                        )
+                        response.dataPoints.forEach { dp ->
+                            Row(
+                                modifier = Modifier.fillMaxWidth(),
+                                horizontalArrangement = Arrangement.SpaceBetween
+                            ) {
+                                Text(
+                                    text = dp.key,
+                                    style = MaterialTheme.typography.bodySmall,
+                                    color = VettrTextSecondary,
+                                    modifier = Modifier.weight(1f)
+                                )
+                                Text(
+                                    text = dp.value,
+                                    style = MaterialTheme.typography.bodySmall,
+                                    color = MaterialTheme.colorScheme.onSurface,
+                                    fontWeight = FontWeight.SemiBold
+                                )
+                            }
                         }
                     }
                 }
