@@ -30,6 +30,15 @@ interface PublicApi {
     ): AutocompleteResponse
 
     /**
+     * Fetch distinct sector strings from the stocks table.
+     * Returns an array of sector names for filtering.
+     *
+     * @return List of distinct sector strings
+     */
+    @GET("stocks/sectors")
+    suspend fun getSectors(): List<String>
+
+    /**
      * Fetch a limited stock preview for unauthenticated users.
      * Returns basic stock info, current price, and VETR score without full analysis.
      *

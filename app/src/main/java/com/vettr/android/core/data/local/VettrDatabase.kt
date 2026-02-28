@@ -32,7 +32,7 @@ import com.vettr.android.core.util.Converters
         PortfolioAlert::class,
         PortfolioInsight::class
     ],
-    version = 2,
+    version = 3,
     exportSchema = true
 )
 @TypeConverters(Converters::class)

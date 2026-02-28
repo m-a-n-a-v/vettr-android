@@ -7,6 +7,7 @@ import com.vettr.android.core.data.local.AlertRuleDao
 import com.vettr.android.core.data.local.ExecutiveDao
 import com.vettr.android.core.data.local.FilingDao
 import com.vettr.android.core.data.local.MIGRATION_1_2
+import com.vettr.android.core.data.local.MIGRATION_2_3
 import com.vettr.android.core.data.local.PortfolioAlertDao
 import com.vettr.android.core.data.local.PortfolioDao
 import com.vettr.android.core.data.local.PortfolioHoldingDao
@@ -38,7 +39,7 @@ object DatabaseModule {
         )
 
         // Add migrations
-        builder.addMigrations(MIGRATION_1_2)
+        builder.addMigrations(MIGRATION_1_2, MIGRATION_2_3)
 
         // For debug builds, allow destructive migrations
         // This will drop and recreate tables if migration is missing

@@ -38,6 +38,12 @@ interface PortfolioRepository {
     fun getHoldings(portfolioId: String): Flow<List<PortfolioHolding>>
 
     /**
+     * Get all holdings across all portfolios from the API.
+     * Returns enriched holdings with vetrScore and priceChangePercent.
+     */
+    suspend fun getAllHoldings(): Result<List<PortfolioHolding>>
+
+    /**
      * Add a holding to a portfolio.
      */
     suspend fun addHolding(

@@ -13,6 +13,7 @@ import com.vettr.android.core.data.repository.StockRepository
 import com.vettr.android.core.model.Filing
 import com.vettr.android.core.model.Portfolio
 import com.vettr.android.core.model.PortfolioAlert
+import com.vettr.android.core.model.PortfolioHolding
 import com.vettr.android.core.model.PortfolioInsight
 import com.vettr.android.core.model.PulseSummary
 import com.vettr.android.core.model.Stock
@@ -77,6 +78,9 @@ class PulseViewModel @Inject constructor(
 
     private val _portfolioInsights = MutableStateFlow<List<PortfolioInsight>>(emptyList())
     val portfolioInsights: StateFlow<List<PortfolioInsight>> = _portfolioInsights.asStateFlow()
+
+    private val _portfolioHoldings = MutableStateFlow<List<PortfolioHolding>>(emptyList())
+    val portfolioHoldings: StateFlow<List<PortfolioHolding>> = _portfolioHoldings.asStateFlow()
 
     private val _isLoading = MutableStateFlow(false)
     val isLoading: StateFlow<Boolean> = _isLoading.asStateFlow()
@@ -261,6 +265,11 @@ class PulseViewModel @Inject constructor(
                 launch {
                     loadPortfolioSummary()
                 }
+
+                // Fetch all portfolio holdings (enriched with vetrScore, priceChangePercent)
+                launch {
+                    loadPortfolioHoldings()
+                }
             } finally {
                 _isLoading.value = false
             }
@@ -295,6 +304,24 @@ class PulseViewModel @Inject constructor(
             }
         } catch (_: Exception) {
             _portfolioSummary.value = null
+        }
+    }
+
+    /**
+     * Load all portfolio holdings across all portfolios.
+     * Used for portfolio health card and gainers/losers on the Pulse screen.
+     */
+    private suspend fun loadPortfolioHoldings() {
+        try {
+            val result = portfolioRepository.getAllHoldings()
+            result.onSuccess { holdings ->
+                _portfolioHoldings.value = holdings
+            }.onFailure {
+                // Portfolio holdings are non-critical; user may not have portfolios yet
+                _portfolioHoldings.value = emptyList()
+            }
+        } catch (_: Exception) {
+            _portfolioHoldings.value = emptyList()
         }
     }
 

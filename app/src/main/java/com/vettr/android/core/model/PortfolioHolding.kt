@@ -56,5 +56,14 @@ data class PortfolioHolding(
     val gainLoss: Double = 0.0,
 
     @ColumnInfo(name = "gain_loss_percent")
-    val gainLossPercent: Double = 0.0
+    val gainLossPercent: Double = 0.0,
+
+    @ColumnInfo(name = "vetr_score")
+    val vetrScore: Int? = null,
+
+    @ColumnInfo(name = "price_change_percent")
+    val priceChangePercent: Double? = null,
+
+    @ColumnInfo(name = "name")
+    val name: String? = null
 )

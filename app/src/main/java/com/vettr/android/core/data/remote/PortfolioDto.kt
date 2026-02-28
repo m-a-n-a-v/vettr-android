@@ -40,7 +40,8 @@ data class HoldingResponse(
     @SerializedName("currentValue") val currentValue: Double = 0.0,
     @SerializedName("gainLoss") val gainLoss: Double = 0.0,
     @SerializedName("gainLossPercent") val gainLossPercent: Double = 0.0,
-    @SerializedName("vetrScore") val vetrScore: Int? = null
+    @SerializedName("vetrScore") val vetrScore: Int? = null,
+    @SerializedName("priceChangePercent") val priceChangePercent: Double? = null
 )
 
 /**

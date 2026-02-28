@@ -119,6 +119,9 @@ interface VettrApi {
     @DELETE("portfolio/{id}")
     suspend fun deletePortfolio(@Path("id") id: String): Response<Unit>
 
+    @GET("portfolio/holdings")
+    suspend fun listAllHoldings(): Response<List<HoldingResponse>>
+
     @GET("portfolio/{id}/holdings")
     suspend fun listHoldings(@Path("id") portfolioId: String): Response<List<HoldingResponse>>
 

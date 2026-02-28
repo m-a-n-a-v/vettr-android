@@ -2,6 +2,7 @@ package com.vettr.android.feature.stockdetail
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.vettr.android.core.data.remote.PublicApi
 import com.vettr.android.core.data.repository.AuthRepository
 import com.vettr.android.core.data.repository.StockRepository
 import com.vettr.android.core.model.Stock
@@ -27,7 +28,8 @@ import javax.inject.Inject
 @HiltViewModel
 class StocksViewModel @Inject constructor(
     private val stockRepository: StockRepository,
-    private val authRepository: AuthRepository
+    private val authRepository: AuthRepository,
+    private val publicApi: PublicApi
 ) : ViewModel() {
 
     private val _allStocks = MutableStateFlow<List<Stock>>(emptyList())
@@ -44,6 +46,12 @@ class StocksViewModel @Inject constructor(
 
     private var lastRefreshTime: Long = 0
     private val refreshDebounceMs = 10_000L // 10 seconds
+
+    private val _selectedSectors = MutableStateFlow<Set<String>>(emptySet())
+    val selectedSectors: StateFlow<Set<String>> = _selectedSectors.asStateFlow()
+
+    private val _availableSectors = MutableStateFlow<List<String>>(emptyList())
+    val availableSectors: StateFlow<List<String>> = _availableSectors.asStateFlow()
 
     private val _showUpgradeDialog = MutableStateFlow(false)
     val showUpgradeDialog: StateFlow<Boolean> = _showUpgradeDialog.asStateFlow()
@@ -129,21 +137,30 @@ class StocksViewModel @Inject constructor(
     private var loadJob: Job? = null
 
     /**
-     * Computed filtered list based on search query.
-     * Filters stocks by ticker or name matching the search query.
+     * Computed filtered list based on search query and selected sectors.
+     * Filters stocks by ticker or name matching the search query, and by sector.
      */
     val filteredStocks: StateFlow<List<Stock>> = combine(
         _allStocks,
-        _searchQuery
-    ) { stocks, query ->
-        if (query.isBlank()) {
-            stocks
-        } else {
-            stocks.filter { stock ->
+        _searchQuery,
+        _selectedSectors
+    ) { stocks, query, sectors ->
+        var filtered = stocks
+
+        // Apply sector filter
+        if (sectors.isNotEmpty()) {
+            filtered = filtered.filter { it.sector in sectors }
+        }
+
+        // Apply search query filter
+        if (query.isNotBlank()) {
+            filtered = filtered.filter { stock ->
                 stock.ticker.contains(query, ignoreCase = true) ||
                 stock.name.contains(query, ignoreCase = true)
             }
         }
+
+        filtered
     }.stateIn(
         scope = viewModelScope,
         started = SharingStarted.WhileSubscribed(5000),
@@ -152,6 +169,7 @@ class StocksViewModel @Inject constructor(
 
     init {
         loadStocks()
+        loadSectors()
     }
 
     /**
@@ -198,6 +216,40 @@ class StocksViewModel @Inject constructor(
      */
     fun searchStocks(query: String) {
         _searchQuery.value = query
+    }
+
+    /**
+     * Load available sectors from the public API.
+     */
+    fun loadSectors() {
+        viewModelScope.launch {
+            try {
+                val sectors = publicApi.getSectors()
+                _availableSectors.value = sectors.sorted()
+            } catch (_: Exception) {
+                // Sectors are non-critical; fall back to empty list
+                _availableSectors.value = emptyList()
+            }
+        }
+    }
+
+    /**
+     * Toggle a sector in/out of the selected set.
+     * @param sector Sector name to toggle
+     */
+    fun toggleSector(sector: String) {
+        _selectedSectors.value = if (sector in _selectedSectors.value) {
+            _selectedSectors.value - sector
+        } else {
+            _selectedSectors.value + sector
+        }
+    }
+
+    /**
+     * Clear all selected sectors (show all stocks).
+     */
+    fun clearSectors() {
+        _selectedSectors.value = emptySet()
     }
 
     /**

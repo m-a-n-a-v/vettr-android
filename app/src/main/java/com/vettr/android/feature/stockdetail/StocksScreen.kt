@@ -6,6 +6,7 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.Spacer
@@ -14,11 +15,14 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.SearchOff
 import androidx.compose.material.icons.filled.Star
+import androidx.compose.material3.FilterChip
+import androidx.compose.material3.FilterChipDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -71,6 +75,8 @@ fun StocksScreen(
     val watchlistLimit by viewModel.watchlistLimit.collectAsStateWithLifecycle()
     val showUpgradeDialog by viewModel.showUpgradeDialog.collectAsStateWithLifecycle()
     val currentTierEnum by viewModel.currentTierEnum.collectAsStateWithLifecycle()
+    val selectedSectors by viewModel.selectedSectors.collectAsStateWithLifecycle()
+    val availableSectors by viewModel.availableSectors.collectAsStateWithLifecycle()
 
     // Upgrade dialog
     UpgradeDialog(
@@ -208,6 +214,38 @@ fun StocksScreen(
                         color = MaterialTheme.colorScheme.onSurface,
                         modifier = Modifier.padding(bottom = Spacing.sm)
                     )
+                }
+
+                // Sector filter chips
+                if (availableSectors.isNotEmpty()) {
+                    LazyRow(
+                        horizontalArrangement = Arrangement.spacedBy(8.dp),
+                        contentPadding = PaddingValues(horizontal = 16.dp),
+                        modifier = Modifier.padding(vertical = 8.dp)
+                    ) {
+                        item {
+                            FilterChip(
+                                selected = selectedSectors.isEmpty(),
+                                onClick = { viewModel.clearSectors() },
+                                label = { Text("All") },
+                                colors = FilterChipDefaults.filterChipColors(
+                                    selectedContainerColor = MaterialTheme.colorScheme.primary,
+                                    selectedLabelColor = MaterialTheme.colorScheme.onPrimary
+                                )
+                            )
+                        }
+                        items(availableSectors) { sector ->
+                            FilterChip(
+                                selected = sector in selectedSectors,
+                                onClick = { viewModel.toggleSector(sector) },
+                                label = { Text(sector) },
+                                colors = FilterChipDefaults.filterChipColors(
+                                    selectedContainerColor = MaterialTheme.colorScheme.primary,
+                                    selectedLabelColor = MaterialTheme.colorScheme.onPrimary
+                                )
+                            )
+                        }
+                    }
                 }
 
                 // Use Crossfade to transition between skeleton and content

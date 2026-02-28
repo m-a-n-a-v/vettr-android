@@ -22,6 +22,22 @@ import androidx.sqlite.db.SupportSQLiteDatabase
  * - portfolio_alerts: Auto-generated portfolio alerts
  * - portfolio_insights: AI-generated portfolio insights
  */
+/**
+ * Migration from version 2 to version 3.
+ *
+ * Adds enriched fields to portfolio_holdings:
+ * - vetr_score: VETR quality score joined from stocks table
+ * - price_change_percent: Price change percentage joined from stocks table
+ * - name: Company name joined from stocks table
+ */
+val MIGRATION_2_3 = object : Migration(2, 3) {
+    override fun migrate(database: SupportSQLiteDatabase) {
+        database.execSQL("ALTER TABLE portfolio_holdings ADD COLUMN vetr_score INTEGER DEFAULT NULL")
+        database.execSQL("ALTER TABLE portfolio_holdings ADD COLUMN price_change_percent REAL DEFAULT NULL")
+        database.execSQL("ALTER TABLE portfolio_holdings ADD COLUMN name TEXT DEFAULT NULL")
+    }
+}
+
 val MIGRATION_1_2 = object : Migration(1, 2) {
     override fun migrate(database: SupportSQLiteDatabase) {
         // Create portfolios table

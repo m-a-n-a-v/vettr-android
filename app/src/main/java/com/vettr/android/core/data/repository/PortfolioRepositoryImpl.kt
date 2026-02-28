@@ -95,6 +95,23 @@ class PortfolioRepositoryImpl @Inject constructor(
         }
     }
 
+    override suspend fun getAllHoldings(): Result<List<PortfolioHolding>> {
+        return withContext(Dispatchers.IO) {
+            try {
+                val response = vettrApi.listAllHoldings()
+                if (response.isSuccessful) {
+                    val holdings = response.body()?.map { it.toEntity(it.portfolioId) } ?: emptyList()
+                    Result.success(holdings)
+                } else {
+                    Result.failure(Exception("Failed to get all holdings: ${response.code()}"))
+                }
+            } catch (e: Exception) {
+                Timber.e(e, "Failed to get all holdings")
+                Result.failure(e)
+            }
+        }
+    }
+
     override suspend fun addHolding(
         portfolioId: String,
         ticker: String,
@@ -221,6 +238,9 @@ private fun HoldingResponse.toEntity(portfolioId: String): PortfolioHolding {
         currentPrice = currentPrice,
         currentValue = currentValue,
         gainLoss = gainLoss,
-        gainLossPercent = gainLossPercent
+        gainLossPercent = gainLossPercent,
+        vetrScore = vetrScore,
+        priceChangePercent = priceChangePercent,
+        name = name
     )
 }

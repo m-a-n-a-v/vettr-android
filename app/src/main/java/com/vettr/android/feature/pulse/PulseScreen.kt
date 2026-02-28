@@ -93,7 +93,7 @@ import kotlin.math.roundToInt
  * 1. Portfolio Summary
  * 2. Portfolio Alerts
  * 3. Portfolio Insights
- * 4. Watchlist Health / Market Overview
+ * 4. Portfolio Health / Market Overview
  * 5. Top Movers
  * 6. Red Flag Summary
  * 7. Smart Filings
@@ -127,36 +127,35 @@ fun PulseScreen(
     val lastUpdatedAt by viewModel.lastUpdatedAt.collectAsStateWithLifecycle()
     val isOnline by viewModel.isOnline.collectAsStateWithLifecycle()
     val portfolioState by viewModel.portfolioState.collectAsStateWithLifecycle()
+    val portfolioHoldings by viewModel.portfolioHoldings.collectAsStateWithLifecycle()
 
     val snackbarHostState = remember { SnackbarHostState() }
 
     // ── Derived data ──
 
-    // Watchlist health: prefer API, fallback to client-side (5-tier)
-    val watchlistHealth by remember(stocks, pulseSummary) {
+    // Portfolio health: computed from portfolio holdings vetrScore
+    val portfolioHealth by remember(portfolioHoldings) {
         derivedStateOf {
-            pulseSummary?.watchlistHealth ?: run {
-                if (stocks.isEmpty()) WatchlistHealth(
-                    elite = HealthBucket(0, 0),
-                    contender = HealthBucket(0, 0),
-                    watchlist = HealthBucket(0, 0),
-                    speculative = HealthBucket(0, 0),
-                    toxic = HealthBucket(0, 0)
-                ) else {
-                    val total = stocks.size
-                    val elite = stocks.count { it.vetrScore >= 90 }
-                    val contender = stocks.count { it.vetrScore in 75..89 }
-                    val watchlistCount = stocks.count { it.vetrScore in 50..74 }
-                    val speculative = stocks.count { it.vetrScore in 30..49 }
-                    val toxic = stocks.count { it.vetrScore < 30 }
-                    WatchlistHealth(
-                        elite = HealthBucket(elite, if (total > 0) (elite * 100f / total).roundToInt() else 0),
-                        contender = HealthBucket(contender, if (total > 0) (contender * 100f / total).roundToInt() else 0),
-                        watchlist = HealthBucket(watchlistCount, if (total > 0) (watchlistCount * 100f / total).roundToInt() else 0),
-                        speculative = HealthBucket(speculative, if (total > 0) (speculative * 100f / total).roundToInt() else 0),
-                        toxic = HealthBucket(toxic, if (total > 0) (toxic * 100f / total).roundToInt() else 0)
-                    )
-                }
+            if (portfolioHoldings.isEmpty()) WatchlistHealth(
+                elite = HealthBucket(0, 0),
+                contender = HealthBucket(0, 0),
+                watchlist = HealthBucket(0, 0),
+                speculative = HealthBucket(0, 0),
+                toxic = HealthBucket(0, 0)
+            ) else {
+                val total = portfolioHoldings.size
+                val elite = portfolioHoldings.count { (it.vetrScore ?: 0) >= 90 }
+                val contender = portfolioHoldings.count { (it.vetrScore ?: 0) in 75..89 }
+                val watchlistCount = portfolioHoldings.count { (it.vetrScore ?: 0) in 50..74 }
+                val speculative = portfolioHoldings.count { (it.vetrScore ?: 0) in 30..49 }
+                val toxic = portfolioHoldings.count { (it.vetrScore ?: 0) < 30 }
+                WatchlistHealth(
+                    elite = HealthBucket(elite, if (total > 0) (elite * 100f / total).roundToInt() else 0),
+                    contender = HealthBucket(contender, if (total > 0) (contender * 100f / total).roundToInt() else 0),
+                    watchlist = HealthBucket(watchlistCount, if (total > 0) (watchlistCount * 100f / total).roundToInt() else 0),
+                    speculative = HealthBucket(speculative, if (total > 0) (speculative * 100f / total).roundToInt() else 0),
+                    toxic = HealthBucket(toxic, if (total > 0) (toxic * 100f / total).roundToInt() else 0)
+                )
             }
         }
     }
@@ -187,12 +186,22 @@ fun PulseScreen(
         derivedStateOf { pulseSummary?.redFlagCategories }
     }
 
-    // Top 2 gainers + top 2 losers
-    val topGainers by remember(stocks) {
-        derivedStateOf { stocks.sortedByDescending { it.priceChange }.take(2) }
+    // Top 2 gainers + top 2 losers from portfolio holdings
+    val topGainerHoldings by remember(portfolioHoldings) {
+        derivedStateOf {
+            portfolioHoldings
+                .filter { it.priceChangePercent != null }
+                .sortedByDescending { it.priceChangePercent }
+                .take(2)
+        }
     }
-    val topLosers by remember(stocks) {
-        derivedStateOf { stocks.sortedBy { it.priceChange }.take(2).filter { it.priceChange < 0 } }
+    val topLoserHoldings by remember(portfolioHoldings) {
+        derivedStateOf {
+            portfolioHoldings
+                .filter { it.priceChangePercent != null && it.priceChangePercent < 0 }
+                .sortedBy { it.priceChangePercent }
+                .take(2)
+        }
     }
 
     // Recent filings (up to 4)
@@ -300,7 +309,7 @@ fun PulseScreen(
                         SkeletonMetricCard(modifier = Modifier.fillMaxWidth())
                         SectionHeader(title = "Smart Filings (SEDAR+)")
                         repeat(3) { SkeletonEventCard() }
-                        SectionHeader(title = "Watchlist Movers")
+                        SectionHeader(title = "Portfolio Movers")
                         repeat(3) { SkeletonStockRow() }
                     }
                 } else {
@@ -350,8 +359,8 @@ fun PulseScreen(
                         Column(verticalArrangement = Arrangement.spacedBy(Spacing.md)) {
                             SectionHeader(title = "Market Overview")
 
-                            // Watchlist Health
-                            WatchlistHealthCard(health = watchlistHealth)
+                            // Portfolio Health
+                            PortfolioHealthCard(health = portfolioHealth)
 
                             // Sector Exposure
                             if (sectorExposure.isNotEmpty()) {
@@ -387,7 +396,7 @@ fun PulseScreen(
                                 }
                             }
 
-                            // Gainers & Losers
+                            // Gainers & Losers (from portfolio holdings)
                             Column(modifier = Modifier.fillMaxWidth().cardStyle().vettrPadding()) {
                                 Text(
                                     text = "GAINERS & LOSERS",
@@ -396,34 +405,34 @@ fun PulseScreen(
                                     letterSpacing = 1.sp,
                                     modifier = Modifier.padding(bottom = Spacing.sm)
                                 )
-                                topGainers.forEach { stock ->
+                                topGainerHoldings.forEach { holding ->
                                     Row(
-                                        modifier = Modifier.fillMaxWidth().clickable { onStockClick(stock.id) }.padding(vertical = Spacing.xs),
+                                        modifier = Modifier.fillMaxWidth().padding(vertical = Spacing.xs),
                                         horizontalArrangement = Arrangement.SpaceBetween,
                                         verticalAlignment = Alignment.CenterVertically
                                     ) {
                                         Column {
-                                            Text(text = stock.ticker, style = MaterialTheme.typography.titleSmall, color = MaterialTheme.colorScheme.onSurface, fontWeight = FontWeight.Bold)
-                                            Text(text = stock.name, style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant, maxLines = 1, overflow = TextOverflow.Ellipsis)
+                                            Text(text = holding.ticker, style = MaterialTheme.typography.titleSmall, color = MaterialTheme.colorScheme.onSurface, fontWeight = FontWeight.Bold)
+                                            Text(text = holding.name ?: holding.ticker, style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant, maxLines = 1, overflow = TextOverflow.Ellipsis)
                                         }
-                                        Text(text = "\u25B2 ${String.format("%.2f", abs(stock.priceChange))}%", style = MaterialTheme.typography.bodyMedium, color = VettrGreen, fontWeight = FontWeight.SemiBold)
+                                        Text(text = "\u25B2 ${String.format("%.2f", abs(holding.priceChangePercent ?: 0.0))}%", style = MaterialTheme.typography.bodyMedium, color = VettrGreen, fontWeight = FontWeight.SemiBold)
                                     }
                                 }
                                 Box(modifier = Modifier.fillMaxWidth().height(1.dp).background(MaterialTheme.colorScheme.onSurface.copy(alpha = 0.05f)).padding(vertical = Spacing.xs))
-                                topLosers.forEach { stock ->
+                                topLoserHoldings.forEach { holding ->
                                     Row(
-                                        modifier = Modifier.fillMaxWidth().clickable { onStockClick(stock.id) }.padding(vertical = Spacing.xs),
+                                        modifier = Modifier.fillMaxWidth().padding(vertical = Spacing.xs),
                                         horizontalArrangement = Arrangement.SpaceBetween,
                                         verticalAlignment = Alignment.CenterVertically
                                     ) {
                                         Column {
-                                            Text(text = stock.ticker, style = MaterialTheme.typography.titleSmall, color = MaterialTheme.colorScheme.onSurface, fontWeight = FontWeight.Bold)
-                                            Text(text = stock.name, style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant, maxLines = 1, overflow = TextOverflow.Ellipsis)
+                                            Text(text = holding.ticker, style = MaterialTheme.typography.titleSmall, color = MaterialTheme.colorScheme.onSurface, fontWeight = FontWeight.Bold)
+                                            Text(text = holding.name ?: holding.ticker, style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant, maxLines = 1, overflow = TextOverflow.Ellipsis)
                                         }
-                                        Text(text = "\u25BC ${String.format("%.2f", abs(stock.priceChange))}%", style = MaterialTheme.typography.bodyMedium, color = VettrRed, fontWeight = FontWeight.SemiBold)
+                                        Text(text = "\u25BC ${String.format("%.2f", abs(holding.priceChangePercent ?: 0.0))}%", style = MaterialTheme.typography.bodyMedium, color = VettrRed, fontWeight = FontWeight.SemiBold)
                                     }
                                 }
-                                if (topLosers.isEmpty()) {
+                                if (topLoserHoldings.isEmpty()) {
                                     Text(text = "No losers", style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant, modifier = Modifier.padding(vertical = Spacing.xs))
                                 }
                             }
@@ -509,10 +518,10 @@ fun PulseScreen(
                             }
                         }
 
-                        // Watchlist Movers
+                        // Portfolio Movers
                         if (topMovers.isNotEmpty()) {
                             Column(verticalArrangement = Arrangement.spacedBy(Spacing.md)) {
-                                SectionHeader(title = "Watchlist Movers", onSeeAllClick = onSeeAllMovers)
+                                SectionHeader(title = "Portfolio Movers", onSeeAllClick = onSeeAllMovers)
                                 Column(verticalArrangement = Arrangement.spacedBy(Spacing.sm)) {
                                     topMovers.forEach { stock ->
                                         val changeColor = if (stock.priceChange >= 0) VettrGreen else VettrRed
@@ -625,13 +634,13 @@ private fun ConnectPortfolioBanner(
 }
 
 @Composable
-private fun WatchlistHealthCard(health: WatchlistHealth, modifier: Modifier = Modifier) {
+private fun PortfolioHealthCard(health: WatchlistHealth, modifier: Modifier = Modifier) {
     val total = health.elite.count + health.contender.count + health.watchlist.count + health.speculative.count + health.toxic.count
     Column(
         modifier = modifier.fillMaxWidth().cardStyle().vettrPadding(),
         verticalArrangement = Arrangement.spacedBy(Spacing.sm)
     ) {
-        Text(text = "WATCHLIST HEALTH", style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant, letterSpacing = 1.sp, modifier = Modifier.padding(bottom = Spacing.xs))
+        Text(text = "PORTFOLIO HEALTH", style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant, letterSpacing = 1.sp, modifier = Modifier.padding(bottom = Spacing.xs))
         if (total > 0) {
             Row(modifier = Modifier.fillMaxWidth().height(24.dp).clip(RoundedCornerShape(6.dp)), horizontalArrangement = Arrangement.spacedBy(2.dp)) {
                 if (health.elite.count > 0) Box(modifier = Modifier.weight(health.elite.count.toFloat()).height(24.dp).clip(RoundedCornerShape(6.dp)).background(VettrEmerald))
