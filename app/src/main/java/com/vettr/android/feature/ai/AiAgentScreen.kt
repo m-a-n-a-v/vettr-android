@@ -71,23 +71,57 @@ fun AiAgentScreen(
             .fillMaxSize()
             .imePadding()
     ) {
-        // Usage indicator
+        // Usage indicator with progress bar
         uiState.usage?.let { usage ->
-            Row(
+            Column(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(horizontal = Spacing.md, vertical = Spacing.xs),
-                horizontalArrangement = Arrangement.SpaceBetween
+                    .background(VettrSurfaceVariant)
+                    .padding(horizontal = Spacing.md, vertical = Spacing.sm)
             ) {
-                Text(
-                    text = "Questions: ${usage.questionsUsed}/${usage.questionsLimit}",
-                    style = MaterialTheme.typography.labelSmall,
-                    color = VettrTextSecondary
-                )
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Text(
+                        text = "Questions: ${usage.questionsUsed}/${usage.questionsLimit}",
+                        style = MaterialTheme.typography.labelSmall,
+                        color = VettrTextSecondary
+                    )
+                    val remaining = usage.questionsLimit - usage.questionsUsed
+                    Text(
+                        text = if (remaining > 0) "$remaining remaining" else "Limit reached",
+                        style = MaterialTheme.typography.labelSmall,
+                        color = if (remaining > 0) VettrAccent else VettrRed,
+                        fontWeight = FontWeight.SemiBold
+                    )
+                }
+                Spacer(modifier = Modifier.height(4.dp))
+                // Progress bar
+                val progress = if (usage.questionsLimit > 0) {
+                    usage.questionsUsed.toFloat() / usage.questionsLimit.toFloat()
+                } else 0f
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(4.dp)
+                        .clip(RoundedCornerShape(2.dp))
+                        .background(VettrTextSecondary.copy(alpha = 0.2f))
+                ) {
+                    Box(
+                        modifier = Modifier
+                            .fillMaxWidth(progress.coerceIn(0f, 1f))
+                            .height(4.dp)
+                            .clip(RoundedCornerShape(2.dp))
+                            .background(if (progress > 0.8f) VettrRed else VettrAccent)
+                    )
+                }
+                Spacer(modifier = Modifier.height(2.dp))
                 Text(
                     text = "Resets: ${usage.resetAt.take(10)}",
                     style = MaterialTheme.typography.labelSmall,
-                    color = VettrTextSecondary
+                    color = VettrTextSecondary.copy(alpha = 0.7f)
                 )
             }
         }
