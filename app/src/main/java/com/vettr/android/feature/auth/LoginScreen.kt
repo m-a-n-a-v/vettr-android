@@ -44,6 +44,7 @@ import com.vettr.android.designsystem.theme.VettrTheme
 fun LoginScreen(
     onSignUpClick: () -> Unit = {},
     onGoogleSignInClick: () -> Unit = {},
+    onForgotPasswordClick: () -> Unit = {},
     viewModel: AuthViewModel = hiltViewModel()
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
@@ -119,6 +120,20 @@ fun LoginScreen(
             ),
             modifier = Modifier.fillMaxWidth()
         )
+
+        // Forgot password link
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.End
+        ) {
+            TextButton(onClick = onForgotPasswordClick) {
+                Text(
+                    text = "Forgot Password?",
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.primary
+                )
+            }
+        }
 
         // Error message
         if (uiState.errorMessage != null) {

@@ -22,6 +22,7 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.navigation
 import androidx.navigation.compose.rememberNavController
 import com.vettr.android.core.data.repository.AuthRepository
+import com.vettr.android.feature.auth.ForgotPasswordScreen
 import com.vettr.android.feature.auth.LoginScreen
 import com.vettr.android.feature.auth.SignUpScreen
 import com.vettr.android.feature.auth.WelcomeScreen
@@ -36,6 +37,7 @@ sealed class Screen(val route: String) {
     data object Welcome : Screen("welcome")
     data object Login : Screen("login")
     data object SignUp : Screen("signup")
+    data object ForgotPassword : Screen("forgotPassword")
 
     // Main graph routes
     data object MainGraph : Screen("main")
@@ -158,6 +160,17 @@ fun VettrNavHost(
                     },
                     onGoogleSignInClick = {
                         // TODO: Handle Google Sign-In in future story
+                    },
+                    onForgotPasswordClick = {
+                        navController.navigate(Screen.ForgotPassword.route)
+                    }
+                )
+            }
+
+            composable(Screen.ForgotPassword.route) {
+                ForgotPasswordScreen(
+                    onBackToLogin = {
+                        navController.navigateUp()
                     }
                 )
             }

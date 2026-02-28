@@ -1,6 +1,9 @@
 package com.vettr.android.core.data.repository
 
 import com.vettr.android.core.data.local.TokenManager
+import com.vettr.android.core.data.remote.ChangePasswordRequest
+import com.vettr.android.core.data.remote.ForgotPasswordRequest
+import com.vettr.android.core.data.remote.VettrApi
 import com.vettr.android.core.model.User
 import com.vettr.android.core.model.VettrTier
 import kotlinx.coroutines.flow.Flow
@@ -15,7 +18,8 @@ import javax.inject.Singleton
  */
 @Singleton
 class AuthRepositoryImpl @Inject constructor(
-    private val tokenManager: TokenManager
+    private val tokenManager: TokenManager,
+    private val vettrApi: VettrApi
 ) : AuthRepository {
 
     // In-memory state for current user
@@ -99,6 +103,42 @@ class AuthRepositoryImpl @Inject constructor(
 
     override fun isAuthenticated(): Flow<Boolean> {
         return _currentUser.map { it != null }
+    }
+
+    override suspend fun forgotPassword(email: String): Result<Unit> {
+        return try {
+            val response = vettrApi.forgotPassword(ForgotPasswordRequest(email = email))
+            if (response.isSuccessful) {
+                Result.success(Unit)
+            } else {
+                Result.failure(Exception("Failed to send reset link. Please check your email address."))
+            }
+        } catch (e: Exception) {
+            Result.failure(Exception(e.message ?: "Network error. Please try again."))
+        }
+    }
+
+    override suspend fun changePassword(currentPassword: String, newPassword: String): Result<Unit> {
+        return try {
+            val response = vettrApi.changePassword(
+                ChangePasswordRequest(
+                    currentPassword = currentPassword,
+                    newPassword = newPassword
+                )
+            )
+            if (response.isSuccessful) {
+                Result.success(Unit)
+            } else {
+                val errorMsg = when (response.code()) {
+                    401 -> "Current password is incorrect"
+                    400 -> "New password does not meet requirements"
+                    else -> "Failed to change password"
+                }
+                Result.failure(Exception(errorMsg))
+            }
+        } catch (e: Exception) {
+            Result.failure(Exception(e.message ?: "Network error. Please try again."))
+        }
     }
 
     /**

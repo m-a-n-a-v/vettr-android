@@ -41,4 +41,19 @@ interface AuthRepository {
      * @return Flow emitting true if user is authenticated, false otherwise.
      */
     fun isAuthenticated(): Flow<Boolean>
+
+    /**
+     * Request a password reset link for the given email address.
+     * @param email The user's email address
+     * @return Result with Unit on success, exception on failure.
+     */
+    suspend fun forgotPassword(email: String): Result<Unit>
+
+    /**
+     * Change the current user's password.
+     * @param currentPassword The user's current password
+     * @param newPassword The new password to set
+     * @return Result with Unit on success, exception on failure.
+     */
+    suspend fun changePassword(currentPassword: String, newPassword: String): Result<Unit>
 }
