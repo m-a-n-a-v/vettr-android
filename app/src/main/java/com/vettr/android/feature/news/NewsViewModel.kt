@@ -17,6 +17,7 @@ data class NewsUiState(
     val filteredArticles: List<NewsArticleResponse> = emptyList(),
     val sources: List<String> = emptyList(),
     val selectedSource: String? = null,
+    val materialOnly: Boolean = false,
     val isLoading: Boolean = true,
     val error: String? = null
 )
@@ -62,13 +63,26 @@ class NewsViewModel @Inject constructor(
 
     fun selectSource(source: String?) {
         _uiState.value = _uiState.value.copy(selectedSource = source)
-        if (source == null) {
-            _uiState.value = _uiState.value.copy(filteredArticles = _uiState.value.articles)
-        } else {
-            _uiState.value = _uiState.value.copy(
-                filteredArticles = _uiState.value.articles.filter { it.source == source }
-            )
+        applyFilters()
+    }
+
+    fun toggleMaterialOnly() {
+        _uiState.value = _uiState.value.copy(materialOnly = !_uiState.value.materialOnly)
+        applyFilters()
+    }
+
+    private fun applyFilters() {
+        val state = _uiState.value
+        var filtered = state.articles
+
+        if (state.selectedSource != null) {
+            filtered = filtered.filter { it.source == state.selectedSource }
         }
+        if (state.materialOnly) {
+            filtered = filtered.filter { it.isMaterial }
+        }
+
+        _uiState.value = state.copy(filteredArticles = filtered)
     }
 
     fun refresh() {

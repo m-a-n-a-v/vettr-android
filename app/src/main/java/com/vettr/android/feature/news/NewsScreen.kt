@@ -54,7 +54,7 @@ fun NewsScreen(
 
     Column(modifier = modifier.fillMaxSize()) {
         // Source filter chips
-        if (uiState.sources.isNotEmpty()) {
+        if (uiState.sources.isNotEmpty() || uiState.articles.isNotEmpty()) {
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -66,6 +66,12 @@ fun NewsScreen(
                     label = "All",
                     isSelected = uiState.selectedSource == null,
                     onClick = { viewModel.selectSource(null) }
+                )
+                SourceChip(
+                    label = "Material Only",
+                    isSelected = uiState.materialOnly,
+                    onClick = { viewModel.toggleMaterialOnly() },
+                    highlightColor = VettrRed
                 )
                 uiState.sources.forEach { source ->
                     SourceChip(
@@ -146,12 +152,13 @@ private fun SourceChip(
     label: String,
     isSelected: Boolean,
     onClick: () -> Unit,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    highlightColor: Color = VettrAccent
 ) {
     Box(
         modifier = modifier
             .clip(RoundedCornerShape(16.dp))
-            .background(if (isSelected) VettrAccent else VettrSurfaceVariant)
+            .background(if (isSelected) highlightColor else VettrSurfaceVariant)
             .clickable(onClick = onClick)
             .padding(horizontal = Spacing.md, vertical = Spacing.xs)
     ) {
