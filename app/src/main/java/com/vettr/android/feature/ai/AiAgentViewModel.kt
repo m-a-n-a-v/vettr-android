@@ -25,6 +25,9 @@ data class AiAgentUiState(
     val inputText: String = "",
     val messages: List<AiConversationMessage> = emptyList(),
     val suggestedQuestions: List<AiAgentQuestionResponse> = emptyList(),
+    val questionCategories: List<String> = emptyList(),
+    val selectedCategory: String? = null,
+    val filteredQuestions: List<AiAgentQuestionResponse> = emptyList(),
     val usage: AiAgentUsageResponse? = null,
     val isLoading: Boolean = false,
     val isLoadingQuestions: Boolean = true,
@@ -47,8 +50,11 @@ class AiAgentViewModel @Inject constructor(
         viewModelScope.launch {
             val questionsResult = aiAgentRepository.getQuestions()
             questionsResult.onSuccess { questions ->
+                val categories = questions.map { it.category }.distinct().sorted()
                 _uiState.value = _uiState.value.copy(
                     suggestedQuestions = questions,
+                    filteredQuestions = questions,
+                    questionCategories = categories,
                     isLoadingQuestions = false
                 )
             }.onFailure {
@@ -62,6 +68,19 @@ class AiAgentViewModel @Inject constructor(
                 _uiState.value = _uiState.value.copy(usage = usage)
             }
         }
+    }
+
+    fun selectCategory(category: String?) {
+        val state = _uiState.value
+        val filtered = if (category == null) {
+            state.suggestedQuestions
+        } else {
+            state.suggestedQuestions.filter { it.category == category }
+        }
+        _uiState.value = state.copy(
+            selectedCategory = category,
+            filteredQuestions = filtered
+        )
     }
 
     fun updateTicker(ticker: String) {

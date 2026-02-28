@@ -126,8 +126,8 @@ fun AiAgentScreen(
                     }
                 }
 
-                // Suggested questions
-                if (uiState.suggestedQuestions.isNotEmpty()) {
+                // Category filter chips for suggested questions
+                if (uiState.questionCategories.isNotEmpty()) {
                     item {
                         Spacer(modifier = Modifier.height(Spacing.md))
                         Text(
@@ -136,9 +136,31 @@ fun AiAgentScreen(
                             color = MaterialTheme.colorScheme.onSurface,
                             fontWeight = FontWeight.SemiBold
                         )
+                        Spacer(modifier = Modifier.height(Spacing.sm))
+                        FlowRow(
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.spacedBy(Spacing.xs),
+                            verticalArrangement = Arrangement.spacedBy(Spacing.xs)
+                        ) {
+                            CategoryChip(
+                                label = "All",
+                                isSelected = uiState.selectedCategory == null,
+                                onClick = { viewModel.selectCategory(null) }
+                            )
+                            uiState.questionCategories.forEach { category ->
+                                CategoryChip(
+                                    label = category,
+                                    isSelected = uiState.selectedCategory == category,
+                                    onClick = { viewModel.selectCategory(category) }
+                                )
+                            }
+                        }
                     }
+                }
 
-                    items(uiState.suggestedQuestions) { question ->
+                // Filtered suggested questions
+                if (uiState.filteredQuestions.isNotEmpty()) {
+                    items(uiState.filteredQuestions) { question ->
                         Box(
                             modifier = Modifier
                                 .fillMaxWidth()
@@ -285,6 +307,29 @@ fun AiAgentScreen(
                 }
             }
         }
+    }
+}
+
+@Composable
+private fun CategoryChip(
+    label: String,
+    isSelected: Boolean,
+    onClick: () -> Unit,
+    modifier: Modifier = Modifier
+) {
+    Box(
+        modifier = modifier
+            .clip(RoundedCornerShape(16.dp))
+            .background(if (isSelected) VettrAccent else VettrSurfaceVariant)
+            .clickable(onClick = onClick)
+            .padding(horizontal = Spacing.md, vertical = Spacing.xs)
+    ) {
+        Text(
+            text = label,
+            style = MaterialTheme.typography.labelMedium,
+            color = if (isSelected) Color.White else VettrTextSecondary,
+            fontWeight = FontWeight.Medium
+        )
     }
 }
 
