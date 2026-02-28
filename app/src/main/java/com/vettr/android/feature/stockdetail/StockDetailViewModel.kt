@@ -4,9 +4,11 @@ import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.vettr.android.core.data.VetrScoreResult
+import com.vettr.android.core.data.remote.FundamentalsResponse
 import com.vettr.android.core.data.repository.AuthRepository
 import com.vettr.android.core.data.repository.ExecutiveRepository
 import com.vettr.android.core.data.repository.FilingRepository
+import com.vettr.android.core.data.repository.FundamentalsRepository
 import com.vettr.android.core.data.repository.PeerComparison
 import com.vettr.android.core.data.repository.StockRepository
 import com.vettr.android.core.data.repository.VetrScoreRepository
@@ -32,6 +34,7 @@ import javax.inject.Inject
  */
 enum class StockDetailTab {
     OVERVIEW,
+    FUNDAMENTALS,
     PEDIGREE,
     RED_FLAGS
 }
@@ -56,6 +59,7 @@ class StockDetailViewModel @Inject constructor(
     private val filingRepository: FilingRepository,
     private val executiveRepository: ExecutiveRepository,
     private val vetrScoreRepository: VetrScoreRepository,
+    private val fundamentalsRepository: FundamentalsRepository,
     private val authRepository: AuthRepository,
     val hapticService: HapticService,
     savedStateHandle: SavedStateHandle
@@ -105,6 +109,9 @@ class StockDetailViewModel @Inject constructor(
 
     private val _peerComparison = MutableStateFlow<PeerComparison?>(null)
     val peerComparison: StateFlow<PeerComparison?> = _peerComparison.asStateFlow()
+
+    private val _fundamentals = MutableStateFlow<FundamentalsResponse?>(null)
+    val fundamentals: StateFlow<FundamentalsResponse?> = _fundamentals.asStateFlow()
 
     /**
      * Count of favorite stocks for watchlist limit enforcement.
@@ -187,9 +194,29 @@ class StockDetailViewModel @Inject constructor(
                             _executives.value = executiveList
                         }
                 }
+
+                // Load fundamentals for this stock
+                launch {
+                    loadFundamentals()
+                }
             } finally {
                 _isLoading.value = false
             }
+        }
+    }
+
+    /**
+     * Load fundamentals data from the API.
+     */
+    private suspend fun loadFundamentals() {
+        try {
+            val ticker = _stock.value?.ticker ?: stockId
+            val result = fundamentalsRepository.getFundamentals(ticker)
+            result.onSuccess { data ->
+                _fundamentals.value = data
+            }
+        } catch (_: Exception) {
+            // Fundamentals are non-critical
         }
     }
 

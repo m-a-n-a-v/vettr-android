@@ -64,6 +64,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.vettr.android.core.data.remote.FundamentalsResponse
 import com.vettr.android.core.model.Executive
 import com.vettr.android.core.model.Filing
 import com.vettr.android.core.model.Stock
@@ -178,6 +179,7 @@ fun StockDetailRoute(
     val stock by viewModel.stock.collectAsStateWithLifecycle()
     val filings by viewModel.filings.collectAsStateWithLifecycle()
     val executives by viewModel.executives.collectAsStateWithLifecycle()
+    val fundamentals by viewModel.fundamentals.collectAsStateWithLifecycle()
     val selectedTab by viewModel.selectedTab.collectAsStateWithLifecycle()
     val isRefreshing by viewModel.isRefreshing.collectAsStateWithLifecycle()
     val showUpgradeDialog by viewModel.showUpgradeDialog.collectAsStateWithLifecycle()
@@ -195,10 +197,12 @@ fun StockDetailRoute(
         stock = stock,
         filings = filings,
         executives = executives,
+        fundamentals = fundamentals,
         selectedTab = when (selectedTab) {
             StockDetailTab.OVERVIEW -> 0
-            StockDetailTab.PEDIGREE -> 1
-            StockDetailTab.RED_FLAGS -> 2
+            StockDetailTab.FUNDAMENTALS -> 1
+            StockDetailTab.PEDIGREE -> 2
+            StockDetailTab.RED_FLAGS -> 3
         },
         isRefreshing = isRefreshing,
         windowSizeClass = windowSizeClass,
@@ -215,8 +219,9 @@ fun StockDetailRoute(
             viewModel.selectTab(
                 when (tabIndex) {
                     0 -> StockDetailTab.OVERVIEW
-                    1 -> StockDetailTab.PEDIGREE
-                    2 -> StockDetailTab.RED_FLAGS
+                    1 -> StockDetailTab.FUNDAMENTALS
+                    2 -> StockDetailTab.PEDIGREE
+                    3 -> StockDetailTab.RED_FLAGS
                     else -> StockDetailTab.OVERVIEW
                 }
             )
@@ -235,6 +240,7 @@ fun StockDetailScreen(
     stock: Stock?,
     filings: List<Filing> = emptyList(),
     executives: List<Executive> = emptyList(),
+    fundamentals: FundamentalsResponse? = null,
     selectedTab: Int = 0,
     isRefreshing: Boolean = false,
     windowSizeClass: WindowSizeClass,
@@ -365,6 +371,13 @@ fun StockDetailScreen(
                         }
 
                         1 -> {
+                            // FUNDAMENTALS TAB
+                            item {
+                                FundamentalsTab(fundamentals = fundamentals)
+                            }
+                        }
+
+                        2 -> {
                             // PEDIGREE TAB
                             item {
                                 PedigreeHeader(
@@ -384,7 +397,7 @@ fun StockDetailScreen(
                             }
                         }
 
-                        2 -> {
+                        3 -> {
                             // RED FLAGS TAB
                             item {
                                 RedFlagsTabContent(
@@ -540,7 +553,7 @@ private fun StockDetailTabs(
     onTabSelected: (Int) -> Unit,
     modifier: Modifier = Modifier
 ) {
-    val tabs = listOf("Overview", "Pedigree", "Red Flags")
+    val tabs = listOf("Overview", "Fundamentals", "Pedigree", "Red Flags")
 
     TabRow(
         selectedTabIndex = selectedTabIndex,
