@@ -51,10 +51,12 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.vettr.android.core.model.HealthBucket
 import com.vettr.android.core.model.WatchlistHealth
+import com.vettr.android.core.data.remote.PortfolioSummaryResponse
 import com.vettr.android.designsystem.component.EmptyStateView
 import com.vettr.android.designsystem.component.ErrorView
 import com.vettr.android.designsystem.component.FilingTypeBadge
 import com.vettr.android.designsystem.component.LastUpdatedText
+import com.vettr.android.designsystem.component.MetricCard
 import com.vettr.android.designsystem.component.RedFlagCategoryCard
 import com.vettr.android.designsystem.component.SectionHeader
 import com.vettr.android.designsystem.component.SectorExposureCell
@@ -97,6 +99,7 @@ fun PulseScreen(
     val stocks by viewModel.stocks.collectAsStateWithLifecycle()
     val filings by viewModel.filings.collectAsStateWithLifecycle()
     val pulseSummary by viewModel.pulseSummary.collectAsStateWithLifecycle()
+    val portfolioSummary by viewModel.portfolioSummary.collectAsStateWithLifecycle()
     val isLoading by viewModel.isLoading.collectAsStateWithLifecycle()
     val errorMessage by viewModel.errorMessage.collectAsStateWithLifecycle()
     val lastUpdatedAt by viewModel.lastUpdatedAt.collectAsStateWithLifecycle()
@@ -271,6 +274,11 @@ fun PulseScreen(
                         verticalArrangement = Arrangement.spacedBy(Spacing.lg)
                     ) {
                         LastUpdatedText(lastUpdatedAt = lastUpdatedAt, modifier = Modifier.fillMaxWidth())
+
+                        // ═══════ Portfolio Summary ═══════
+                        if (portfolioSummary != null && portfolioSummary!!.holdingsCount > 0) {
+                            PortfolioSummarySection(summary = portfolioSummary!!)
+                        }
 
                         // ═══════ ROW 1: Market Overview ═══════
                         Column(verticalArrangement = Arrangement.spacedBy(Spacing.md)) {
@@ -550,6 +558,58 @@ private fun AllClearCard(category: String, modifier: Modifier = Modifier) {
         }
         Text(text = "All Clear", style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant, fontWeight = FontWeight.Medium)
         Text(text = "No flags", style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.6f))
+    }
+}
+
+@OptIn(ExperimentalLayoutApi::class)
+@Composable
+private fun PortfolioSummarySection(
+    summary: PortfolioSummaryResponse,
+    modifier: Modifier = Modifier
+) {
+    Column(
+        modifier = modifier,
+        verticalArrangement = Arrangement.spacedBy(Spacing.md)
+    ) {
+        SectionHeader(title = "Portfolio Summary")
+        FlowRow(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.spacedBy(Spacing.sm),
+            verticalArrangement = Arrangement.spacedBy(Spacing.sm),
+            maxItemsInEachRow = 2
+        ) {
+            MetricCard(
+                title = "Total Value",
+                value = formatCurrency(summary.totalValue),
+                modifier = Modifier.weight(1f)
+            )
+            MetricCard(
+                title = "P&L",
+                value = formatCurrency(summary.totalGainLoss),
+                change = summary.totalGainLossPercent,
+                modifier = Modifier.weight(1f)
+            )
+            MetricCard(
+                title = "VETTR Coverage",
+                value = "${String.format("%.0f", summary.vetrCoverage)}%",
+                modifier = Modifier.weight(1f)
+            )
+            MetricCard(
+                title = "Holdings",
+                value = "${summary.holdingsCount}",
+                modifier = Modifier.weight(1f)
+            )
+        }
+    }
+}
+
+private fun formatCurrency(value: Double): String {
+    val absValue = kotlin.math.abs(value)
+    val prefix = if (value < 0) "-" else ""
+    return when {
+        absValue >= 1_000_000 -> "${prefix}$${String.format("%.1f", absValue / 1_000_000)}M"
+        absValue >= 1_000 -> "${prefix}$${String.format("%.1f", absValue / 1_000)}K"
+        else -> "${prefix}$${String.format("%.2f", absValue)}"
     }
 }
 

@@ -2,7 +2,9 @@ package com.vettr.android.feature.pulse
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.vettr.android.core.data.remote.PortfolioSummaryResponse
 import com.vettr.android.core.data.repository.FilingRepository
+import com.vettr.android.core.data.repository.PortfolioRepository
 import com.vettr.android.core.data.repository.PulseRepository
 import com.vettr.android.core.data.repository.StockRepository
 import com.vettr.android.core.model.Filing
@@ -21,13 +23,15 @@ import javax.inject.Inject
 /**
  * ViewModel for the Pulse screen.
  * Manages UI state for market overview, strategic events, trending stocks,
- * and pulse summary (watchlist health, sector exposure, red flag categories).
+ * pulse summary (watchlist health, sector exposure, red flag categories),
+ * and portfolio summary.
  */
 @HiltViewModel
 class PulseViewModel @Inject constructor(
     private val stockRepository: StockRepository,
     private val filingRepository: FilingRepository,
     private val pulseRepository: PulseRepository,
+    private val portfolioRepository: PortfolioRepository,
     private val observabilityService: ObservabilityService,
     private val networkMonitor: NetworkMonitor
 ) : ViewModel() {
@@ -40,6 +44,9 @@ class PulseViewModel @Inject constructor(
 
     private val _pulseSummary = MutableStateFlow<PulseSummary?>(null)
     val pulseSummary: StateFlow<PulseSummary?> = _pulseSummary.asStateFlow()
+
+    private val _portfolioSummary = MutableStateFlow<PortfolioSummaryResponse?>(null)
+    val portfolioSummary: StateFlow<PortfolioSummaryResponse?> = _portfolioSummary.asStateFlow()
 
     private val _isLoading = MutableStateFlow(false)
     val isLoading: StateFlow<Boolean> = _isLoading.asStateFlow()
@@ -121,6 +128,11 @@ class PulseViewModel @Inject constructor(
                 launch {
                     loadPulseSummary()
                 }
+
+                // Fetch portfolio summary
+                launch {
+                    loadPortfolioSummary()
+                }
             } finally {
                 _isLoading.value = false
             }
@@ -137,6 +149,24 @@ class PulseViewModel @Inject constructor(
         } catch (_: Exception) {
             // Pulse summary is non-critical; continue with client-side fallbacks
             _pulseSummary.value = null
+        }
+    }
+
+    /**
+     * Load portfolio summary data from the backend.
+     * Falls back gracefully to null if the API call fails (user may not have portfolios).
+     */
+    private suspend fun loadPortfolioSummary() {
+        try {
+            val result = portfolioRepository.getPortfolioSummary()
+            result.onSuccess { summary ->
+                _portfolioSummary.value = summary
+            }.onFailure {
+                // Portfolio summary is non-critical; user may not have portfolios yet
+                _portfolioSummary.value = null
+            }
+        } catch (_: Exception) {
+            _portfolioSummary.value = null
         }
     }
 
