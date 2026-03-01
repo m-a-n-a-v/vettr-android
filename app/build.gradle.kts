@@ -30,7 +30,7 @@ android {
                 "proguard-rules.pro"
             )
             buildConfigField("String", "API_BASE_URL", "\"https://vettr-backend.vercel.app/v1/\"")
-            buildConfigField("String", "CLERK_PUBLISHABLE_KEY", "\"REPLACE_WITH_YOUR_CLERK_PUBLISHABLE_KEY\"")
+            buildConfigField("String", "CLERK_PUBLISHABLE_KEY", "\"pk_test_Y2xhc3NpYy1tb3NxdWl0by0zNS5jbGVyay5hY2NvdW50cy5kZXYk\"")
         }
         debug {
             isMinifyEnabled = false
@@ -38,7 +38,7 @@ android {
             versionNameSuffix = "-debug"
             // Use production API for live data (was 10.0.2.2 for local Docker)
             buildConfigField("String", "API_BASE_URL", "\"https://vettr-backend.vercel.app/v1/\"")
-            buildConfigField("String", "CLERK_PUBLISHABLE_KEY", "\"REPLACE_WITH_YOUR_CLERK_PUBLISHABLE_KEY\"")
+            buildConfigField("String", "CLERK_PUBLISHABLE_KEY", "\"pk_test_Y2xhc3NpYy1tb3NxdWl0by0zNS5jbGVyay5hY2NvdW50cy5kZXYk\"")
         }
     }
 
