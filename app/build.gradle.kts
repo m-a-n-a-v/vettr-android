@@ -112,7 +112,10 @@ dependencies {
     implementation(libs.kotlinx.coroutines.core)
 
     // Clerk Authentication
-    implementation("com.clerk:clerk-android-api:1.0.5")
+    implementation("com.clerk:clerk-android-api:1.0.5") {
+        exclude(group = "androidx.browser", module = "browser")
+    }
+    implementation("androidx.browser:browser:1.8.0")
 
     // Google Sign-In / Auth
     implementation(libs.play.services.auth)
