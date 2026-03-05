@@ -49,6 +49,7 @@ android {
 
     kotlinOptions {
         jvmTarget = "17"
+        freeCompilerArgs += listOf("-Xskip-metadata-version-check")
     }
 
     buildFeatures {
@@ -122,7 +123,7 @@ dependencies {
     implementation(libs.googleid)
     implementation(libs.androidx.credentials)
     implementation(libs.androidx.credentials.play.services.auth)
-    implementation(libs.play.core)
+    implementation(libs.play.review)
 
     // Security
     implementation(libs.androidx.security.crypto)
