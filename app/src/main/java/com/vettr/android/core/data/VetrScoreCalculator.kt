@@ -77,7 +77,8 @@ class VetrScoreCalculator @Inject constructor(
             val pillars = calculatePillars(ticker, stockId)
             val baseScore = calculateBaseScore(pillars)
             val adjustments = calculateAdjustments(ticker, stockId)
-            val finalScore = (baseScore + adjustments).coerceIn(0.0, 100.0).toInt()
+            val overlay = calculateHourlyActionOverlay(stockId)
+            val finalScore = (baseScore + adjustments + overlay).coerceIn(0.0, 100.0).toInt()
 
             VetrScoreResult(
                 overallScore = finalScore,
@@ -269,44 +270,65 @@ class VetrScoreCalculator @Inject constructor(
 
     /**
      * Calculate Market Sentiment Score (0-100).
-     * Evaluates liquidity, momentum, news sentiment, short interest, and analyst targets.
+     * Evaluates liquidity and news sentiment (momentum removed — replaced by Hourly Action Overlay).
+     * Re-weighted after removing momentum sub-metric.
      */
     private suspend fun calculateMarketSentimentScore(ticker: String, stockId: String): Int {
         val stock = stockRepository.getStock(stockId).first() ?: return 0
         val flags = redFlagRepository.detectFlagsForStock(ticker)
 
         // Liquidity proxy: market cap as indicator of tradability
+        // Re-weighted: was 30 max out of 100, now ~46 max out of 100 (30/65 * 100)
         val liquidityScore = when {
-            stock.marketCap >= 1_000_000_000 -> 30  // Highly liquid
-            stock.marketCap >= 250_000_000 -> 25    // Good liquidity
-            stock.marketCap >= 100_000_000 -> 20    // Moderate liquidity
-            stock.marketCap >= 50_000_000 -> 15     // Low liquidity
-            else -> 10                               // Very low liquidity
-        }
-
-        // Price momentum
-        val momentumScore = when {
-            stock.priceChange >= 20.0 -> 40   // Strong positive momentum
-            stock.priceChange >= 10.0 -> 35   // Good positive momentum
-            stock.priceChange >= 5.0 -> 30    // Mild positive momentum
-            stock.priceChange >= 0.0 -> 20    // Flat to slightly positive
-            stock.priceChange >= -5.0 -> 15   // Mild negative momentum
-            stock.priceChange >= -10.0 -> 10  // Moderate negative momentum
-            else -> 0                          // Strong negative momentum
+            stock.marketCap >= 1_000_000_000 -> 46  // Highly liquid
+            stock.marketCap >= 250_000_000 -> 38    // Good liquidity
+            stock.marketCap >= 100_000_000 -> 31    // Moderate liquidity
+            stock.marketCap >= 50_000_000 -> 23     // Low liquidity
+            else -> 15                               // Very low liquidity
         }
 
         // Sentiment penalty from disclosure gaps / executive churn
+        // Re-weighted: was 30 max, now ~46 max (30/65 * 100)
         val sentimentFlags = flags.filter {
             it.type == RedFlagType.DISCLOSURE_GAPS || it.type == RedFlagType.EXECUTIVE_CHURN
         }
-        val sentimentPenalty = when {
-            sentimentFlags.isEmpty() -> 30                     // Clean sentiment
-            sentimentFlags.sumOf { it.score } < 10 -> 20      // Minor concern
-            sentimentFlags.sumOf { it.score } < 20 -> 10      // Moderate concern
+        val sentimentScore = when {
+            sentimentFlags.isEmpty() -> 54                     // Clean sentiment
+            sentimentFlags.sumOf { it.score } < 10 -> 36      // Minor concern
+            sentimentFlags.sumOf { it.score } < 20 -> 18      // Moderate concern
             else -> 0                                           // Significant concern
         }
 
-        return (liquidityScore + momentumScore + sentimentPenalty).coerceIn(0, 100)
+        return (liquidityScore + sentimentScore).coerceIn(0, 100)
+    }
+
+    /**
+     * Calculate Hourly Action Overlay: volatility-adjusted price action tilt (±7.5 max).
+     * Applied after base score calculation as a post-processing step.
+     *
+     * Steps:
+     * A: Return% = (currentPrice - previousClose) / previousClose * 100
+     * B: Z-Score = Return% / ATR% (14-day ATR)
+     * C: Dynamic Tilt = 15 * (sigmoid(Z) - 0.5) → range ±7.5
+     */
+    private suspend fun calculateHourlyActionOverlay(stockId: String): Double {
+        val stock = stockRepository.getStock(stockId).first() ?: return 0.0
+        val currentPrice = stock.price
+        val previousClose = stock.price - stock.priceChange // Approximate previous close
+
+        if (currentPrice <= 0.0 || previousClose <= 0.0) return 0.0
+
+        // Step A: Hourly Return
+        val returnPct = ((currentPrice - previousClose) / previousClose) * 100.0
+
+        // Step B: Z-Score — use a default ATR% of 5% for local calculation
+        // (Server-side uses actual 14-day ATR from OHLC data)
+        val atrPct = 5.0
+        val zScore = if (atrPct == 0.0) 0.0 else returnPct / atrPct
+
+        // Step C: Sigmoid cap → Dynamic Tilt (±7.5 max)
+        val sigmoid = 1.0 / (1.0 + kotlin.math.exp(-zScore))
+        return 15.0 * (sigmoid - 0.5)
     }
 
     /**

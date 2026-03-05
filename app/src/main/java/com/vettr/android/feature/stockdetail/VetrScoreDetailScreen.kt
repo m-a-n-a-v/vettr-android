@@ -636,7 +636,7 @@ private fun ScoringMethodologySection(
 
                 MethodologyItem(
                     title = "Market Sentiment (15%)",
-                    description = "Tracks liquidity, price momentum, news sentiment, short interest, and analyst price targets."
+                    description = "Tracks liquidity and news sentiment. Hourly Action Overlay adjusts the final score based on volatility-adjusted price action (±7.5 tilt)."
                 )
 
                 Spacer(modifier = Modifier.height(Spacing.xs))
@@ -1075,7 +1075,7 @@ private fun generateInsights(components: Map<String, Int>, overallScore: Int): L
             }
             "marketSentiment" -> {
                 if (score < 60) {
-                    insights.add("Focus on liquidity improvement and positive momentum to enhance Market Sentiment")
+                    insights.add("Focus on liquidity improvement to enhance Market Sentiment")
                 }
             }
         }
